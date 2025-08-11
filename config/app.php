@@ -2,15 +2,15 @@
 
 return [
     //
-	'cuStaffPortal' => env('APP_ENV') == "production"? 'http://Erp-Server.pergamoninvestmentbank.com:2047/BC140/WS/PERGAMON%20INVESTMENT%20BANK/Codeunit/CuStaffPortal':'http://Erp-Server.pergamoninvestmentbank.com:2047/BC140/WS/PERGAMON%20INVESTMENT%20BANK/Codeunit/CuStaffPortal',
-    'odataBaseUrl' => env('APP_ENV') == "production"? "http://Erp-Server.pergamoninvestmentbank.com:2048/BC140/ODataV4/Company('PERGAMON%20INVESTMENT%20BANK')/":"http://Erp-Server.pergamoninvestmentbank.com:2048/BC140/ODataV4/Company('PERGAMON%20INVESTMENT%20BANK')/",
-    'soapPageBaseUrl' => env('APP_ENV') == "production"? "http://Erp-Server.pergamoninvestmentbank.com:2048/BC140/ODataV4/Company('PERGAMON%20INVESTMENT%20BANK')/":"http://Erp-Server.pergamoninvestmentbank.com:2048/BC140/ODataV4/Company('PERGAMON%20INVESTMENT%20BANK')/",
+	'cuStaffPortal' => env('APP_ENV') == "production"? 'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal':'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal',
+    'odataBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
+    'soapPageBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
 	//
     'storagePath' => env('APP_ENV') == "production"? 'C:\\inetpub\\wwwroot\\PortalReports\\':'C:\\inetpub\\wwwroot\\PortalReports\\',
 	'reportsPath' => env('APP_ENV') == "production"? '\\\\WIN-NGMOA211LM7\\PortalReports\\':'\\\\WIN-NGMOA211LM7\\PortalReports\\',
-	'domainUser' => env('APP_ENV') == "production"? "Admin:Admin@123":"Admin:Admin@123",
-	'NavUser' => env('APP_ENV') == "production"? "Admin":"Admin",
-	'NavPassword' => env('APP_ENV') == "production"? "Admin@123":"Admin@123",
+	'domainUser' => env('APP_ENV') == "production"? "PTL:Kenya@2024!":"PTL:Kenya@2024!",
+	'NavUser' => env('APP_ENV') == "production"? "PTL":"PTL",
+	'NavPassword' => env('APP_ENV') == "production"? "Kenya@2024!":"Kenya@2024!",
 	'maxRecPerPage' => env('MAX_PER_PAGE',50),
     //
     'debug' => env('APP_DEBUG', ''),

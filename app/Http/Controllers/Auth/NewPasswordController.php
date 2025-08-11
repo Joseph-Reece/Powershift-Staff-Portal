@@ -46,11 +46,11 @@ class NewPasswordController extends Controller
             'password' => 'required|string|confirmed|min:8',
         ]);
         $request->staffNo = str_replace("__","/",$request->staffNo);
-        $user = $this->odataClient()->from(HREmployee::wsName())->where('No',$request->staffNo)->where('Status','Active')->first();
+        $user = $this->odataClient()->from(HREmployee::wsName())->where('No',$request->staffNo)->where('Status_1','Active')->first();
         if($user == null){
             return redirect()->back()->with("error","Invalid Staff No.");
         }
-        if($user['Reset_Token'] != $request->resetToken || $user['Token_Expired']){
+        if($user['PortalResetToken'] != $request->resetToken || $user['PortalResetTokenExpired']){
             return redirect()->back()->with("error","Reset token is wrong or it has already expired. Kindly use the last sent token.");
         }
         try{

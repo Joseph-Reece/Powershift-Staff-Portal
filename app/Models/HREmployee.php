@@ -9,6 +9,6 @@ class HREmployee extends Model
 {
     use HasFactory;
     public static function wsName(){
-        return "QyHREmployees";
+        return "QyEmployees";
     }
 }

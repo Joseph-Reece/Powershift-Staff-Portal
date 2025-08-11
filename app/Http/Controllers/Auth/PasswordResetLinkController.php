@@ -39,7 +39,7 @@ class PasswordResetLinkController extends Controller
         if($user == null){
             return redirect()->back()->with("error","Invalid Staff No.");
         }
-        if($user['E_Mail'] == null){
+        if($user['CompanyEMail'] == null){
             return redirect()->back()->with("error","Your email is not set in your employee details. Kindly contact the IT office for help.");
         }
         try{
@@ -52,10 +52,11 @@ class PasswordResetLinkController extends Controller
             if($result->return_value == true){
                 $service2 = $this->MySoapClient(config('app.cuStaffPortal'));
                 $params1 = new \stdClass();
-                $params1->receiver = $user['E_Mail'];
+                $params1->recipients = $user['CompanyEMail'];
                 $params1->subject = "Password Reset Token";
                 $message = "Your new password reset token is ".$resetToken;
                 $params1->message = $message;
+                $params1->ccRecipients = "";
                 $result2 = $service2->SendEmail($params1);
                 // $service2 = $this->MySoapClient(config('app.cuStaffPortal'));
                 // $params1 = new \stdClass();
@@ -66,7 +67,7 @@ class PasswordResetLinkController extends Controller
                 // $params1->no = $request->staffNo;
                 // $result2 = $service2->SendSMS($params1);
                 if($result2->return_value == 'sent'){
-                    $request->staffNo = str_replace("/","__",$request->staffNo);
+                    // $request->staffNo = str_replace("/","__",$request->staffNo);
                     return redirect('/reset-password/'.$request->staffNo)->with("success","We have sent a reset token to your phone via SMS. Kindly check your phone to get the reset token");
                 }
             }
