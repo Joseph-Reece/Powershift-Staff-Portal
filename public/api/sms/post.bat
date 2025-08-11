@@ -1,0 +1,1 @@
+"E:\Program Files\iis express\PHP\v7.3\php.exe" "E:\inetpub\wwwroot\api\sms\post.php"

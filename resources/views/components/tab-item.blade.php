@@ -1,0 +1,1 @@
+<li class="px-1 sm:px-4 py-1 fontx-semibold text-black rounded-t {{isset($active) && $active? 'border-b-2 border-green-400':''}}"><a href="{{$href}}" class="flex items-center {{isset($active) && $active? 'text-green-600':'text-black'}}">{{$slot}}</a></li>

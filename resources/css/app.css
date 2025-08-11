@@ -1,0 +1,74 @@
+@import 'tom-select/dist/css/tom-select.bootstrap5.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+    .bg-theme1{
+      background-color:#003f7d;
+      color:white;
+    }
+    .bg-theme1TextColor{
+      color:#003f7d;
+    }
+    .bg-theme1 .trigger:hover,.bg-theme1 .trigger .icon:hover{
+      background-color:#ff4f02;
+      color:white;
+    }
+    .bg-theme1 .trigger:focus,.bg-theme1 .trigger .icon:focus{
+      background-color:#ff4f02;
+      color:white;
+    }
+    .bg-theme1 .trigger:active,.bg-theme1 .trigger .icon:active{
+      background-color:	#ff4f02;
+      color:white;
+    }
+    .bg-theme1 .trigger:hover{
+      cursor: pointer;
+    }
+    .bg-theme1 .icon{
+      color:white;
+    }
+    .bg-theme2{
+        background: #ff4f02;
+    }
+    .borderBgTheme2:focus,.borderBgTheme2:hover{
+        border-color: #ff4f02 !important;
+    }
+    .btnBgTheme2:focus,.btnBgTheme2:hover{
+        background-color: #ff4f02 !important;
+    }
+    .sidebarx a:hover,.sidebarx a:focus{
+        background-color:#ff4f02;
+        color:white;
+      }
+.tom-selects{
+        cursor: pointer !important;
+        --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+        appearance: none !important;
+        border-width: 1px !important;
+        width:100% !important;
+        --tw-text-opacity: 1 !important;
+        color: rgba(55, 65, 81, var(--tw-text-opacity)) !important;
+        line-height: 1.25 !important;
+    }
+    .tom-selects:focus{
+        outline: 2px solid transparent !important;
+        outline-offset: 2px !important;
+    }
+    .tom-selects:disabled{
+        --tw-bg-opacity: 0.4 !important;
+    }
+    .turbo-progress-bar{
+        height: 5px !important;
+        background-color: orange !important;
+    }
+};
+@layer components {
+    .form-control {
+      @apply shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none disabled:opacity-40;
+    }
+    .form-label{
+        @apply text-gray-700 text-xs mb-2;
+    }
+}
