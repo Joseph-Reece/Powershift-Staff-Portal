@@ -169,11 +169,11 @@ class GeneralController extends Controller
         return $periodMonths;
     }
     public function employeeDesc($employeeNo){
-        $employee = $this->odataClient()->from(HREmployee::wsName())->select('First_Name','Middle_Name','Last_Name')->where('No',$employeeNo)->first();
+        $employee = $this->odataClient()->from(HREmployee::wsName())->select('FirstName','MiddleName','LastName')->where('No',$employeeNo)->first();
         return $employee;
     }
     public function employeeDesc2($userID){
-        $employee = $this->odataClient()->from(HREmployee::wsName())->select('First_Name','Middle_Name','Last_Name')->where('User_ID',$userID)->first();
+        $employee = $this->odataClient()->from(HREmployee::wsName())->select('FirstName','MiddleName','LastName')->where('UserID',$userID)->first();
         return $employee;
     }
     public function getItems(){

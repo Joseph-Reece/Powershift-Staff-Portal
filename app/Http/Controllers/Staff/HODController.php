@@ -31,7 +31,7 @@ class HODController extends Controller
         }
         if($status == null){
             $staff = $this->odataClient()->from(HREmployee::wsName())
-            ->select('No','First_Name','Middle_Name','Last_Name',)
+            ->select('No','FirstName','MiddleName','LastName',)
             ->where('No','!=',session('authUser')['employeeNo'])
             ->where('Status','=','Active')
             //->where('Department_Code','=',session('authUser')['HOD']['Code'])
@@ -42,7 +42,7 @@ class HODController extends Controller
             if($status == 'onLeave'){
                 $title = "Staff on leave";
                 $employees = $this->odataClient()->from(HREmployee::wsName())
-                ->select('No','First_Name','Middle_Name','Last_Name',)
+                ->select('No','FirstName','MiddleName','LastName',)
                 ->where('No','!=',session('authUser')['employeeNo'])
                 ->where('Status','=','Active')
                 //->where('Department_Code','=',session('authUser')['HOD']['Code'])
@@ -65,7 +65,7 @@ class HODController extends Controller
     }
     public function employeeDetails($staffNo){
         $employee = $this->odataClient()->from(HREmployee::wsName())
-        ->select('No','First_Name','Middle_Name','Last_Name',)
+        ->select('No','FirstName','MiddleName','LastName',)
         ->where('No','=',$staffNo)
         ->where('Status','=','Active')
         // ->where('Department_Code','=',session('authUser')['HOD']['Code'])

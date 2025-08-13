@@ -6,8 +6,8 @@ return [
     'odataBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
     'soapPageBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
 	//
-    'storagePath' => env('APP_ENV') == "production"? 'C:\\inetpub\\wwwroot\\PortalReports\\':'C:\\inetpub\\wwwroot\\PortalReports\\',
-	'reportsPath' => env('APP_ENV') == "production"? '\\\\WIN-NGMOA211LM7\\PortalReports\\':'\\\\WIN-NGMOA211LM7\\PortalReports\\',
+    'storagePath' => env('APP_ENV') == "production"? 'C:\\inetpub\\wwwroot\\PortalFiles\\':'C:\\inetpub\\wwwroot\\PortalFiles\\',
+	'reportsPath' => env('APP_ENV') == "production"? '\\\\WIN-NGMOA211LM7\\PortalFiles\\':'\\\\WIN-NGMOA211LM7\\PortalFiles\\',
 	'domainUser' => env('APP_ENV') == "production"? "PTL:Kenya@2024!":"PTL:Kenya@2024!",
 	'NavUser' => env('APP_ENV') == "production"? "PTL":"PTL",
 	'NavPassword' => env('APP_ENV') == "production"? "Kenya@2024!":"Kenya@2024!",

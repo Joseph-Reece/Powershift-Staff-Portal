@@ -10,7 +10,7 @@
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Leave No</x-slot>
-                                <x-slot name="value">{{$requisition->Document_No}}</x-slot>
+                                <x-slot name="value">{{$requisition->No}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>
@@ -28,13 +28,13 @@
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Applied Duration</x-slot>
-                                <x-slot name="value">{{$requisition->Days_Applied." Days"}}</x-slot>
+                                <x-slot name="value">{{$requisition->Applied_Days." Days"}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Starting Date</x-slot>
-                                <x-slot name="value">{{$requisition->Start_Date}}</x-slot>
+                                <x-slot name="value">{{$requisition->Starting_Date}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>
@@ -46,19 +46,19 @@
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Return Date</x-slot>
-                                <x-slot name="value">{{$requisition->Return_to_Work_Date}}</x-slot>
+                                <x-slot name="value">{{$requisition->Return_Date}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Application Date</x-slot>
-                                <x-slot name="value">{{$requisition->Application_Date}}</x-slot>
+                                <x-slot name="value">{{$requisition->Date}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>
                             <x-show-group>
                                 <x-slot name="label">Reliever No</x-slot>
-                                <x-slot name="value">{{$requisition->Reliever_No}}</x-slot>
+                                <x-slot name="value">{{$requisition->RelieverNo}}</x-slot>
                             </x-show-group>
                         </x-grid-col>
                         <x-grid-col>

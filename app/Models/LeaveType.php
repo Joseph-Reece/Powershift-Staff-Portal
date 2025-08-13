@@ -9,6 +9,6 @@ class LeaveType extends Model
 {
     use HasFactory;
     public static function wsName(){
-        return "QyHRLeaveTypes";
+        return "PgHrLeavetypes";
     }
 }

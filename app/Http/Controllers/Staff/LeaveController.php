@@ -24,37 +24,40 @@ class LeaveController extends Controller
         $this->middleware('isAuth');
         $this->middleware('staff');
     }
-    public function index(){
+    public function index()
+    {
         $dateToday = Carbon::now();
         $startDate = $dateToday->startOfYear()->format('Y-m-d');
         $endDate = $dateToday->endOfYear()->format('Y-m-d');
         $requsitions = $this->odataClient()->from(HRLeaveRequisition::wsName())
-        ->where('User_ID',session('authUser')['userID'])
-        ->where('#filter',"(Application_Date gt $startDate and Application_Date lt $endDate)"."filter#")
-        ->get();
+            ->where('Employee_No', session('authUser')['employeeNo'])
+            ->where('#filter', "(Starting_Date gt $startDate and Starting_Date lt $endDate)" . "filter#") //TODO: Will not show leaves spanning two years.
+            ->get();
+        // dd($requsitions);
         $data = [
             'requsitions' => $requsitions
         ];
         return view('staff.leave.index')->with($data);
     }
-    public function create(){
-        $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Pending Approval')->where('Employee_No',session('authUser')['employeeNo'])->first();
+    public function create()
+    {
+        $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('Employee_No', session('authUser')['employeeNo'])->first();
         // if($requisition != null){
         //     return redirect()->back()->with('error','Oops! you cannot make a new leave application while there is another one that is pending approval.');
         // }
-        if(session('authUser')['Gender'] == 'Male'){
+        if (session('authUser')['Gender'] == 'Male') {
             $notGender = 'Female';
-        }else{
+        } else {
             $notGender = 'Male';
         }
         $leaveTypes = $this->odataClient()->from(LeaveType::wsName())
-        ->where('Gender','!=',$notGender)
-        ->get();
+            ->where('Gender', '!=', $notGender)
+            ->get();
         $relievers = $this->odataClient()->from(HREmployee::wsName())
-        ->select('No','First_Name','Middle_Name','Last_Name')
-        ->where('No','!=',session('authUser')['employeeNo'])
-        ->where('Status','=','Active')
-        ->get();
+            ->select('No', 'FirstName', 'MiddleName', 'LastName')
+            ->where('No', '!=', session('authUser')['employeeNo'])
+            ->where('Status_1', '=', 'Active')
+            ->get();
         //$relievers = [];
         // $isOnLeave = false;
         // //get relievers not on leave
@@ -83,7 +86,8 @@ class LeaveController extends Controller
         ];
         return view('staff.leave.application')->with($data);
     }
-    public function store(REQUEST $request){
+    public function store(REQUEST $request)
+    {
         $request->validate([
             'leaveType' => 'required',
             'appliedDays' => 'nullable',
@@ -92,11 +96,11 @@ class LeaveController extends Controller
             'reason' => 'required',
             'requestLeaveAllowance' => 'required',
         ]);
-        $dates = $this->getLeaveDates($request->leaveType,$request->appliedDays,$request->startDate);
-        if($dates == null){
-            return redirect()->back()->with('error','Oops! something went wrong. Please try again');
+        $dates = $this->getLeaveDates($request->leaveType, $request->appliedDays, $request->startDate);
+        if ($dates == null) {
+            return redirect()->back()->with('error', 'Oops! something went wrong. Please try again');
         }
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->action = 'create';
@@ -113,16 +117,17 @@ class LeaveController extends Controller
             // dd($request->all());
             $result = $service->LeaveApplication($params);
             // dd($result);
-            if($result->return_value != ''){
-                if($request->hasFile('attachment')){
+            if ($result->return_value != '') {
+                if ($request->hasFile('attachment')) {
                     // dd('heere');
-                    $this->validate($request,
+                    $this->validate(
+                        $request,
                         [
                             'attachment' => 'required|max:2999',
                         ],
                         ['attachment.max' => 'File size cannot exceed 3MB']
                     );
-                    try{
+                    try {
                         // $service = $this->MySoapClient(config('app.cuStaffPortal'));
                         $params = new \stdClass();
                         $params->accountNo = $result->return_value;
@@ -132,66 +137,66 @@ class LeaveController extends Controller
                         $file = $request->file('attachment');
                         $b64File = base64_encode(file_get_contents($file));
                         $params->b64File = $b64File;
-                        $params->fileName = $params->description.'.'.$file->getClientOriginalExtension();
-                        $params->fileName = str_replace(" ","-",$params->fileName);
-                        $params->fileName = str_replace("/","_",$params->fileName);
+                        $params->fileName = $params->description . '.' . $file->getClientOriginalExtension();
+                        $params->fileName = str_replace(" ", "-", $params->fileName);
+                        $params->fileName = str_replace("/", "_", $params->fileName);
                         $params->tableID = 52202673;
 
                         $result = $service->FnAttachment($params);
                         // dd($result);
                         // $returnValue = $result->return_value;
-                    }
-                    catch (\SoapFault $e) {
-                        $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+                    } catch (\SoapFault $e) {
+                        $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
                         $errorMsg = $e->faultstring;
-                        return redirect()->back()->with('error',$errorMsg);
+                        return redirect()->back()->with('error', $errorMsg);
                     }
 
                     $data = [
                         'pKey' => $result->return_value,
                         'tableDesc' => HRLeaveRequisition::tableDesc(),
                         'file' => $request->file('attachment'),
-                        'description' => 'leave_attachment_'.$result->return_value
+                        'description' => 'leave_attachment_' . $result->return_value
                     ];
                     // dd($data);
                     // $this->uploadAttachment($data);
                 }
-                return redirect('/staff/leave')->with('success','Leave application created successfully');
+                return redirect('/staff/leave')->with('success', 'Leave application created successfully');
             }
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
             // dd($errorMsg);
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function show($no){
+    public function show($no)
+    {
         $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())
-        ->where('Document_No',$no)
-        ->where('Employee_No',session('authUser')['employeeNo'])
-        ->first();
-        if($requisition == null){
-            return redirect('/staff/leave')->with('error','Leave application not found.');
+            ->where('No', $no)
+            ->where('Employee_No', session('authUser')['employeeNo'])
+            ->first();
+        if ($requisition == null) {
+            return redirect('/staff/leave')->with('error', 'Leave application not found.');
         }
         $relieverDesc = app('App\Http\Controllers\Staff\GeneralController')->employeeDesc($requisition->Duties_Taken_Over_By);
         $requisition['relieverDesc'] = $relieverDesc;
-        $approvers = app('App\Http\Controllers\Staff\ApprovalsController')->getApprovers($requisition->Document_No);
+        $approvers = app('App\Http\Controllers\Staff\ApprovalsController')->getApprovers($requisition->No);
         $data = [
             'requisition' => $requisition,
             'approvers' => $approvers,
         ];
         return view('staff.leave.show')->with($data);
     }
-    public function edit($no){
+    public function edit($no)
+    {
         $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())
-        ->where('Document_No',$no)
-        ->where('Employee_No',session('authUser')['employeeNo'])
-        ->where('Status','Open')
-        ->first();
-        if($requisition == null){
-            return redirect('/staff/leave')->with('error','Leave application is no longer editable or does not exist.');
+            ->where('No', $no)
+            ->where('Employee_No', session('authUser')['employeeNo'])
+            ->where('Status', 'Open')
+            ->first();
+        if ($requisition == null) {
+            return redirect('/staff/leave')->with('error', 'Leave application is no longer editable or does not exist.');
         }
         // if($requisition->Hourly){
         //     $requisition->Start_Time = Carbon::parse($requisition->Start_Time);
@@ -202,12 +207,12 @@ class LeaveController extends Controller
         // }
         //
         $leaveTypes = $this->odataClient()->from(LeaveType::wsName())
-        ->get();
+            ->get();
         $relievers = $this->odataClient()->from(HREmployee::wsName())
-        ->select('No','First_Name','Middle_Name','Last_Name')
-        ->where('No','!=',session('authUser')['employeeNo'])
-        ->where('Status','=','Active')
-        ->get();
+            ->select('No', 'FirstName', 'MiddleName', 'LastName')
+            ->where('No', '!=', session('authUser')['employeeNo'])
+            ->where('Status_1', '=', 'Active')
+            ->get();
         // $relievers = [];
         // $isOnLeave = false;
         // foreach($employees as $employee){
@@ -236,7 +241,8 @@ class LeaveController extends Controller
         ];
         return view('staff.leave.application')->with($data);
     }
-    public function update(REQUEST $request){
+    public function update(REQUEST $request)
+    {
         $request->validate([
             'leaveType' => 'required',
             'appliedDays' => 'nullable',
@@ -244,13 +250,14 @@ class LeaveController extends Controller
             'endDate' => 'nullable|date',
             'reason' => 'required',
             'requestLeaveAllowance' => 'required',
+            'requisitionNo' => 'required'
         ]);
-        $dates = $this->getLeaveDates($request->leaveType,$request->appliedDays,$request->startDate);
-        if($dates == null){
-            return redirect()->back()->with('error','Oops! something went wrong. Please try again');
-        }
+        // $dates = $this->getLeaveDates($request->leaveType,$request->appliedDays,$request->startDate);
+        // if($dates == null){
+        //     return redirect()->back()->with('error','Oops! something went wrong. Please try again');
+        // }
 
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->action = 'edit';
@@ -264,23 +271,24 @@ class LeaveController extends Controller
             $params->myUserID = session('authUser')['userID'];
             $params->leaveType = $request->leaveType;
             $params->isRequestLeaveAllowance = $request->requestLeaveAllowance;
+            // dd($request);
             $result = $service->LeaveApplication($params);
-            if($result->return_value == true){
-                return redirect('/staff/leave')->with('success','Leave application updated successfully');
+            if ($result->return_value == true) {
+                return redirect('/staff/leave')->with('success', 'Leave application updated successfully');
             }
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
 
     //
-    public function createLeaveAttachment($no){
-        $data=[
-            'leaveNo'=>$no
+    public function createLeaveAttachment($no)
+    {
+        $data = [
+            'leaveNo' => $no
         ];
         return view('staff.leave.attachment-create')->with($data);
     }
@@ -293,144 +301,144 @@ class LeaveController extends Controller
 
         // compress Picture before uploading.
         // Error: Failed to upload error for files above 2mbs
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->docNo = $request->leaveNo;
             $params->docNo2 = $request->leaveNo;
             $params->description = $request->description;
             $params->tableID = 52202673;
-            if($request->hasFile('file')){
+            if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $b64File = base64_encode(file_get_contents($file));
                 $params->file = $b64File;
-                $params->fileName = $params->description.'.'.$file->getClientOriginalExtension();
-                $params->fileName = str_replace(" ","-",$params->fileName);
-                $params->fileName = str_replace("/","_",$params->fileName);
+                $params->fileName = $params->description . '.' . $file->getClientOriginalExtension();
+                $params->fileName = str_replace(" ", "-", $params->fileName);
+                $params->fileName = str_replace("/", "_", $params->fileName);
                 // dd($params->filename);
             }
             $params->tableID = 52202543;
             $result = $service->UploadDocumentAttachment($params);
             $returnValue = $result->return_value;
-            if($returnValue){
+            if ($returnValue) {
                 $message = "Saved successfully";
-                return redirect('/staff/leave/show/'.$request->leaveNo)->with('success',$message);
+                return redirect('/staff/leave/show/' . $request->leaveNo)->with('success', $message);
             }
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function showLeaveAttachment(REQUEST $request){
+    public function showLeaveAttachment(REQUEST $request)
+    {
         $request->validate([
             'attachmentID' => 'required',
             'tableID' => 'required',
             'leaveNo' => 'required',
             'fileName' => 'required',
         ]);
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
-            if(!isset($params)){
+            if (!isset($params)) {
                 $params = new \stdClass();
             }
             $params->docNo = $request->leaveNo;
             $params->attachmentID = $request->attachmentID;
             $params->tableID = $request->tableID;
             $result = $service->GetDocumentAttachment($params);
-			if($result->return_value != ""){
-				$data = base64_decode($result->return_value);
+            if ($result->return_value != "") {
+                $data = base64_decode($result->return_value);
                 header('Content-Type: application/pdf');
                 header("Content-Disposition:attachment;filename=\"$request->fileName\"");
                 echo $data;
-			}else{
-                return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
+            } else {
+                return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
             }
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function deleteLeaveAttachment(REQUEST $request){
+    public function deleteLeaveAttachment(REQUEST $request)
+    {
         $request->validate([
             'docId' => 'required',
             'leaveNo' => 'required',
         ]);
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
-            if(!isset($params)){
+            if (!isset($params)) {
                 $params = new \stdClass();
             }
             $params->docNo = $request->leaveNo;
             $params->docID = $request->docId;
             $result = $service->DeleteDocumentAttachment($params);
-			if($result->return_value != ""){
-                return redirect()->back()->with('success',"Deleted successfully");
-			}else{
-                return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
+            if ($result->return_value != "") {
+                return redirect()->back()->with('success', "Deleted successfully");
+            } else {
+                return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
             }
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function cancel(REQUEST $request){
+    public function cancel(REQUEST $request)
+    {
         $request->validate([
             'requisitionNo' => 'required',
         ]);
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->requisitionNo = $request->requisitionNo;
             $params->employeeNo = session('authUser')['employeeNo'];
             $result = $service->CancelLeaveApplication($params);
-            if($result->return_value == true){
-                return redirect('/staff/leave')->with('success','Leave application cancelled successfully');
+            if ($result->return_value == true) {
+                return redirect('/staff/leave')->with('success', 'Leave application cancelled successfully');
             }
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function approval(REQUEST $request){
+    public function approval(REQUEST $request)
+    {
         $request->validate([
             'requisitionNo' => 'required',
         ]);
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->requisitionNo = $request->requisitionNo;
             $params->employeeNo = session('authUser')['employeeNo'];
             $params->tableID = HRLeaveRequisition::tableDesc()['tableID'];
             $result = $service->RequestLeaveApproval($params);
-            if($result->return_value == true){
-                return redirect('/staff/leave')->with('success','Leave application sent for approval successfully');
+            if ($result->return_value == true) {
+                return redirect('/staff/leave')->with('success', 'Leave application sent for approval successfully');
             }
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function getLeaveDates($leaveType,$endDate,$startDate){
-        $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())->where('Code',$leaveType)->first();
+    public function getLeaveDates($leaveType, $endDate, $startDate)
+    {
+        $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())->where('Code', $leaveType)->first();
         $leaveBalance = $this->getLeaveBalance($leaveType);
         // if($leaveBalance <= 0 || $appliedDays > $leaveBalance){
         //     return null;
         // }
-        $start_date = str_replace('_',"/",$startDate);
-        $end_date = str_replace('_',"/",$endDate);
+        $start_date = str_replace('_', "/", $startDate);
+        $end_date = str_replace('_', "/", $endDate);
         // if($leaveTypeDesc->Allow_Hourly){
         //     $endDate = Carbon::parse($start_date)->addHours($appliedDays);
         //     $returnDate = Carbon::parse($start_date)->addHours($appliedDays);
@@ -446,7 +454,7 @@ class LeaveController extends Controller
         // if(Carbon::parse($returnDate)->dayOfWeek == Carbon::SUNDAY){
         //     $returnDate = Carbon::parse($returnDate)->addDays(1);
         // }
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
             $params = new \stdClass();
             $params->empNo = session('authUser')['employeeNo'];
@@ -454,123 +462,135 @@ class LeaveController extends Controller
             $params->endDate = Carbon::parse(strtotime($end_date))->format('Y-m-d');
             $params->leaveType = $leaveType;
             $result = $service->FnGetLeaveDetails($params);
-            if($result->return_value != ""){
-                $vars = explode("##",$result->return_value);
+            // dd($result);
+            if ($result->return_value != "") {
+                $vars = explode("##", $result->return_value);
                 $appliedDays = $vars[1];
                 $returnDate = Carbon::parse($vars[0])->format('d-M-Y');
                 $data = [
                     'isWeekend' =>  Carbon::parse($start_date)->dayOfWeek == Carbon::SUNDAY,
                     'endDate' => $endDate,
                     'appliedDays' => $appliedDays,
-                    'returnDate' =>$returnDate,
+                    'returnDate' => $returnDate,
                 ];
                 return $data;
             }
             return null;
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
             dd($e->faultstring);
             return null;
         }
-
     }
-    public function getLeaveBalance($leaveType){
+    public function getLeaveBalance($leaveType)
+    {
         $empNo = session('authUser')['employeeNo'];
         $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())
-        ->where('Code',$leaveType)
-        ->first();
-       $pendingApproval = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Pending Approval')->where('Employee_No',session('authUser')['employeeNo'])->where('Leave_Type',$leaveType)->where('#filter','End_Date gt '.date('Y-m-d').'filter#')->count();
-        $currentPeriod = $this->odataClient()->from(HRLeavePeriod::wsName())->where('Current_Leave','true')->first();
-       //$takenDays = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Released')->where('Employee_No',session('authUser')['employeeNo'])->where('Leave_Type',$leaveType)->count();
+            ->where('Code', $leaveType)
+            ->first();
+        $pendingApproval = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('Employee_No', session('authUser')['employeeNo'])->where('Leave_Type', $leaveType)->where('#filter', 'End_Date gt ' . date('Y-m-d') . 'filter#')->count();
+        $currentPeriod = $this->odataClient()->from(HRLeavePeriod::wsName())->where('Current', 'true')->first();
+        // dd($currentPeriod);
+        // if ($currentPeriod == null)
+        // {
+        //     return redirect()->back()->with('error','Oops! Leave Calendar not Activated.'.config('app.errors')['persists']);
+        // }
+        //$takenDays = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Released')->where('Employee_No',session('authUser')['employeeNo'])->where('Leave_Type',$leaveType)->count();
         $data = [];
         $data['balance'] = 0;
         $data['isHourly'] = false;
         $data['pendingCount'] = $pendingApproval;
-        if($leaveTypeDesc != null){
+        if ($leaveTypeDesc != null) {
             $leaveTypeDays = $leaveTypeDesc['Days'];
             $leaveEntries = $this->odataClient()->from(HRLeaveLedger::wsName())
-            ->where('Employee_No',$empNo)
-            ->where('Leave_Type',$leaveType)
-            ->where('Leave_Period',$currentPeriod->Code)
-            ->get();
+                ->where('EmployeeNo', $empNo)
+                ->where('LeaveType', $leaveType)
+                ->where('CalendarCode', $currentPeriod->Code)
+                ->get();
             $availableDays = $leaveTypeDays;
             $deductions = 0;
             $additions = 0;
             $leaveBalance = 0;
+            // dd($leaveEntries);
             //$leaveBalance = $leaveTypeDays - ($takenDays+$pendingApproval);
-            if($leaveEntries != null){
-                foreach($leaveEntries as $entry){
-                    if($entry->No_of_Days < 0){
-                        $deductions =  $deductions + -$entry->No_of_Days;
-                    }else{
-                        $additions =  $additions + $entry->No_of_Days;
+            if ($leaveEntries != null) {
+                foreach ($leaveEntries as $entry) {
+                    if ($entry->NoofDays < 0) {
+                        $deductions =  $deductions + -$entry->NoofDays;
+                    } else {
+                        $additions =  $additions + $entry->NoofDays;
                     }
                     // $takenDays = $takenDays + $entry->No_of_Days;
                 }
             }
-            if($leaveTypeDesc['Code'] == 'ANNUAL'){
+            if ($leaveTypeDesc['Code'] == 'ANNUAL') {
                 $leaveBalance = $additions - $deductions;
-            }else{
+            } else {
                 $deductions = $deductions - $additions;
                 $leaveBalance = $leaveTypeDays - $deductions;
             }
-            if($leaveBalance >= 0){
+            if ($leaveBalance >= 0) {
                 $data['balance'] = (int)$leaveBalance;
             }
+            // dd($data);
             return $data;
         }
     }
     //
-    public function leaveStatement(){
-        if(session('authUser')['Gender'] == 'Male'){
+    public function leaveStatement()
+    {
+        if (session('authUser')['Gender'] == 'Male') {
             $notGender = 'Female';
-        }else{
+        } else {
             $notGender = 'Male';
         }
-        $leaveTypes = $this->odataClient()->from(LeaveType::wsName())->where('Gender','!=',$notGender)->get();
+        $leaveTypes = $this->odataClient()->from(LeaveType::wsName())->where('Gender', '!=', $notGender)->get();
         $data = [
             'leaveTypes' => $leaveTypes,
         ];
         return view('staff.leave.statement')->with($data);
     }
-    public function generateLeaveStatement(REQUEST $request){
+    public function generateLeaveStatement(REQUEST $request)
+    {
         $request->validate([
             'leaveType' => 'required',
         ]);
         // $period = Carbon::parse("$request->month/01/$request->year")->format('Y-m-d');
-        try{
+        try {
             $service = $this->MySoapClient(config('app.cuStaffPortal'));
-            if(!isset($params)){
+            if (!isset($params)) {
                 $params = new \stdClass();
             }
             $empNo = session('authUser')['employeeNo'];
             $params->employeeNo = $empNo;
             $params->leaveType = $request->leaveType;
-            $fname = str_replace('/','_',$empNo)."_leave.pdf";
+            $fname = str_replace('/', '_', $empNo) . "_leave.pdf";
             $params->filenameFromApp = $fname;
+            // dd($params);
             $result = $service->GenerateLeaveStatement($params);
-			if($result->return_value != ""){
-				$data = base64_decode($result->return_value);
-                header('Content-Type: application/pdf');
-                echo $data;
-			}
-            return redirect()->back()->with('error','Oops! Something went wrong.'.config('app.errors')['persists']);
-        }
-        catch (\SoapFault $e) {
-            $this->InsertLog("SOAP Error",$e->faultstring, Request()->Route()->getActionName());
+            // dd($result);
+            if ($result->return_value != "") {
+                $data = base64_decode($result->return_value, true);
+                return response($data)->header('Content-Type', 'application/pdf');
+            } else {
+
+                return redirect()->back()->with('error', 'Oops! Something went wrong.' . config('app.errors')['persists']);
+            }
+        } catch (\SoapFault $e) {
+            $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
-            return redirect()->back()->with('error',$errorMsg);
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
-    public function isOnLeave($empNo){
-        $leaveEntries = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Employee_No',$empNo)->where('Status','Released')->get();
-        if($leaveEntries != null){
-            foreach($leaveEntries as $leave){
-                $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Document_No',$leave['Document_No'])->first();
-                if($requisition != null){
-                    if(Carbon::parse($requisition->End_Date)->gt(date('Y-m-d'))){
+    public function isOnLeave($empNo)
+    {
+        $leaveEntries = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Employee_No', $empNo)->where('Status', 'Released')->get();
+        if ($leaveEntries != null) {
+            foreach ($leaveEntries as $leave) {
+                $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Document_No', $leave['Document_No'])->first();
+                if ($requisition != null) {
+                    if (Carbon::parse($requisition->End_Date)->gt(date('Y-m-d'))) {
                         return true;
                     }
                 }

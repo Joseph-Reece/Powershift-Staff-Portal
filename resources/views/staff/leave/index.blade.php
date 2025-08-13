@@ -19,14 +19,14 @@
             <x-slot name="tbody">
                 @if($requsitions != null && count($requsitions) > 0)
                     @foreach($requsitions as $requisition)
-                        <x-table.tr isEven="{{$loop->even}}" onClick="location = '/staff/leave/show/{{$requisition->Document_No}}'">
-                            <x-table.td>{{$requisition->Document_No}}</x-table.td>
+                        <x-table.tr isEven="{{$loop->even}}" onClick="location = '/staff/leave/show/{{$requisition->No}}'">
+                            <x-table.td>{{$requisition->No}}</x-table.td>
                             <x-table.td>{{$requisition->Leave_Type}}</x-table.td>
-                            <x-table.td>{{$requisition->Application_Date}}</x-table.td>
-                            <x-table.td >{{$requisition->Days_Applied." Days"}}</x-table.td>
-                            <x-table.td>{{$requisition->Start_Date}} {{$requisition->Hourly? $requisition->Start_Time:''}}</x-table.td>
+                            <x-table.td>{{$requisition->Date}}</x-table.td>
+                            <x-table.td >{{$requisition->Applied_Days." Days"}}</x-table.td>
+                            <x-table.td>{{$requisition->Starting_Date}} {{$requisition->Hourly? $requisition->Start_Time:''}}</x-table.td>
                             <x-table.td>{{$requisition->End_Date}} {{$requisition->Hourly? $requisition->Return_Time:''}}</x-table.td>
-                            <x-table.td>{{$requisition->Return_to_Work_Date}} {{$requisition->Hourly? $requisition->Return_Time:''}}</x-table.td>
+                            <x-table.td>{{$requisition->Return_Date}} {{$requisition->Hourly? $requisition->Return_Time:''}}</x-table.td>
                             <x-table.td>{{$requisition->Reliever_Name}}</x-table.td>
                             <x-table.td>
                                 @if ($requisition->Status == 'Open' || $requisition->Status == 'Pending Approval')

@@ -50,15 +50,7 @@ class AuthenticatedSessionController extends Controller
                     }
                     if (!\Hash::check($request->password, $user->PortalPassword)) {
                         return redirect()->back()->with('error', 'Staff No or password is incorrect');
-                    } else {
-                        //
-                        // $userSetup = $this->odataClient()->from(User::wsName())
-                        // ->where('EmployeeNo',$request->staffNo)
-                        // ->first();
-                        // if($userSetup == null)
-                        // {
-                        //     return redirect()->back()->with('error','User with that employee no not found in the user setup');
-                        // }
+                    } else {                        
 
                         $user = [
                             'employeeNo' => $user['No'],
@@ -70,9 +62,9 @@ class AuthenticatedSessionController extends Controller
                             'isChangedPassword' => $user['ChangedPassword'],
                             'branch' => $user['ShortcutDimension1Code'],
                             'department' => $user['DepartmentName'],
-                            //'HOD' => $this->isHOD($user['No']),
-                            'HOD' => true,
-                            'CEO' => $this->isCEO($user['No']),
+                            'HOD' => $this->isHOD($user['No']),
+                            // 'HOD' => true,
+                            // 'CEO' => $this->isCEO($user['No']),
                             'isNotified' => false,
                             'picture' => app('App\Http\Controllers\Staff\ProfileController')->getPassportPhoto($user['No'])
                         ];
@@ -96,9 +88,9 @@ class AuthenticatedSessionController extends Controller
     public function isHOD($employeeNo)
     {
         $dimensionValue = $this->odataClient()->from(DimensionValue::wsName())
-            ->select('Staff_No', 'Code')
-            ->where('Staff_No', '=', $employeeNo)
-            ->where('Dimension_Code', '=', 'DEPARTMENTS')
+            ->select('HOD', 'Code')
+            ->where('HOD', '=', $employeeNo)
+            ->where('DimensionCode', '=', 'DEPARTMENT')
             ->first();
         return $dimensionValue;
     }

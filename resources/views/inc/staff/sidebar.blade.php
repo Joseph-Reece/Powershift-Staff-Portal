@@ -11,7 +11,7 @@
             <div class="pl-4">
                 <x-jet-dropdown-link href="/staff/leave" class="border-b border-l pl-1 flex items-center gap-1  {{\Request::is('*staff/leave*') && !Request::is('*staff/leave/statement')? 'bg-theme2':''}}">
                     <x-heroicon-o-home/>
-                    Leave Requisition
+                    Leave Application
                 </x-jet-dropdown-link>
                 <x-jet-dropdown-link href="/staff/leave/statement" class="border-b border-l pl-1 flex items-center gap-1 {{\Request::is('*staff/leave/statement')? 'bg-theme2':''}}">
                     <x-heroicon-o-home/>
@@ -94,7 +94,7 @@
             </div>
         </div>
         <!--CEO-->
-        @if(session('authUser')['CEO'])
+        {{-- @if(session('authUser')['CEO'])
             <div class="pl-1 border-t">
                 <span class="flex items-center gap-1"><x-heroicon-o-user-group/> CEO</span>
                 <div class="pl-4">
@@ -104,7 +104,7 @@
                     </x-jet-dropdown-link>
                 </div>
             </div>
-        @endif
+        @endif --}}
         <!--HOD-->
         @if(session('authUser')['HOD'] != null)
             <div class="pl-1 border-t">

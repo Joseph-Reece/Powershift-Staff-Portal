@@ -8,7 +8,7 @@
                  @csrf
                  @if($action == 'edit')
                     @method('PUT')
-                    <input id="requisitionNo" type="hidden" name="requisitionNo" value="{{isset($requisition)? $requisition->Document_No:''}}"/>
+                    <input id="requisitionNo" type="hidden" name="requisitionNo" value="{{isset($requisition)? $requisition->No:''}}"/>
                  @endif
                     <input id="isHourly" type="hidden" name="isHourly" value=""/>
                     <x-grid>
