@@ -17,10 +17,10 @@
                     <x-heroicon-o-home/>
                     Leave Statement
                 </x-jet-dropdown-link>
-                <x-jet-dropdown-link href="/staff/requisition/training" class="border-b border-l pl-1 flex items-center gap-1  {{\Request::is('*staff/requisition/training*')? 'bg-theme2':''}}">
+                {{-- <x-jet-dropdown-link href="/staff/requisition/training" class="border-b border-l pl-1 flex items-center gap-1  {{\Request::is('*staff/requisition/training*')? 'bg-theme2':''}}">
                     <x-heroicon-o-home/>
                     Training Request
-                </x-jet-dropdown-link>
+                </x-jet-dropdown-link> --}}
                 <x-jet-dropdown-link href="/staff/payslip" class="border-b border-l pl-1 flex items-center gap-1 {{\Request::is('*staff/payslip')? 'bg-theme2':''}}">
                     <x-heroicon-o-currency-dollar/>
                     Pay Slip

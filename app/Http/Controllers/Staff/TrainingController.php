@@ -24,7 +24,7 @@ class TrainingController extends Controller
     //myUserId : Code[100];action : Text;DocNo : Code[50];department : Code[100];accountNo : Code[30];payingBankAccount : Code[30];purpose : Text;paymentReleaseDate : Date;payMode : Integer;responsibilityCenter : Code[30]
     public function index(){
         $requsitions = $this->odataClient()->from(TrainingHeader::wsName())
-        ->where('Employee_no',session('authUser')['employeeNo'])
+        ->where('EmployeeNo',session('authUser')['employeeNo'])
         ->get();
         $data = [
             'requsitions' => $requsitions
