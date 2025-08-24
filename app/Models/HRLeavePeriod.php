@@ -9,11 +9,11 @@ class HRLeavePeriod extends Model
 {
     use HasFactory;
     public static function wsName(){
-        return "PgHrLeaveCalendar";
+        return "QyHrLeaveCalendar";
     }
     public static function tableDesc(){
         $data =  [
-            'tableID' => 52203100,
+            'tableID' => 50045,
         ];
         return $data;
     }

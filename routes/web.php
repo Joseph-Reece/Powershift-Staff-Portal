@@ -51,18 +51,19 @@ Route::group(['prefix' => 'staff'], function(){
     Route::post('/approval',[ApprovalsController::class,'documentApproval'])->name('documentApproval');
     Route::get('/approval/approvals-count/{type}/{status}',[ApprovalsController::class,'approvalsCount']);
     //LEAVE
-    Route::get('/leave',[LeaveController::class,'index']);
+    Route::get('/leave',[LeaveController::class,'index'])->name('leave.index');
     Route::get('/leave/create',[LeaveController::class,'create']);
     Route::post('/leave/store',[LeaveController::class,'store'])->name('storeLeave');
-    Route::get('/leave/balance/{type}',[LeaveController::class,'getLeaveBalance']);
-    Route::get('/leave/dates/{type}/{days}/{startDate}',[LeaveController::class,'getLeaveDates']);
-    Route::get('/leave/show/{no}',[LeaveController::class,'show']);
-    Route::get('/leave/edit/{no}',[LeaveController::class,'edit']);
-    Route::put('/leave/update',[LeaveController::class,'update'])->name('updateLeave');
+    Route::get('/leave/balance/{type}',[LeaveController::class,'showBalance']);
+    Route::get('/leave/dates/{type}/{days}/{startDate}',[LeaveController::class,'getLeaveDatesDetails']);
+    Route::get('/leave/details', [LeaveController::class, 'getLeaveDatesDetails']);
+    Route::get('/leave/show/{no}',[LeaveController::class,'showLeave']);
+    Route::get('/leave/edit/{no}',[LeaveController::class,'editThisLeave']);
+    Route::put('/leave/update',[LeaveController::class,'updateThisLeave'])->name('updateLeave');
     Route::post('/leave/cancel',[LeaveController::class,'cancel'])->name('cancelLeave');
-    Route::post('/leave/approval',[LeaveController::class,'approval'])->name('reqLeaveApproval');
-    Route::get('/leave/statement',[LeaveController::class,'leaveStatement']);
-    Route::post('/leave/statement',[LeaveController::class,'generateLeaveStatement'])->name('generateLeaveStatement');
+    Route::post('/leave/approval',[LeaveController::class,'SendForLeaveApproval'])->name('reqLeaveApproval');
+    Route::get('/leave/statement',[LeaveController::class,'getLeaveStatement']);
+    Route::post('/leave/statement',[LeaveController::class,'generateLeaveTypeStatement'])->name('generateLeaveStatement');
     //GENERAL
     Route::get('/payslip',[StaffGeneralController::class,'payslip']);
     Route::post('/payslip/generate',[StaffGeneralController::class,'generatePayslip'])->name('generatePayslip');

@@ -2,17 +2,25 @@
 
 return [
     //
-	'cuStaffPortal' => env('APP_ENV') == "production"? 'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal':'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal',
-    'odataBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
-    'soapPageBaseUrl' => env('APP_ENV') == "production"? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/":"http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
-	//
-    'storagePath' => env('APP_ENV') == "production"? 'C:\\inetpub\\wwwroot\\PortalFiles\\':'C:\\inetpub\\wwwroot\\PortalFiles\\',
-	'reportsPath' => env('APP_ENV') == "production"? '\\\\WIN-NGMOA211LM7\\PortalFiles\\':'\\\\WIN-NGMOA211LM7\\PortalFiles\\',
-	'domainUser' => env('APP_ENV') == "production"? "PTL:Kenya@2024!":"PTL:Kenya@2024!",
-	'NavUser' => env('APP_ENV') == "production"? "PTL":"PTL",
-	'NavPassword' => env('APP_ENV') == "production"? "Kenya@2024!":"Kenya@2024!",
-	'maxRecPerPage' => env('MAX_PER_PAGE',50),
+    'cuStaffPortal' => env('APP_ENV') == "production" ? 'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal' : 'http://artisan:7047/BC230/WS/CHIROMO%20HOSPITAL%20GROUP/Codeunit/CuStaffPortal',
+    'odataBaseUrl' => env('APP_ENV') == "production" ? "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/" : "http://artisan:7048/BC230/ODataV4/Company('CHIROMO%20HOSPITAL%20GROUP')/",
+    'soapPageBaseUrl' => env('APP_ENV') == "production" ? env('BUSINESS_CENTRAL_SOAP_BASE_URL') : env('BUSINESS_CENTRAL_SOAP_BASE_URL'),
+    'business_central_company' => env('APP_ENV') == "production" ? env('BC_Company') : env('BC_Company'),
     //
+    'storagePath' => env('APP_ENV') == "production" ? 'C:\\inetpub\\wwwroot\\PortalFiles\\' : 'C:\\inetpub\\wwwroot\\PortalFiles\\',
+    'reportsPath' => env('APP_ENV') == "production" ? '\\\\WIN-NGMOA211LM7\\PortalFiles\\' : '\\\\WIN-NGMOA211LM7\\PortalFiles\\',
+    'domainUser' => env('APP_ENV') == "production" ? "PTL:Kenya@2024!" : "PTL:Kenya@2024!",
+    'NavUser' => env('APP_ENV') == "production" ? "PTL" : "PTL",
+    'NavPassword' => env('APP_ENV') == "production" ? "Kenya@2024!" : "Kenya@2024!",
+    'maxRecPerPage' => env('MAX_PER_PAGE', 50),
+    //
+    // New Auth Implementation
+    'businessCentralTenantId' => env('BUSINESS_CENTRAL_TENANT_ID'),
+    'businessCentralClientId' => env('BUSINESS_CENTRAL_CLIENT_ID'),
+    'businessCentralClientSecret' => env('BUSINESS_CENTRAL_CLIENT_SECRET'),
+    'businessCentralScope' => env('BUSINESS_CENTRAL_SCOPE', 'https://api.businesscentral.dynamics.com/.default'),
+    'businessCentralApiBaseUrl' => env('BUSINESS_CENTRAL_API_BASE_URL', 'https://api.businesscentral.dynamics.com/'),
+    // New Auth Implementation
     'debug' => env('APP_DEBUG', ''),
     'company' => [
         'name' => env('COMPANY_NAME', ''),
@@ -29,7 +37,7 @@ return [
     ],
     'googleCaptchaKey' => '**',
     'googleAnalyticsId' => '**',
-    'metaDescription' => env('COMPANY_NAME')."",
+    'metaDescription' => env('COMPANY_NAME') . "",
     'metaKeywords' => '',
     /*
     |--------------------------------------------------------------------------

@@ -6,84 +6,122 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\WebServicesTrait;
 use App\Traits\AttachmentTrait;
-use App\CustomClasses\NTLM\NTLMSoapClient;
+use App\Http\Enums\LeaveType as EnumsLeaveType;
+use App\Http\Requests\ApproveLeaveRequisitionRequest;
+use App\Http\Requests\GenerateLeaveStatementRequest;
+use App\Http\Requests\LeaveDetailsRequest;
+use App\Http\Requests\ShowLeaveRequisitionRequest;
+use App\Http\Requests\UpdateLeaveRequisitionRequest;
 use App\Models\HRLeaveRequisition;
 use App\Models\LeaveType;
 use App\Models\HRLeavePeriod;
 use App\Models\HRLeaveLedger;
 use App\Models\HREmployee;
+use App\Services\ApprovalService;
+use App\Services\BusinessCentralService;
+use App\Services\EmployeeService;
+use App\Services\LeaveBalanceService;
+use App\Services\LeaveService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\View\View;
 
 class LeaveController extends Controller
 {
     use WebServicesTrait;
     use AttachmentTrait;
+    protected $leaveService;
+    protected $employeeService;
+    protected $approvalService;
+    protected $bcService;
 
-    public function __construct()
-    {
+    public function __construct(
+        LeaveService $leaveService,
+        EmployeeService $employeeService,
+        ApprovalService $approvalService,
+        BusinessCentralService $bcService
+    ) {
         $this->middleware('isAuth');
         $this->middleware('staff');
+        $this->middleware('BCAuth');
+        $this->leaveService = $leaveService;
+        $this->employeeService = $employeeService;
+        $this->approvalService = $approvalService;
+        $this->bcService = $bcService;
     }
+
+    // public function __construct(BusinessCentralService $bcService, LeaveService $leaveService)
+    // {
+    //     $this->bcService = $bcService;
+    //     $this->leaveService = $leaveService;
+    // }
+
     public function index()
     {
         $dateToday = Carbon::now();
         $startDate = $dateToday->startOfYear()->format('Y-m-d');
         $endDate = $dateToday->endOfYear()->format('Y-m-d');
-        $requsitions = $this->odataClient()->from(HRLeaveRequisition::wsName())
-            ->where('Employee_No', session('authUser')['employeeNo'])
-            ->where('#filter', "(Starting_Date gt $startDate and Starting_Date lt $endDate)" . "filter#") //TODO: Will not show leaves spanning two years.
-            ->get();
-        // dd($requsitions);
+        $employeeNo = session('authUser')['employeeNo'];
+
+        $leaveRequests = $this->bcService->callPage(
+            HRLeaveRequisition::wsName(),
+            [
+                '$filter' => "StartDate gt $startDate and StartDate lt $endDate and EmployeeNo eq '$employeeNo'"
+            ]
+        );
+        // dd($leaveRequests->value);
         $data = [
-            'requsitions' => $requsitions
+            'requsitions' => $leaveRequests->value
         ];
+        // dd($data);
         return view('staff.leave.index')->with($data);
     }
     public function create()
     {
-        $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('Employee_No', session('authUser')['employeeNo'])->first();
-        // if($requisition != null){
-        //     return redirect()->back()->with('error','Oops! you cannot make a new leave application while there is another one that is pending approval.');
-        // }
-        if (session('authUser')['Gender'] == 'Male') {
+        // $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('EmployeeNo', session('authUser')['employeeNo'])->first();
+        $employeeNo = session('authUser')['employeeNo'];
+
+        $leaveRequisition = $this->bcService->callPage(
+            HRLeaveRequisition::wsName(),
+            [
+                '$filter' => "Status eq 'Pending Approval' and EmployeeNo eq '{$employeeNo}'",
+                '$top' => 1
+            ]
+        );
+        if (session('authUser')['gender'] == 'Male') {
             $notGender = 'Female';
         } else {
             $notGender = 'Male';
         }
-        $leaveTypes = $this->odataClient()->from(LeaveType::wsName())
-            ->where('Gender', '!=', $notGender)
-            ->get();
-        $relievers = $this->odataClient()->from(HREmployee::wsName())
-            ->select('No', 'FirstName', 'MiddleName', 'LastName')
-            ->where('No', '!=', session('authUser')['employeeNo'])
-            ->where('Status_1', '=', 'Active')
-            ->get();
-        //$relievers = [];
-        // $isOnLeave = false;
-        // //get relievers not on leave
-        // foreach($employees as $employee){
-        //     $leaveEntries = $this->odataClient()->from(HRLeaveLedger::wsName())->where('Employee_No',$employee['No'])->where('Leave_Period',(int)date('Y'))->get();
-        //     if($leaveEntries != null){
-        //         foreach($leaveEntries as $leave){
-        //             $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('No',$leave['Document_No'])->first();
-        //             if($requisition != null){
-        //                 if(Carbon::parse($requisition->End_Date)->gt(date('Y-m-d'))){
-        //                     $isOnLeave = true;
-        //                 }
-        //             }
-        //         }
-        //         if(!$isOnLeave){
-        //             $relievers[] = $employee;
-        //         }
-        //     }else{
-        //         $relievers[] = $employee;
-        //     }
-        // }
+        // dd($notGender);
+        $leaveTypes = $this->bcService->callPage(
+            LeaveType::wsName(),
+            [
+                '$filter' => "Gender ne '{$notGender}'"
+            ]
+        );
+        // dd($leaveTypes);
+        $relievers = $this->bcService->callPage(
+            HREmployee::wsName(),
+            [
+                '$select' => 'No,FirstName,MiddleName,LastName',
+                '$filter' => "No ne '{$employeeNo}' and Status eq 'Active'"
+            ]
+        );
+        // dd($leaveTypes);
+        //TODO: Filter Out Employees on leave
         $data = [
-            'leaveTypes' => $leaveTypes,
-            'relievers' => $relievers,
+            'leaveTypes' => $leaveTypes->value,
+            'relievers' => $relievers->value,
             'action' => 'create',
         ];
+
+        // dd($data);
+
         return view('staff.leave.application')->with($data);
     }
     public function store(REQUEST $request)
@@ -174,7 +212,7 @@ class LeaveController extends Controller
     {
         $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())
             ->where('No', $no)
-            ->where('Employee_No', session('authUser')['employeeNo'])
+            ->where('EmployeeNo', session('authUser')['employeeNo'])
             ->first();
         if ($requisition == null) {
             return redirect('/staff/leave')->with('error', 'Leave application not found.');
@@ -188,24 +226,42 @@ class LeaveController extends Controller
         ];
         return view('staff.leave.show')->with($data);
     }
+    /**
+     * Display a specific leave requisition.
+     */
+    public function showLeave(string $no): View|RedirectResponse
+    {
+        try {
+            $requisition = $this->leaveService->getLeaveRequisition($no);
+            $relieverDesc = $this->employeeService->getEmployeeDescription($requisition->Duties_Taken_Over_By ?? null);
+            $approvers = $this->approvalService->getApprovers($no);
+
+            $data = [
+                'requisition' => (object) array_merge((array) $requisition, ['relieverDesc' => $relieverDesc]),
+                'approvers' => $approvers,
+            ];
+
+            return view('staff.leave.show', $data);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch leave requisition details', [
+                'no' => $no,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('leave.index')->with('error', 'Unable to retrieve leave requisition. Please try again or contact support.');
+        }
+    }
     public function edit($no)
     {
         $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())
             ->where('No', $no)
-            ->where('Employee_No', session('authUser')['employeeNo'])
+            ->where('EmployeeNo', session('authUser')['employeeNo'])
             ->where('Status', 'Open')
             ->first();
         if ($requisition == null) {
             return redirect('/staff/leave')->with('error', 'Leave application is no longer editable or does not exist.');
         }
-        // if($requisition->Hourly){
-        //     $requisition->Start_Time = Carbon::parse($requisition->Start_Time);
-        //     $requisition->Return_Time = Carbon::parse($requisition->Return_Time);
-        //     $requisition->Start_Date = Carbon::parse($requisition->Start_Time)->format('m/d/Y h:i A');
-        //     $appliedHours = $requisition->Start_Time->diffInHours($requisition->Return_Time);
-        //     $requisition->appliedHours = $appliedHours;
-        // }
-        //
+
         $leaveTypes = $this->odataClient()->from(LeaveType::wsName())
             ->get();
         $relievers = $this->odataClient()->from(HREmployee::wsName())
@@ -213,26 +269,7 @@ class LeaveController extends Controller
             ->where('No', '!=', session('authUser')['employeeNo'])
             ->where('Status_1', '=', 'Active')
             ->get();
-        // $relievers = [];
-        // $isOnLeave = false;
-        // foreach($employees as $employee){
-        //     $leaveEntries = $this->odataClient()->from(HRLeaveLedger::wsName())->where('Employee_No',$employee['No'])->where('Leave_Period',(int)date('Y'))->get();
-        //     if($leaveEntries != null){
-        //         foreach($leaveEntries as $leave){
-        //             $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('No',$leave['Document_No'])->first();
-        //             if($requisition != null){
-        //                 if(Carbon::parse($requisition->End_Date)->gt(date('Y-m-d'))){
-        //                     $isOnLeave = true;
-        //                 }
-        //             }
-        //         }
-        //         if(!$isOnLeave){
-        //             $relievers[] = $employee;
-        //         }
-        //     }else{
-        //         $relievers[] = $employee;
-        //     }
-        // }
+
         $data = [
             'leaveTypes' => $leaveTypes,
             'relievers' => $relievers,
@@ -240,6 +277,34 @@ class LeaveController extends Controller
             'requisition' => $requisition,
         ];
         return view('staff.leave.application')->with($data);
+    }
+    /**
+     * Display the form to edit a leave requisition.
+     */
+    public function editThisLeave(string $no): View|RedirectResponse
+    {
+        try {
+            $gender = Session::get('authUser.gender');
+            $requisition = $this->leaveService->getEditableLeaveRequisition($no);
+            $leaveTypes = $this->leaveService->getLeaveTypes($gender);
+            $relievers = $this->employeeService->getActiveRelievers();
+
+            $data = [
+                'leaveTypes' => $leaveTypes,
+                'relievers' => $relievers,
+                'action' => 'edit',
+                'requisition' => $requisition,
+            ];
+
+            return view('staff.leave.application', $data);
+        } catch (\Exception $e) {
+            Log::error('Failed to load leave requisition edit form', [
+                'no' => $no,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('leave.index')->with('error', 'Unable to load leave requisition edit form. Please try again or contact support.');
+        }
     }
     public function update(REQUEST $request)
     {
@@ -281,6 +346,33 @@ class LeaveController extends Controller
             $this->InsertLog("SOAP Error", $e->faultstring, Request()->Route()->getActionName());
             $errorMsg = $e->faultstring;
             return redirect()->back()->with('error', $errorMsg);
+        }
+    }
+    /**
+     * Update a leave requisition.
+     */
+    public function updateThisLeave(UpdateLeaveRequisitionRequest $request): RedirectResponse
+    {
+        try {
+            $this->leaveService->updateLeaveRequisition(
+                $request->requisitionNo,
+                $request->leaveType,
+                $request->startDate,
+                $request->endDate,
+                $request->reason,
+                $request->reliever,
+                $request->boolean('requestLeaveAllowance')
+            );
+
+            return redirect()->route('leave.index')->with('success', 'Leave application updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update leave requisition', [
+                'requisitionNo' => $request->requisitionNo,
+                'leaveType' => $request->leaveType,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['requisitionNo' => 'Unable to update leave requisition. Please try again or contact support.']);
         }
     }
 
@@ -430,41 +522,60 @@ class LeaveController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
     }
+    /**
+     * Send a leave requisition for approval.
+     */
+    public function SendForLeaveApproval(ApproveLeaveRequisitionRequest $request): RedirectResponse
+    {
+        try {
+            $this->leaveService->requestLeaveApproval($request->requisitionNo);
+
+            return redirect()->route('leave.index')->with('success', 'Leave application sent for approval successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to send leave requisition for approval', [
+                'requisitionNo' => $request->requisitionNo,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['requisitionNo' => 'Unable to send leave requisition for approval. Please try again or contact support.']);
+        }
+    }
     public function getLeaveDates($leaveType, $endDate, $startDate)
     {
-        $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())->where('Code', $leaveType)->first();
-        $leaveBalance = $this->getLeaveBalance($leaveType);
-        // if($leaveBalance <= 0 || $appliedDays > $leaveBalance){
-        //     return null;
-        // }
+        // $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())->where('Code', $leaveType)->first();
+        // $leaveBalance = $this->getLeaveBalance($leaveType);
+        // $leaveTypeDesc = $this->bcService->callPage(
+        //     LeaveType::wsName(),
+        //     [
+        //         '$filter' => "Code eq $leaveType",
+        //         '$top' => 1
+        //     ]
+        // );
+        // $leaveBalance = $this->leaveService->getLeaveBalance($leaveType);
+
+
         $start_date = str_replace('_', "/", $startDate);
         $end_date = str_replace('_', "/", $endDate);
-        // if($leaveTypeDesc->Allow_Hourly){
-        //     $endDate = Carbon::parse($start_date)->addHours($appliedDays);
-        //     $returnDate = Carbon::parse($start_date)->addHours($appliedDays);
-        //     $endDate = Carbon::parse($endDate)->format('d-M-Y h:i:s');
-        //     $returnDate = Carbon::parse($returnDate)->format('d-M-Y h:i:s');
-        // }else{
-        //
-        // $endDate = Carbon::parse($start_date)->addDays($appliedDays-1);
-        // if(Carbon::parse( $endDate)->dayOfWeek == Carbon::SUNDAY){
-        //     $endDate = Carbon::parse($endDate)->addDays(1);
-        // }
-        // $returnDate = Carbon::parse($start_date)->addDays(($appliedDays+1));
-        // if(Carbon::parse($returnDate)->dayOfWeek == Carbon::SUNDAY){
-        //     $returnDate = Carbon::parse($returnDate)->addDays(1);
-        // }
         try {
-            $service = $this->MySoapClient(config('app.cuStaffPortal'));
-            $params = new \stdClass();
-            $params->empNo = session('authUser')['employeeNo'];
-            $params->startDate = Carbon::parse(strtotime($start_date))->format('Y-m-d');
-            $params->endDate = Carbon::parse(strtotime($end_date))->format('Y-m-d');
-            $params->leaveType = $leaveType;
-            $result = $service->FnGetLeaveDetails($params);
+
+            // $service = $this->MySoapClient(config('app.cuStaffPortal'));
+
+            $result = $this->bcService->callCodeUnitAction(
+                'cuStaffPortal',
+                'FnGetLeaveDetails',
+                [
+                    'empNo' => session('authUser')['employeeNo'],
+                    'startDate' => Carbon::parse(strtotime($start_date))->format('Y-m-d'),
+                    'endDate' => Carbon::parse(strtotime($end_date))->format('Y-m-d'),
+                    'leaveType' => $leaveType
+                ]
+            );
             // dd($result);
-            if ($result->return_value != "") {
-                $vars = explode("##", $result->return_value);
+            // return $result;
+            // $result = $service->FnGetLeaveDetails($params);
+            dd($result);
+            if ($result->value != "") {
+                $vars = explode("##", $result->value);
                 $appliedDays = $vars[1];
                 $returnDate = Carbon::parse($vars[0])->format('d-M-Y');
                 $data = [
@@ -483,26 +594,68 @@ class LeaveController extends Controller
             return null;
         }
     }
+    /**
+     * Get leave details for a given leave type and date range.
+     */
+    public function getLeaveDatesDetails(LeaveDetailsRequest $request): JsonResponse
+    {
+        // dd($request);
+        try {
+            $leaveDetails = $this->leaveService->getLeaveDetails(
+                $request->leaveType,
+                $request->startDate,
+                $request->endDate
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $leaveDetails,
+                'message' => 'Leave details retrieved successfully.',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch leave details', [
+                'leaveType' => $request->leaveType,
+                'startDate' => $request->startDate,
+                'endDate' => $request->endDate,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to retrieve leave details. Please try again or contact support.',
+            ], 400);
+        }
+    }
     public function getLeaveBalance($leaveType)
     {
         $empNo = session('authUser')['employeeNo'];
-        $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())
-            ->where('Code', $leaveType)
-            ->first();
-        $pendingApproval = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('Employee_No', session('authUser')['employeeNo'])->where('Leave_Type', $leaveType)->where('#filter', 'End_Date gt ' . date('Y-m-d') . 'filter#')->count();
+        // $leaveTypeDesc = $this->odataClient()->from(LeaveType::wsName())
+        //     ->where('Code', $leaveType)
+        //     ->first();
+
+        $LeavetypeDescription = $this->bcService->callPage(
+            LeaveType::wsName(),
+            [
+                '$filter' => "Code eq $leaveType",
+                '$top' => 1
+            ]
+        );
+
+
+        $pendingApproval = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status', 'Pending Approval')->where('EmployeeNo', session('authUser')['employeeNo'])->where('Leave_Type', $leaveType)->where('#filter', 'EndDate gt ' . date('Y-m-d') . 'filter#')->count();
         $currentPeriod = $this->odataClient()->from(HRLeavePeriod::wsName())->where('Current', 'true')->first();
         // dd($currentPeriod);
         // if ($currentPeriod == null)
         // {
         //     return redirect()->back()->with('error','Oops! Leave Calendar not Activated.'.config('app.errors')['persists']);
         // }
-        //$takenDays = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Released')->where('Employee_No',session('authUser')['employeeNo'])->where('Leave_Type',$leaveType)->count();
+        //$takenDays = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Status','Released')->where('EmployeeNo',session('authUser')['employeeNo'])->where('Leave_Type',$leaveType)->count();
         $data = [];
         $data['balance'] = 0;
         $data['isHourly'] = false;
         $data['pendingCount'] = $pendingApproval;
-        if ($leaveTypeDesc != null) {
-            $leaveTypeDays = $leaveTypeDesc['Days'];
+        if ($LeavetypeDescription != null) {
+            $leaveTypeDays = $LeavetypeDescription['Days'];
             $leaveEntries = $this->odataClient()->from(HRLeaveLedger::wsName())
                 ->where('EmployeeNo', $empNo)
                 ->where('LeaveType', $leaveType)
@@ -524,7 +677,8 @@ class LeaveController extends Controller
                     // $takenDays = $takenDays + $entry->No_of_Days;
                 }
             }
-            if ($leaveTypeDesc['Code'] == 'ANNUAL') {
+
+            if ($LeavetypeDescription['Code'] == EnumsLeaveType::ANNUAL) {
                 $leaveBalance = $additions - $deductions;
             } else {
                 $deductions = $deductions - $additions;
@@ -537,10 +691,28 @@ class LeaveController extends Controller
             return $data;
         }
     }
+    public function showBalance(Request $request)
+    {
+        try {
+            $leaveType = $request->input('leave_type', LeaveType::ANNUAL);
+            $balanceData = $this->leaveService->getLeaveBalance($leaveType);
+
+            return response()->json([
+                'success' => true,
+                'data' => $balanceData,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
     //
     public function leaveStatement()
     {
-        if (session('authUser')['Gender'] == 'Male') {
+        // dd(session('authUser'));
+        if (session('authUser')['gender'] == 'Male') {
             $notGender = 'Female';
         } else {
             $notGender = 'Male';
@@ -550,6 +722,32 @@ class LeaveController extends Controller
             'leaveTypes' => $leaveTypes,
         ];
         return view('staff.leave.statement')->with($data);
+    }
+    /**
+     * Display the leave statement for the authenticated user.
+     */
+    public function getLeaveStatement(): View|RedirectResponse
+    {
+        try {
+            $statement = $this->leaveService->getLeaveStatement();
+
+            if (empty($statement)) {
+                Log::warning('No leave types available for user', [
+                    'employeeNo' => Session::get('authUser.employeeNo'),
+                    'gender' => Session::get('authUser.gender'),
+                ]);
+                return redirect()->route('leave.index')->with('warning', 'No leave types available for your account.');
+            }
+
+            return view('staff.leave.statement', ['leaveTypes' => $statement]);
+        } catch (\Exception $e) {
+            Log::error('Failed to load leave statement', [
+                'employeeNo' => Session::get('authUser.employeeNo'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('leave.index')->with('error', 'Unable to load leave statement. Please try again or contact support.');
+        }
     }
     public function generateLeaveStatement(REQUEST $request)
     {
@@ -583,9 +781,35 @@ class LeaveController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
     }
+    /**
+     * Generate a leave statement PDF for the specified leave type.
+     */
+    public function generateLeaveTypeStatement(GenerateLeaveStatementRequest $request): Response|RedirectResponse
+    {
+        try {
+            $pdfData = $this->leaveService->generateLeaveStatement(
+                $request->leaveType,
+                $request->getPeriod()
+            );
+
+            $filename = str_replace('/', '_', Session::get('authUser.employeeNo')) . "_leave_{$request->leaveType}.pdf";
+
+            return response($pdfData)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', "inline; filename=\"{$filename}\"");
+        } catch (\Exception $e) {
+            Log::error('Failed to generate leave statement PDF', [
+                'employeeNo' => Session::get('authUser.employeeNo'),
+                'leaveType' => $request->leaveType,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['leaveType' => 'Unable to generate leave statement. Please try again or contact support.']);
+        }
+    }
     public function isOnLeave($empNo)
     {
-        $leaveEntries = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Employee_No', $empNo)->where('Status', 'Released')->get();
+        $leaveEntries = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('EmployeeNo', $empNo)->where('Status', 'Released')->get();
         if ($leaveEntries != null) {
             foreach ($leaveEntries as $leave) {
                 $requisition = $this->odataClient()->from(HRLeaveRequisition::wsName())->where('Document_No', $leave['Document_No'])->first();

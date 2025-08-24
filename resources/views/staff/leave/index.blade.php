@@ -18,16 +18,18 @@
             </x-slot>
             <x-slot name="tbody">
                 @if($requsitions != null && count($requsitions) > 0)
+                {{-- Echo requisitions for debugging --}}                 
+                {{-- @dd($requsitions) --}}
                     @foreach($requsitions as $requisition)
-                        <x-table.tr isEven="{{$loop->even}}" onClick="location = '/staff/leave/show/{{$requisition->No}}'">
-                            <x-table.td>{{$requisition->No}}</x-table.td>
-                            <x-table.td>{{$requisition->Leave_Type}}</x-table.td>
-                            <x-table.td>{{$requisition->Date}}</x-table.td>
-                            <x-table.td >{{$requisition->Applied_Days." Days"}}</x-table.td>
-                            <x-table.td>{{$requisition->Starting_Date}} {{$requisition->Hourly? $requisition->Start_Time:''}}</x-table.td>
-                            <x-table.td>{{$requisition->End_Date}} {{$requisition->Hourly? $requisition->Return_Time:''}}</x-table.td>
-                            <x-table.td>{{$requisition->Return_Date}} {{$requisition->Hourly? $requisition->Return_Time:''}}</x-table.td>
-                            <x-table.td>{{$requisition->Reliever_Name}}</x-table.td>
+                        <x-table.tr isEven="{{$loop->even}}" onClick="location = '/staff/leave/show/{{$requisition->ApplicationCode}}'">
+                            <x-table.td>{{$requisition->ApplicationCode}}</x-table.td>
+                            <x-table.td>{{$requisition->LeaveType}}</x-table.td>
+                            <x-table.td>{{$requisition->ApplicationDate}}</x-table.td>
+                            <x-table.td >{{$requisition->DaysApplied." Days"}}</x-table.td>
+                            <x-table.td>{{$requisition->StartDate}}</x-table.td>
+                            <x-table.td>{{$requisition->EndDate}}</x-table.td>
+                            <x-table.td>{{$requisition->ReturnDate}}</x-table.td>
+                            <x-table.td>{{$requisition->RelieverName}}</x-table.td>
                             <x-table.td>
                                 @if ($requisition->Status == 'Open' || $requisition->Status == 'Pending Approval')
                                     <x-badge :class="'bg-blue-600'">{{$requisition->Status}}</x-badge>

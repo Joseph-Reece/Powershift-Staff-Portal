@@ -114,4 +114,9 @@ return [
 
     'password_timeout' => 10800,
 
+    'password_reset' => [
+        'email_subject' => 'Password Reset Token',
+        'email_template' => 'Your password reset token is {token}. Please use it to reset your password.',
+    ],
+
 ];

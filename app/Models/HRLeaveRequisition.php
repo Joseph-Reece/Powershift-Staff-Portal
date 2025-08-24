@@ -13,7 +13,7 @@ class HRLeaveRequisition extends Model
     }
     public static function tableDesc(){
         $data =  [
-            'tableID' => 52202673,
+            'tableID' => 50359,
             'pKeyID' => 1
         ];
         return $data;
