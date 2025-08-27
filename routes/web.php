@@ -38,7 +38,7 @@ Route::get('/', function(){
     }
     return redirect('/login');
 });
-Route::get('/dashboard',[GeneralController::class,'dashboard']);
+Route::get('/dashboard',[GeneralController::class,'dashboard'])->name('dashboard');
 Route::post('/send-sms',[GeneralController::class,'sendSMS']);
 Route::group(['prefix' => 'staff'], function(){
     Route::get('/dashboard/statistics',[StaffGeneralController::class,'dashboardStatistics']);
@@ -65,9 +65,9 @@ Route::group(['prefix' => 'staff'], function(){
     Route::get('/leave/statement',[LeaveController::class,'getLeaveStatement']);
     Route::post('/leave/statement',[LeaveController::class,'generateLeaveTypeStatement'])->name('generateLeaveStatement');
     //GENERAL
-    Route::get('/payslip',[StaffGeneralController::class,'payslip']);
-    Route::post('/payslip/generate',[StaffGeneralController::class,'generatePayslip'])->name('generatePayslip');
-    Route::get('/payroll-period/year-month/{year}',[StaffGeneralController::class,'prPeriodYearMonths']);
+    Route::get('/payslip',[StaffGeneralController::class,'getPayrollPeriods'])->name('payslip');
+    Route::post('/payslip/generate',[StaffGeneralController::class,'generateMonthPaySlip'])->name('generatePayslip');
+    Route::get('/payroll-period/year-month/{year}',[StaffGeneralController::class,'PeriodYearMonths']);
     Route::get('/p-nine',[StaffGeneralController::class,'pNine']);
     Route::post('/p-nine/generate',[StaffGeneralController::class,'generatePNine'])->name('generatePNine');
     //PROFILE

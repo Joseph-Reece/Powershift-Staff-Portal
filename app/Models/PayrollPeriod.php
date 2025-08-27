@@ -9,7 +9,7 @@ class PayrollPeriod extends Model
 {
     use HasFactory;
     public static function wsName(){
-        return "QyPayrollPeriods";
+        return "PgPayrollPeriods";
     }
 
 }

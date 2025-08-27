@@ -393,7 +393,7 @@
                         elStartDate.value = isHourly ? elStartDate.value : '';
                         elStartDateTime.value = isHourly ? '' : elStartDateTime.value;
                     } else {
-                        elAppliedDays.innerHTML = dates.appliedDays;
+                        // elAppliedDays.innerHTML = dates.appliedDays;
                         elReturnDate.innerHTML = dates.returnDate;
                     }
                 }).catch(error => {

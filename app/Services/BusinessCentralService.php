@@ -110,7 +110,6 @@ class BusinessCentralService
                 'error'      => $errorMessage,
             ]);
 
-            session()->flash('error', 'Business Central API Error: ' . $e->getMessage());
             return null;
         } catch (\Exception $e) {
             Log::error('Unexpected Business Central API Error', [
@@ -120,8 +119,6 @@ class BusinessCentralService
                 'error'      => $e->getMessage(),
             ]);
 
-            dd($e->getMessage());
-            session()->flash('error', 'Unexpected Business Central API Error: ' . $e->getMessage());
             return null;
         }
     }

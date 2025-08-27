@@ -4,7 +4,7 @@
 </svg> --}}
 <a href="/" class="hover:underlinex">
 <div class="flex items-center ml-1">
-    <div><img src="/storage/general/logo.jpg" class="" alt="{{config('app.company')['name']}}" style="max-height:47px; max-width:100%; background-color:white; padding-right:2px; padding-left:2px;"></div>
-    <div class="ml-2 font-bold uppercase hidden md:block" style="color:#003f7d;">SELF SERVICE PORTAL</div>
+    <div><img src="/storage/general/Powershift_Logo.webp" class="" alt="{{config('app.company')['name']}}" style="max-height:47px; max-width:100%; background-color:white; padding-right:2px; padding-left:2px;"></div>
+    <div class="ml-2 font-bold uppercase hidden md:block" style="color:#6F431A;">SELF SERVICE PORTAL</div>
 </div>
 </a>

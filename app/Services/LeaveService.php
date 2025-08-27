@@ -483,7 +483,7 @@ class LeaveService
         }
 
         $result = $this->bcService->callCodeunitAction('cuStaffPortal', 'GenerateLeaveStatement', $params);
-        dd($result);
+        // dd($result);
 
         if (!$result || !isset($result->value) || !is_string($result->value)) {
             Log::error('Failed to generate leave statement PDF', [

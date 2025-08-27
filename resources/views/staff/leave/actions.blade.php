@@ -5,7 +5,7 @@
             <form method="POST" action="{{route('reqLeaveApproval')}}" class="text-black w-full" data-turbo-frame="_top" data-turbo="false" onsubmit="return confirm('Are you sure you want to send this leave application for approval?');">
                     @csrf
                 <input id="requisitionNo" type="hidden" name="requisitionNo" value="{{$requisition->ApplicationCode}}"/>
-                <x-jet-button type="submit" class="bg-green-600 pr-4 rounded-full"><x-heroicon-o-check/> Request Approval</x-button>
+                <x-jet-button type="submit" class="pr-4 rounded-full"><x-heroicon-o-check/> Request Approval</x-button>
             </form>
         @endif
         @if($requisition->Status == 'Pending Approval')

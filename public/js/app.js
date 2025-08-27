@@ -1,4 +1,1270 @@
-(()=>{var e,t,i={184:(e,t,i)=>{"use strict";i.d(t,{BL:()=>pe,c$:()=>me,kK:()=>ge}),function(){if(void 0===window.Reflect||void 0===window.customElements||window.customElements.polyfillWrapFlushCallback)return;const e=HTMLElement,t=function(){return Reflect.construct(e,[],this.constructor)};window.HTMLElement=t,HTMLElement.prototype=e.prototype,HTMLElement.prototype.constructor=HTMLElement,Object.setPrototypeOf(HTMLElement,e)}();const s=new WeakMap;function n(e){const t=function(e){const t=e instanceof Element?e:e instanceof Node?e.parentElement:null,i=t?t.closest("input, button"):null;return"submit"==(null==i?void 0:i.type)?i:null}(e.target);t&&t.form&&s.set(t.form,t)}var r,o,a,l;"SubmitEvent"in window||(addEventListener("click",n,!0),Object.defineProperty(Event.prototype,"submitter",{get(){if("submit"==this.type&&this.target instanceof HTMLFormElement)return s.get(this.target)}})),function(e){e.eager="eager",e.lazy="lazy"}(r||(r={}));class c extends HTMLElement{constructor(){super(),this.loaded=Promise.resolve(),this.delegate=new c.delegateConstructor(this)}static get observedAttributes(){return["loading","src"]}connectedCallback(){this.delegate.connect()}disconnectedCallback(){this.delegate.disconnect()}attributeChangedCallback(e){"loading"==e?this.delegate.loadingStyleChanged():"src"==e&&this.delegate.sourceURLChanged()}get src(){return this.getAttribute("src")}set src(e){e?this.setAttribute("src",e):this.removeAttribute("src")}get loading(){return function(e){if("lazy"===e.toLowerCase())return r.lazy;return r.eager}(this.getAttribute("loading")||"")}set loading(e){e?this.setAttribute("loading",e):this.removeAttribute("loading")}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}get autoscroll(){return this.hasAttribute("autoscroll")}set autoscroll(e){e?this.setAttribute("autoscroll",""):this.removeAttribute("autoscroll")}get complete(){return!this.delegate.isLoading}get isActive(){return this.ownerDocument===document&&!this.isPreview}get isPreview(){var e,t;return null===(t=null===(e=this.ownerDocument)||void 0===e?void 0:e.documentElement)||void 0===t?void 0:t.hasAttribute("data-turbo-preview")}}function d(e){const t=document.createElement("a");return t.href=e.toString(),new URL(t.href)}function u(e){let t;return e.hash?e.hash.slice(1):(t=e.href.match(/#(.*)$/))?t[1]:""}function h(e){return(function(e){return function(e){return e.pathname.split("/").slice(1)}(e).slice(-1)[0]}(e).match(/\.[^.]*$/)||[])[0]||""}function p(e,t){const i=function(e){return t=e.origin+e.pathname,t.endsWith("/")?t:t+"/";var t}(t);return e.href===d(i).href||e.href.startsWith(i)}function m(e){const t=e.hash.length;return t<2?e.href:e.href.slice(0,-t)}class g{constructor(e){this.response=e}get succeeded(){return this.response.ok}get failed(){return!this.succeeded}get clientError(){return this.statusCode>=400&&this.statusCode<=499}get serverError(){return this.statusCode>=500&&this.statusCode<=599}get redirected(){return this.response.redirected}get location(){return d(this.response.url)}get isHTML(){return this.contentType&&this.contentType.match(/^(?:text\/([^\s;,]+\b)?html|application\/xhtml\+xml)\b/)}get statusCode(){return this.response.status}get contentType(){return this.header("Content-Type")}get responseText(){return this.response.text()}get responseHTML(){return this.isHTML?this.response.text():Promise.resolve(void 0)}header(e){return this.response.headers.get(e)}}function f(e,{target:t,cancelable:i,detail:s}={}){const n=new CustomEvent(e,{cancelable:i,bubbles:!0,detail:s});return(t||document.documentElement).dispatchEvent(n),n}function v(){return new Promise((e=>requestAnimationFrame((()=>e()))))}function b(e=""){return(new DOMParser).parseFromString(e,"text/html")}function y(e,...t){const i=function(e,t){return e.reduce(((e,i,s)=>e+i+(null==t[s]?"":t[s])),"")}(e,t).replace(/^\n/,"").split("\n"),s=i[0].match(/^\s+/),n=s?s[0].length:0;return i.map((e=>e.slice(n))).join("\n")}function w(){return Array.apply(null,{length:36}).map(((e,t)=>8==t||13==t||18==t||23==t?"-":14==t?"4":19==t?(Math.floor(4*Math.random())+8).toString(16):Math.floor(15*Math.random()).toString(16))).join("")}!function(e){e[e.get=0]="get",e[e.post=1]="post",e[e.put=2]="put",e[e.patch=3]="patch",e[e.delete=4]="delete"}(o||(o={}));class S{constructor(e,t,i,s=new URLSearchParams){this.abortController=new AbortController,this.delegate=e,this.method=t,this.isIdempotent?this.url=function(e,t){const i=new URLSearchParams(e.search);for(const[s,n]of t)n instanceof File||(i.has(s)?(i.delete(s),e.searchParams.set(s,n)):e.searchParams.append(s,n));return e}(i,[...s.entries()]):(this.body=s,this.url=i)}get location(){return this.url}get params(){return this.url.searchParams}get entries(){return this.body?Array.from(this.body.entries()):[]}cancel(){this.abortController.abort()}async perform(){const{fetchOptions:e}=this;f("turbo:before-fetch-request",{detail:{fetchOptions:e}});try{this.delegate.requestStarted(this);const t=await fetch(this.url.href,e);return await this.receive(t)}catch(e){throw this.delegate.requestErrored(this,e),e}finally{this.delegate.requestFinished(this)}}async receive(e){const t=new g(e);return f("turbo:before-fetch-response",{cancelable:!0,detail:{fetchResponse:t}}).defaultPrevented?this.delegate.requestPreventedHandlingResponse(this,t):t.succeeded?this.delegate.requestSucceededWithResponse(this,t):this.delegate.requestFailedWithResponse(this,t),t}get fetchOptions(){return{method:o[this.method].toUpperCase(),credentials:"same-origin",headers:this.headers,redirect:"follow",body:this.body,signal:this.abortSignal}}get isIdempotent(){return this.method==o.get}get headers(){const e=Object.assign({},this.defaultHeaders);return"function"==typeof this.delegate.prepareHeadersForRequest&&this.delegate.prepareHeadersForRequest(e,this),e}get abortSignal(){return this.abortController.signal}get defaultHeaders(){return{Accept:"text/html, application/xhtml+xml"}}}class E{constructor(e,t){this.started=!1,this.intersect=e=>{const t=e.slice(-1)[0];(null==t?void 0:t.isIntersecting)&&this.delegate.elementAppearedInViewport(this.element)},this.delegate=e,this.element=t,this.intersectionObserver=new IntersectionObserver(this.intersect)}start(){this.started||(this.started=!0,this.intersectionObserver.observe(this.element))}stop(){this.started&&(this.started=!1,this.intersectionObserver.unobserve(this.element))}}class O{constructor(e){this.templateElement=document.createElement("template"),this.templateElement.innerHTML=e}static wrap(e){return"string"==typeof e?new this(e):e}get fragment(){const e=document.createDocumentFragment();for(const t of this.foreignElements)e.appendChild(document.importNode(t,!0));return e}get foreignElements(){return this.templateChildren.reduce(((e,t)=>"turbo-stream"==t.tagName.toLowerCase()?[...e,t]:e),[])}get templateChildren(){return Array.from(this.templateElement.content.children)}}O.contentType="text/vnd.turbo-stream.html",function(e){e[e.initialized=0]="initialized",e[e.requesting=1]="requesting",e[e.waiting=2]="waiting",e[e.receiving=3]="receiving",e[e.stopping=4]="stopping",e[e.stopped=5]="stopped"}(a||(a={})),function(e){e.urlEncoded="application/x-www-form-urlencoded",e.multipart="multipart/form-data",e.plain="text/plain"}(l||(l={}));class x{constructor(e,t,i,s=!1){this.state=a.initialized,this.delegate=e,this.formElement=t,this.submitter=i,this.formData=function(e,t){const i=new FormData(e),s=null==t?void 0:t.getAttribute("name"),n=null==t?void 0:t.getAttribute("value");s&&i.get(s)!=n&&i.append(s,n||"");return i}(t,i),this.fetchRequest=new S(this,this.method,this.location,this.body),this.mustRedirect=s}get method(){var e;return function(e){switch(e.toLowerCase()){case"get":return o.get;case"post":return o.post;case"put":return o.put;case"patch":return o.patch;case"delete":return o.delete}}(((null===(e=this.submitter)||void 0===e?void 0:e.getAttribute("formmethod"))||this.formElement.getAttribute("method")||"").toLowerCase())||o.get}get action(){var e;return(null===(e=this.submitter)||void 0===e?void 0:e.getAttribute("formaction"))||this.formElement.action}get location(){return d(this.action)}get body(){return this.enctype==l.urlEncoded||this.method==o.get?new URLSearchParams(this.stringFormData):this.formData}get enctype(){var e;return function(e){switch(e.toLowerCase()){case l.multipart:return l.multipart;case l.plain:return l.plain;default:return l.urlEncoded}}((null===(e=this.submitter)||void 0===e?void 0:e.getAttribute("formenctype"))||this.formElement.enctype)}get stringFormData(){return[...this.formData].reduce(((e,[t,i])=>e.concat("string"==typeof i?[[t,i]]:[])),[])}async start(){const{initialized:e,requesting:t}=a;if(this.state==e)return this.state=t,this.fetchRequest.perform()}stop(){const{stopping:e,stopped:t}=a;if(this.state!=e&&this.state!=t)return this.state=e,this.fetchRequest.cancel(),!0}prepareHeadersForRequest(e,t){if(!t.isIdempotent){const t=function(e){if(null!=e){const t=(document.cookie?document.cookie.split("; "):[]).find((t=>t.startsWith(e)));if(t){const e=t.split("=").slice(1).join("=");return e?decodeURIComponent(e):void 0}}}(C("csrf-param"))||C("csrf-token");t&&(e["X-CSRF-Token"]=t),e.Accept=[O.contentType,e.Accept].join(", ")}}requestStarted(e){this.state=a.waiting,f("turbo:submit-start",{target:this.formElement,detail:{formSubmission:this}}),this.delegate.formSubmissionStarted(this)}requestPreventedHandlingResponse(e,t){this.result={success:t.succeeded,fetchResponse:t}}requestSucceededWithResponse(e,t){if(t.clientError||t.serverError)this.delegate.formSubmissionFailedWithResponse(this,t);else if(this.requestMustRedirect(e)&&function(e){return 200==e.statusCode&&!e.redirected}(t)){const e=new Error("Form responses must redirect to another location");this.delegate.formSubmissionErrored(this,e)}else this.state=a.receiving,this.result={success:!0,fetchResponse:t},this.delegate.formSubmissionSucceededWithResponse(this,t)}requestFailedWithResponse(e,t){this.result={success:!1,fetchResponse:t},this.delegate.formSubmissionFailedWithResponse(this,t)}requestErrored(e,t){this.result={success:!1,error:t},this.delegate.formSubmissionErrored(this,t)}requestFinished(e){this.state=a.stopped,f("turbo:submit-end",{target:this.formElement,detail:Object.assign({formSubmission:this},this.result)}),this.delegate.formSubmissionFinished(this)}requestMustRedirect(e){return!e.isIdempotent&&this.mustRedirect}}function C(e){const t=document.querySelector(`meta[name="${e}"]`);return t&&t.content}class _{constructor(e){this.element=e}get children(){return[...this.element.children]}hasAnchor(e){return null!=this.getElementForAnchor(e)}getElementForAnchor(e){try{return this.element.querySelector(`[id='${e}'], a[name='${e}']`)}catch(e){return null}}get firstAutofocusableElement(){return this.element.querySelector("[autofocus]")}get permanentElements(){return[...this.element.querySelectorAll("[id][data-turbo-permanent]")]}getPermanentElementById(e){return this.element.querySelector(`#${e}[data-turbo-permanent]`)}getPermanentElementsPresentInSnapshot(e){return this.permanentElements.filter((({id:t})=>e.getPermanentElementById(t)))}}class k{constructor(e,t){this.submitBubbled=e=>{if(e.target instanceof HTMLFormElement){const t=e.target,i=e.submitter||void 0;this.delegate.shouldInterceptFormSubmission(t,i)&&(e.preventDefault(),e.stopImmediatePropagation(),this.delegate.formSubmissionIntercepted(t,i))}},this.delegate=e,this.element=t}start(){this.element.addEventListener("submit",this.submitBubbled)}stop(){this.element.removeEventListener("submit",this.submitBubbled)}}class A{constructor(e,t){this.delegate=e,this.element=t}scrollToAnchor(e){const t=this.snapshot.getElementForAnchor(e);t?this.scrollToElement(t):this.scrollToPosition({x:0,y:0})}scrollToElement(e){e.scrollIntoView()}scrollToPosition({x:e,y:t}){this.scrollRoot.scrollTo(e,t)}get scrollRoot(){return window}async render(e){if(this.renderer)throw new Error("rendering is already in progress");const{isPreview:t,shouldRender:i,newSnapshot:s}=e;if(i)try{this.renderer=e,this.prepareToRenderSnapshot(e),this.delegate.viewWillRenderSnapshot(s,t),await this.renderSnapshot(e),this.delegate.viewRenderedSnapshot(s,t),this.finishRenderingSnapshot(e)}finally{delete this.renderer}else this.invalidate()}invalidate(){this.delegate.viewInvalidated()}prepareToRenderSnapshot(e){this.markAsPreview(e.isPreview),e.prepareToRender()}markAsPreview(e){e?this.element.setAttribute("data-turbo-preview",""):this.element.removeAttribute("data-turbo-preview")}async renderSnapshot(e){await e.render()}finishRenderingSnapshot(e){e.finishRendering()}}class L extends A{invalidate(){this.element.innerHTML=""}get snapshot(){return new _(this.element)}}class I{constructor(e,t){this.clickBubbled=e=>{this.respondsToEventTarget(e.target)?this.clickEvent=e:delete this.clickEvent},this.linkClicked=e=>{this.clickEvent&&this.respondsToEventTarget(e.target)&&e.target instanceof Element&&this.delegate.shouldInterceptLinkClick(e.target,e.detail.url)&&(this.clickEvent.preventDefault(),e.preventDefault(),this.delegate.linkClickIntercepted(e.target,e.detail.url)),delete this.clickEvent},this.willVisit=()=>{delete this.clickEvent},this.delegate=e,this.element=t}start(){this.element.addEventListener("click",this.clickBubbled),document.addEventListener("turbo:click",this.linkClicked),document.addEventListener("turbo:before-visit",this.willVisit)}stop(){this.element.removeEventListener("click",this.clickBubbled),document.removeEventListener("turbo:click",this.linkClicked),document.removeEventListener("turbo:before-visit",this.willVisit)}respondsToEventTarget(e){const t=e instanceof Element?e:e instanceof Node?e.parentElement:null;return t&&t.closest("turbo-frame, html")==this.element}}class P{constructor(e,t,i){this.currentSnapshot=e,this.newSnapshot=t,this.isPreview=i,this.promise=new Promise(((e,t)=>this.resolvingFunctions={resolve:e,reject:t}))}get shouldRender(){return!0}prepareToRender(){}finishRendering(){this.resolvingFunctions&&(this.resolvingFunctions.resolve(),delete this.resolvingFunctions)}createScriptElement(e){if("false"==e.getAttribute("data-turbo-eval"))return e;{const t=document.createElement("script");return t.textContent=e.textContent,t.async=!1,function(e,t){for(const{name:i,value:s}of[...t.attributes])e.setAttribute(i,s)}(t,e),t}}preservingPermanentElements(e){const t=(i=this.currentSnapshot,s=this.newSnapshot,i.getPermanentElementsPresentInSnapshot(s).reduce(((e,t)=>{const i=s.getPermanentElementById(t.id);if(i){const s=function(e){const t=document.createElement("meta");return t.setAttribute("name","turbo-permanent-placeholder"),t.setAttribute("content",e.id),{element:t,permanentElement:e}}(t);return T(t,s.element),T(i,t),[...e,s]}return e}),[]));var i,s;e(),function(e){for(const{element:t,permanentElement:i}of e){T(t,i.cloneNode(!0))}}(t)}focusFirstAutofocusableElement(){const e=this.newSnapshot.firstAutofocusableElement;(function(e){return e&&"function"==typeof e.focus})(e)&&e.focus()}get currentElement(){return this.currentSnapshot.element}get newElement(){return this.newSnapshot.element}}function T(e,t){const i=e.parentElement;if(i)return i.replaceChild(t,e)}class R extends P{get shouldRender(){return!0}async render(){await v(),this.preservingPermanentElements((()=>{this.loadFrameElement()})),this.scrollFrameIntoView(),await v(),this.focusFirstAutofocusableElement()}loadFrameElement(){var e;const t=document.createRange();t.selectNodeContents(this.currentElement),t.deleteContents();const i=this.newElement,s=null===(e=i.ownerDocument)||void 0===e?void 0:e.createRange();s&&(s.selectNodeContents(i),this.currentElement.appendChild(s.extractContents()))}scrollFrameIntoView(){if(this.currentElement.autoscroll||this.newElement.autoscroll){const i=this.currentElement.firstElementChild,s=(e=this.currentElement.getAttribute("data-autoscroll-block"),t="end","end"==e||"start"==e||"center"==e||"nearest"==e?e:t);if(i)return i.scrollIntoView({block:s}),!0}var e,t;return!1}}function F(e){if(null!=e){const t=document.getElementById(e);if(t instanceof c)return t}}function M(e){if(e&&e.ownerDocument!==document&&(e=document.importNode(e,!0)),e instanceof c)return e}const q={append(){var e;null===(e=this.targetElement)||void 0===e||e.append(this.templateContent)},prepend(){var e;null===(e=this.targetElement)||void 0===e||e.prepend(this.templateContent)},remove(){var e;null===(e=this.targetElement)||void 0===e||e.remove()},replace(){var e;null===(e=this.targetElement)||void 0===e||e.replaceWith(this.templateContent)},update(){this.targetElement&&(this.targetElement.innerHTML="",this.targetElement.append(this.templateContent))}};class j extends HTMLElement{async connectedCallback(){try{await this.render()}catch(e){console.error(e)}finally{this.disconnect()}}async render(){var e;return null!==(e=this.renderPromise)&&void 0!==e?e:this.renderPromise=(async()=>{this.dispatchEvent(this.beforeRenderEvent)&&(await v(),this.performAction())})()}disconnect(){try{this.remove()}catch(e){}}get performAction(){if(this.action){const e=q[this.action];if(e)return e;this.raise("unknown action")}this.raise("action attribute is missing")}get targetElement(){var e;if(this.target)return null===(e=this.ownerDocument)||void 0===e?void 0:e.getElementById(this.target);this.raise("target attribute is missing")}get templateContent(){return this.templateElement.content}get templateElement(){if(this.firstElementChild instanceof HTMLTemplateElement)return this.firstElementChild;this.raise("first child element must be a <template> element")}get action(){return this.getAttribute("action")}get target(){return this.getAttribute("target")}raise(e){throw new Error(`${this.description}: ${e}`)}get description(){var e,t;return null!==(t=(null!==(e=this.outerHTML.match(/<[^>]+>/))&&void 0!==e?e:[])[0])&&void 0!==t?t:"<turbo-stream>"}get beforeRenderEvent(){return new CustomEvent("turbo:before-stream-render",{bubbles:!0,cancelable:!0})}}c.delegateConstructor=class{constructor(e){this.resolveVisitPromise=()=>{},this.element=e,this.view=new L(this,this.element),this.appearanceObserver=new E(this,this.element),this.linkInterceptor=new I(this,this.element),this.formInterceptor=new k(this,this.element)}connect(){this.loadingStyle==r.lazy&&this.appearanceObserver.start(),this.linkInterceptor.start(),this.formInterceptor.start()}disconnect(){this.appearanceObserver.stop(),this.linkInterceptor.stop(),this.formInterceptor.stop()}sourceURLChanged(){this.loadingStyle==r.eager&&this.loadSourceURL()}loadingStyleChanged(){this.loadingStyle==r.lazy?this.appearanceObserver.start():(this.appearanceObserver.stop(),this.loadSourceURL())}async loadSourceURL(){if(this.isActive&&this.sourceURL&&this.sourceURL!=this.loadingURL)try{this.loadingURL=this.sourceURL,this.element.loaded=this.visit(this.sourceURL),this.appearanceObserver.stop(),await this.element.loaded}finally{delete this.loadingURL}}async loadResponse(e){try{const t=await e.responseHTML;if(t){const{body:e}=b(t),i=new _(await this.extractForeignFrameElement(e)),s=new R(this.view.snapshot,i,!1);await this.view.render(s)}}catch(e){console.error(e),this.view.invalidate()}}elementAppearedInViewport(e){this.loadSourceURL()}shouldInterceptLinkClick(e,t){return this.shouldInterceptNavigation(e)}linkClickIntercepted(e,t){this.navigateFrame(e,t)}shouldInterceptFormSubmission(e){return this.shouldInterceptNavigation(e)}formSubmissionIntercepted(e,t){this.formSubmission&&this.formSubmission.stop(),this.formSubmission=new x(this,e,t),this.formSubmission.fetchRequest.isIdempotent?this.navigateFrame(e,this.formSubmission.fetchRequest.url.href):this.formSubmission.start()}prepareHeadersForRequest(e,t){e["Turbo-Frame"]=this.id}requestStarted(e){this.element.setAttribute("busy","")}requestPreventedHandlingResponse(e,t){this.resolveVisitPromise()}async requestSucceededWithResponse(e,t){await this.loadResponse(t),this.resolveVisitPromise()}requestFailedWithResponse(e,t){console.error(t),this.resolveVisitPromise()}requestErrored(e,t){console.error(t),this.resolveVisitPromise()}requestFinished(e){this.element.removeAttribute("busy")}formSubmissionStarted(e){}formSubmissionSucceededWithResponse(e,t){this.findFrameElement(e.formElement).delegate.loadResponse(t)}formSubmissionFailedWithResponse(e,t){this.element.delegate.loadResponse(t)}formSubmissionErrored(e,t){}formSubmissionFinished(e){}viewWillRenderSnapshot(e,t){}viewRenderedSnapshot(e,t){}viewInvalidated(){}async visit(e){const t=new S(this,o.get,d(e));return new Promise((e=>{this.resolveVisitPromise=()=>{this.resolveVisitPromise=()=>{},e()},t.perform()}))}navigateFrame(e,t){this.findFrameElement(e).src=t}findFrameElement(e){var t;return null!==(t=F(e.getAttribute("data-turbo-frame")||this.element.getAttribute("target")))&&void 0!==t?t:this.element}async extractForeignFrameElement(e){let t;const i=CSS.escape(this.id);return(t=M(e.querySelector(`turbo-frame#${i}`)))?t:(t=M(e.querySelector(`turbo-frame[src][recurse~=${i}]`)))?(await t.loaded,await this.extractForeignFrameElement(t)):(console.error(`Response has no matching <turbo-frame id="${i}"> element`),new c)}shouldInterceptNavigation(e){const t=e.getAttribute("data-turbo-frame")||this.element.getAttribute("target");if(!this.enabled||"_top"==t)return!1;if(t){const e=F(t);if(e)return!e.disabled}return!0}get id(){return this.element.id}get enabled(){return!this.element.disabled}get sourceURL(){return this.element.src}get loadingStyle(){return this.element.loading}get isLoading(){return void 0!==this.formSubmission||void 0!==this.loadingURL}get isActive(){return this.element.isActive}},customElements.define("turbo-frame",c),customElements.define("turbo-stream",j),(()=>{let e=document.currentScript;if(e&&!e.hasAttribute("data-turbo-suppress-warning"))for(;e=e.parentElement;)if(e==document.body)return console.warn(y`
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./node_modules/@hotwired/turbo/dist/turbo.es2017-esm.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/@hotwired/turbo/dist/turbo.es2017-esm.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clearCache: () => (/* binding */ clearCache),
+/* harmony export */   connectStreamSource: () => (/* binding */ connectStreamSource),
+/* harmony export */   disconnectStreamSource: () => (/* binding */ disconnectStreamSource),
+/* harmony export */   navigator: () => (/* binding */ navigator),
+/* harmony export */   registerAdapter: () => (/* binding */ registerAdapter),
+/* harmony export */   renderStreamMessage: () => (/* binding */ renderStreamMessage),
+/* harmony export */   setProgressBarDelay: () => (/* binding */ setProgressBarDelay),
+/* harmony export */   start: () => (/* binding */ start),
+/* harmony export */   visit: () => (/* binding */ visit)
+/* harmony export */ });
+/*
+Turbo 7.0.0-beta.4
+Copyright © 2021 Basecamp, LLC
+ */
+(function () {
+    if (window.Reflect === undefined || window.customElements === undefined ||
+        window.customElements.polyfillWrapFlushCallback) {
+        return;
+    }
+    const BuiltInHTMLElement = HTMLElement;
+    const wrapperForTheName = {
+        'HTMLElement': function HTMLElement() {
+            return Reflect.construct(BuiltInHTMLElement, [], this.constructor);
+        }
+    };
+    window.HTMLElement =
+        wrapperForTheName['HTMLElement'];
+    HTMLElement.prototype = BuiltInHTMLElement.prototype;
+    HTMLElement.prototype.constructor = HTMLElement;
+    Object.setPrototypeOf(HTMLElement, BuiltInHTMLElement);
+})();
+
+const submittersByForm = new WeakMap;
+function findSubmitterFromClickTarget(target) {
+    const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+    const candidate = element ? element.closest("input, button") : null;
+    return (candidate === null || candidate === void 0 ? void 0 : candidate.type) == "submit" ? candidate : null;
+}
+function clickCaptured(event) {
+    const submitter = findSubmitterFromClickTarget(event.target);
+    if (submitter && submitter.form) {
+        submittersByForm.set(submitter.form, submitter);
+    }
+}
+(function () {
+    if ("SubmitEvent" in window)
+        return;
+    addEventListener("click", clickCaptured, true);
+    Object.defineProperty(Event.prototype, "submitter", {
+        get() {
+            if (this.type == "submit" && this.target instanceof HTMLFormElement) {
+                return submittersByForm.get(this.target);
+            }
+        }
+    });
+})();
+
+var FrameLoadingStyle;
+(function (FrameLoadingStyle) {
+    FrameLoadingStyle["eager"] = "eager";
+    FrameLoadingStyle["lazy"] = "lazy";
+})(FrameLoadingStyle || (FrameLoadingStyle = {}));
+class FrameElement extends HTMLElement {
+    constructor() {
+        super();
+        this.loaded = Promise.resolve();
+        this.delegate = new FrameElement.delegateConstructor(this);
+    }
+    static get observedAttributes() {
+        return ["loading", "src"];
+    }
+    connectedCallback() {
+        this.delegate.connect();
+    }
+    disconnectedCallback() {
+        this.delegate.disconnect();
+    }
+    attributeChangedCallback(name) {
+        if (name == "loading") {
+            this.delegate.loadingStyleChanged();
+        }
+        else if (name == "src") {
+            this.delegate.sourceURLChanged();
+        }
+    }
+    get src() {
+        return this.getAttribute("src");
+    }
+    set src(value) {
+        if (value) {
+            this.setAttribute("src", value);
+        }
+        else {
+            this.removeAttribute("src");
+        }
+    }
+    get loading() {
+        return frameLoadingStyleFromString(this.getAttribute("loading") || "");
+    }
+    set loading(value) {
+        if (value) {
+            this.setAttribute("loading", value);
+        }
+        else {
+            this.removeAttribute("loading");
+        }
+    }
+    get disabled() {
+        return this.hasAttribute("disabled");
+    }
+    set disabled(value) {
+        if (value) {
+            this.setAttribute("disabled", "");
+        }
+        else {
+            this.removeAttribute("disabled");
+        }
+    }
+    get autoscroll() {
+        return this.hasAttribute("autoscroll");
+    }
+    set autoscroll(value) {
+        if (value) {
+            this.setAttribute("autoscroll", "");
+        }
+        else {
+            this.removeAttribute("autoscroll");
+        }
+    }
+    get complete() {
+        return !this.delegate.isLoading;
+    }
+    get isActive() {
+        return this.ownerDocument === document && !this.isPreview;
+    }
+    get isPreview() {
+        var _a, _b;
+        return (_b = (_a = this.ownerDocument) === null || _a === void 0 ? void 0 : _a.documentElement) === null || _b === void 0 ? void 0 : _b.hasAttribute("data-turbo-preview");
+    }
+}
+function frameLoadingStyleFromString(style) {
+    switch (style.toLowerCase()) {
+        case "lazy": return FrameLoadingStyle.lazy;
+        default: return FrameLoadingStyle.eager;
+    }
+}
+
+function expandURL(locatable) {
+    const anchor = document.createElement("a");
+    anchor.href = locatable.toString();
+    return new URL(anchor.href);
+}
+function getAnchor(url) {
+    let anchorMatch;
+    if (url.hash) {
+        return url.hash.slice(1);
+    }
+    else if (anchorMatch = url.href.match(/#(.*)$/)) {
+        return anchorMatch[1];
+    }
+    else {
+        return "";
+    }
+}
+function getExtension(url) {
+    return (getLastPathComponent(url).match(/\.[^.]*$/) || [])[0] || "";
+}
+function isHTML(url) {
+    return !!getExtension(url).match(/^(?:|\.(?:htm|html|xhtml))$/);
+}
+function isPrefixedBy(baseURL, url) {
+    const prefix = getPrefix(url);
+    return baseURL.href === expandURL(prefix).href || baseURL.href.startsWith(prefix);
+}
+function toCacheKey(url) {
+    const anchorLength = url.hash.length;
+    if (anchorLength < 2) {
+        return url.href;
+    }
+    else {
+        return url.href.slice(0, -anchorLength);
+    }
+}
+function getPathComponents(url) {
+    return url.pathname.split("/").slice(1);
+}
+function getLastPathComponent(url) {
+    return getPathComponents(url).slice(-1)[0];
+}
+function getPrefix(url) {
+    return addTrailingSlash(url.origin + url.pathname);
+}
+function addTrailingSlash(value) {
+    return value.endsWith("/") ? value : value + "/";
+}
+
+class FetchResponse {
+    constructor(response) {
+        this.response = response;
+    }
+    get succeeded() {
+        return this.response.ok;
+    }
+    get failed() {
+        return !this.succeeded;
+    }
+    get clientError() {
+        return this.statusCode >= 400 && this.statusCode <= 499;
+    }
+    get serverError() {
+        return this.statusCode >= 500 && this.statusCode <= 599;
+    }
+    get redirected() {
+        return this.response.redirected;
+    }
+    get location() {
+        return expandURL(this.response.url);
+    }
+    get isHTML() {
+        return this.contentType && this.contentType.match(/^(?:text\/([^\s;,]+\b)?html|application\/xhtml\+xml)\b/);
+    }
+    get statusCode() {
+        return this.response.status;
+    }
+    get contentType() {
+        return this.header("Content-Type");
+    }
+    get responseText() {
+        return this.response.text();
+    }
+    get responseHTML() {
+        if (this.isHTML) {
+            return this.response.text();
+        }
+        else {
+            return Promise.resolve(undefined);
+        }
+    }
+    header(name) {
+        return this.response.headers.get(name);
+    }
+}
+
+function dispatch(eventName, { target, cancelable, detail } = {}) {
+    const event = new CustomEvent(eventName, { cancelable, bubbles: true, detail });
+    void (target || document.documentElement).dispatchEvent(event);
+    return event;
+}
+function nextAnimationFrame() {
+    return new Promise(resolve => requestAnimationFrame(() => resolve()));
+}
+function nextEventLoopTick() {
+    return new Promise(resolve => setTimeout(() => resolve(), 0));
+}
+function nextMicrotask() {
+    return Promise.resolve();
+}
+function parseHTMLDocument(html = "") {
+    return new DOMParser().parseFromString(html, "text/html");
+}
+function unindent(strings, ...values) {
+    const lines = interpolate(strings, values).replace(/^\n/, "").split("\n");
+    const match = lines[0].match(/^\s+/);
+    const indent = match ? match[0].length : 0;
+    return lines.map(line => line.slice(indent)).join("\n");
+}
+function interpolate(strings, values) {
+    return strings.reduce((result, string, i) => {
+        const value = values[i] == undefined ? "" : values[i];
+        return result + string + value;
+    }, "");
+}
+function uuid() {
+    return Array.apply(null, { length: 36 }).map((_, i) => {
+        if (i == 8 || i == 13 || i == 18 || i == 23) {
+            return "-";
+        }
+        else if (i == 14) {
+            return "4";
+        }
+        else if (i == 19) {
+            return (Math.floor(Math.random() * 4) + 8).toString(16);
+        }
+        else {
+            return Math.floor(Math.random() * 15).toString(16);
+        }
+    }).join("");
+}
+
+var FetchMethod;
+(function (FetchMethod) {
+    FetchMethod[FetchMethod["get"] = 0] = "get";
+    FetchMethod[FetchMethod["post"] = 1] = "post";
+    FetchMethod[FetchMethod["put"] = 2] = "put";
+    FetchMethod[FetchMethod["patch"] = 3] = "patch";
+    FetchMethod[FetchMethod["delete"] = 4] = "delete";
+})(FetchMethod || (FetchMethod = {}));
+function fetchMethodFromString(method) {
+    switch (method.toLowerCase()) {
+        case "get": return FetchMethod.get;
+        case "post": return FetchMethod.post;
+        case "put": return FetchMethod.put;
+        case "patch": return FetchMethod.patch;
+        case "delete": return FetchMethod.delete;
+    }
+}
+class FetchRequest {
+    constructor(delegate, method, location, body = new URLSearchParams) {
+        this.abortController = new AbortController;
+        this.delegate = delegate;
+        this.method = method;
+        if (this.isIdempotent) {
+            this.url = mergeFormDataEntries(location, [...body.entries()]);
+        }
+        else {
+            this.body = body;
+            this.url = location;
+        }
+    }
+    get location() {
+        return this.url;
+    }
+    get params() {
+        return this.url.searchParams;
+    }
+    get entries() {
+        return this.body ? Array.from(this.body.entries()) : [];
+    }
+    cancel() {
+        this.abortController.abort();
+    }
+    async perform() {
+        const { fetchOptions } = this;
+        dispatch("turbo:before-fetch-request", { detail: { fetchOptions } });
+        try {
+            this.delegate.requestStarted(this);
+            const response = await fetch(this.url.href, fetchOptions);
+            return await this.receive(response);
+        }
+        catch (error) {
+            this.delegate.requestErrored(this, error);
+            throw error;
+        }
+        finally {
+            this.delegate.requestFinished(this);
+        }
+    }
+    async receive(response) {
+        const fetchResponse = new FetchResponse(response);
+        const event = dispatch("turbo:before-fetch-response", { cancelable: true, detail: { fetchResponse } });
+        if (event.defaultPrevented) {
+            this.delegate.requestPreventedHandlingResponse(this, fetchResponse);
+        }
+        else if (fetchResponse.succeeded) {
+            this.delegate.requestSucceededWithResponse(this, fetchResponse);
+        }
+        else {
+            this.delegate.requestFailedWithResponse(this, fetchResponse);
+        }
+        return fetchResponse;
+    }
+    get fetchOptions() {
+        return {
+            method: FetchMethod[this.method].toUpperCase(),
+            credentials: "same-origin",
+            headers: this.headers,
+            redirect: "follow",
+            body: this.body,
+            signal: this.abortSignal
+        };
+    }
+    get isIdempotent() {
+        return this.method == FetchMethod.get;
+    }
+    get headers() {
+        const headers = Object.assign({}, this.defaultHeaders);
+        if (typeof this.delegate.prepareHeadersForRequest == "function") {
+            this.delegate.prepareHeadersForRequest(headers, this);
+        }
+        return headers;
+    }
+    get abortSignal() {
+        return this.abortController.signal;
+    }
+    get defaultHeaders() {
+        return {
+            "Accept": "text/html, application/xhtml+xml"
+        };
+    }
+}
+function mergeFormDataEntries(url, entries) {
+    const currentSearchParams = new URLSearchParams(url.search);
+    for (const [name, value] of entries) {
+        if (value instanceof File)
+            continue;
+        if (currentSearchParams.has(name)) {
+            currentSearchParams.delete(name);
+            url.searchParams.set(name, value);
+        }
+        else {
+            url.searchParams.append(name, value);
+        }
+    }
+    return url;
+}
+
+class AppearanceObserver {
+    constructor(delegate, element) {
+        this.started = false;
+        this.intersect = entries => {
+            const lastEntry = entries.slice(-1)[0];
+            if (lastEntry === null || lastEntry === void 0 ? void 0 : lastEntry.isIntersecting) {
+                this.delegate.elementAppearedInViewport(this.element);
+            }
+        };
+        this.delegate = delegate;
+        this.element = element;
+        this.intersectionObserver = new IntersectionObserver(this.intersect);
+    }
+    start() {
+        if (!this.started) {
+            this.started = true;
+            this.intersectionObserver.observe(this.element);
+        }
+    }
+    stop() {
+        if (this.started) {
+            this.started = false;
+            this.intersectionObserver.unobserve(this.element);
+        }
+    }
+}
+
+class StreamMessage {
+    constructor(html) {
+        this.templateElement = document.createElement("template");
+        this.templateElement.innerHTML = html;
+    }
+    static wrap(message) {
+        if (typeof message == "string") {
+            return new this(message);
+        }
+        else {
+            return message;
+        }
+    }
+    get fragment() {
+        const fragment = document.createDocumentFragment();
+        for (const element of this.foreignElements) {
+            fragment.appendChild(document.importNode(element, true));
+        }
+        return fragment;
+    }
+    get foreignElements() {
+        return this.templateChildren.reduce((streamElements, child) => {
+            if (child.tagName.toLowerCase() == "turbo-stream") {
+                return [...streamElements, child];
+            }
+            else {
+                return streamElements;
+            }
+        }, []);
+    }
+    get templateChildren() {
+        return Array.from(this.templateElement.content.children);
+    }
+}
+StreamMessage.contentType = "text/vnd.turbo-stream.html";
+
+var FormSubmissionState;
+(function (FormSubmissionState) {
+    FormSubmissionState[FormSubmissionState["initialized"] = 0] = "initialized";
+    FormSubmissionState[FormSubmissionState["requesting"] = 1] = "requesting";
+    FormSubmissionState[FormSubmissionState["waiting"] = 2] = "waiting";
+    FormSubmissionState[FormSubmissionState["receiving"] = 3] = "receiving";
+    FormSubmissionState[FormSubmissionState["stopping"] = 4] = "stopping";
+    FormSubmissionState[FormSubmissionState["stopped"] = 5] = "stopped";
+})(FormSubmissionState || (FormSubmissionState = {}));
+var FormEnctype;
+(function (FormEnctype) {
+    FormEnctype["urlEncoded"] = "application/x-www-form-urlencoded";
+    FormEnctype["multipart"] = "multipart/form-data";
+    FormEnctype["plain"] = "text/plain";
+})(FormEnctype || (FormEnctype = {}));
+function formEnctypeFromString(encoding) {
+    switch (encoding.toLowerCase()) {
+        case FormEnctype.multipart: return FormEnctype.multipart;
+        case FormEnctype.plain: return FormEnctype.plain;
+        default: return FormEnctype.urlEncoded;
+    }
+}
+class FormSubmission {
+    constructor(delegate, formElement, submitter, mustRedirect = false) {
+        this.state = FormSubmissionState.initialized;
+        this.delegate = delegate;
+        this.formElement = formElement;
+        this.submitter = submitter;
+        this.formData = buildFormData(formElement, submitter);
+        this.fetchRequest = new FetchRequest(this, this.method, this.location, this.body);
+        this.mustRedirect = mustRedirect;
+    }
+    get method() {
+        var _a;
+        const method = ((_a = this.submitter) === null || _a === void 0 ? void 0 : _a.getAttribute("formmethod")) || this.formElement.getAttribute("method") || "";
+        return fetchMethodFromString(method.toLowerCase()) || FetchMethod.get;
+    }
+    get action() {
+        var _a;
+        return ((_a = this.submitter) === null || _a === void 0 ? void 0 : _a.getAttribute("formaction")) || this.formElement.action;
+    }
+    get location() {
+        return expandURL(this.action);
+    }
+    get body() {
+        if (this.enctype == FormEnctype.urlEncoded || this.method == FetchMethod.get) {
+            return new URLSearchParams(this.stringFormData);
+        }
+        else {
+            return this.formData;
+        }
+    }
+    get enctype() {
+        var _a;
+        return formEnctypeFromString(((_a = this.submitter) === null || _a === void 0 ? void 0 : _a.getAttribute("formenctype")) || this.formElement.enctype);
+    }
+    get stringFormData() {
+        return [...this.formData].reduce((entries, [name, value]) => {
+            return entries.concat(typeof value == "string" ? [[name, value]] : []);
+        }, []);
+    }
+    async start() {
+        const { initialized, requesting } = FormSubmissionState;
+        if (this.state == initialized) {
+            this.state = requesting;
+            return this.fetchRequest.perform();
+        }
+    }
+    stop() {
+        const { stopping, stopped } = FormSubmissionState;
+        if (this.state != stopping && this.state != stopped) {
+            this.state = stopping;
+            this.fetchRequest.cancel();
+            return true;
+        }
+    }
+    prepareHeadersForRequest(headers, request) {
+        if (!request.isIdempotent) {
+            const token = getCookieValue(getMetaContent("csrf-param")) || getMetaContent("csrf-token");
+            if (token) {
+                headers["X-CSRF-Token"] = token;
+            }
+            headers["Accept"] = [StreamMessage.contentType, headers["Accept"]].join(", ");
+        }
+    }
+    requestStarted(request) {
+        this.state = FormSubmissionState.waiting;
+        dispatch("turbo:submit-start", { target: this.formElement, detail: { formSubmission: this } });
+        this.delegate.formSubmissionStarted(this);
+    }
+    requestPreventedHandlingResponse(request, response) {
+        this.result = { success: response.succeeded, fetchResponse: response };
+    }
+    requestSucceededWithResponse(request, response) {
+        if (response.clientError || response.serverError) {
+            this.delegate.formSubmissionFailedWithResponse(this, response);
+        }
+        else if (this.requestMustRedirect(request) && responseSucceededWithoutRedirect(response)) {
+            const error = new Error("Form responses must redirect to another location");
+            this.delegate.formSubmissionErrored(this, error);
+        }
+        else {
+            this.state = FormSubmissionState.receiving;
+            this.result = { success: true, fetchResponse: response };
+            this.delegate.formSubmissionSucceededWithResponse(this, response);
+        }
+    }
+    requestFailedWithResponse(request, response) {
+        this.result = { success: false, fetchResponse: response };
+        this.delegate.formSubmissionFailedWithResponse(this, response);
+    }
+    requestErrored(request, error) {
+        this.result = { success: false, error };
+        this.delegate.formSubmissionErrored(this, error);
+    }
+    requestFinished(request) {
+        this.state = FormSubmissionState.stopped;
+        dispatch("turbo:submit-end", { target: this.formElement, detail: Object.assign({ formSubmission: this }, this.result) });
+        this.delegate.formSubmissionFinished(this);
+    }
+    requestMustRedirect(request) {
+        return !request.isIdempotent && this.mustRedirect;
+    }
+}
+function buildFormData(formElement, submitter) {
+    const formData = new FormData(formElement);
+    const name = submitter === null || submitter === void 0 ? void 0 : submitter.getAttribute("name");
+    const value = submitter === null || submitter === void 0 ? void 0 : submitter.getAttribute("value");
+    if (name && formData.get(name) != value) {
+        formData.append(name, value || "");
+    }
+    return formData;
+}
+function getCookieValue(cookieName) {
+    if (cookieName != null) {
+        const cookies = document.cookie ? document.cookie.split("; ") : [];
+        const cookie = cookies.find((cookie) => cookie.startsWith(cookieName));
+        if (cookie) {
+            const value = cookie.split("=").slice(1).join("=");
+            return value ? decodeURIComponent(value) : undefined;
+        }
+    }
+}
+function getMetaContent(name) {
+    const element = document.querySelector(`meta[name="${name}"]`);
+    return element && element.content;
+}
+function responseSucceededWithoutRedirect(response) {
+    return response.statusCode == 200 && !response.redirected;
+}
+
+class Snapshot {
+    constructor(element) {
+        this.element = element;
+    }
+    get children() {
+        return [...this.element.children];
+    }
+    hasAnchor(anchor) {
+        return this.getElementForAnchor(anchor) != null;
+    }
+    getElementForAnchor(anchor) {
+        try {
+            return this.element.querySelector(`[id='${anchor}'], a[name='${anchor}']`);
+        }
+        catch (_a) {
+            return null;
+        }
+    }
+    get firstAutofocusableElement() {
+        return this.element.querySelector("[autofocus]");
+    }
+    get permanentElements() {
+        return [...this.element.querySelectorAll("[id][data-turbo-permanent]")];
+    }
+    getPermanentElementById(id) {
+        return this.element.querySelector(`#${id}[data-turbo-permanent]`);
+    }
+    getPermanentElementsPresentInSnapshot(snapshot) {
+        return this.permanentElements.filter(({ id }) => snapshot.getPermanentElementById(id));
+    }
+}
+
+class FormInterceptor {
+    constructor(delegate, element) {
+        this.submitBubbled = ((event) => {
+            if (event.target instanceof HTMLFormElement) {
+                const form = event.target;
+                const submitter = event.submitter || undefined;
+                if (this.delegate.shouldInterceptFormSubmission(form, submitter)) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    this.delegate.formSubmissionIntercepted(form, submitter);
+                }
+            }
+        });
+        this.delegate = delegate;
+        this.element = element;
+    }
+    start() {
+        this.element.addEventListener("submit", this.submitBubbled);
+    }
+    stop() {
+        this.element.removeEventListener("submit", this.submitBubbled);
+    }
+}
+
+class View {
+    constructor(delegate, element) {
+        this.delegate = delegate;
+        this.element = element;
+    }
+    scrollToAnchor(anchor) {
+        const element = this.snapshot.getElementForAnchor(anchor);
+        if (element) {
+            this.scrollToElement(element);
+        }
+        else {
+            this.scrollToPosition({ x: 0, y: 0 });
+        }
+    }
+    scrollToElement(element) {
+        element.scrollIntoView();
+    }
+    scrollToPosition({ x, y }) {
+        this.scrollRoot.scrollTo(x, y);
+    }
+    get scrollRoot() {
+        return window;
+    }
+    async render(renderer) {
+        if (this.renderer) {
+            throw new Error("rendering is already in progress");
+        }
+        const { isPreview, shouldRender, newSnapshot: snapshot } = renderer;
+        if (shouldRender) {
+            try {
+                this.renderer = renderer;
+                this.prepareToRenderSnapshot(renderer);
+                this.delegate.viewWillRenderSnapshot(snapshot, isPreview);
+                await this.renderSnapshot(renderer);
+                this.delegate.viewRenderedSnapshot(snapshot, isPreview);
+                this.finishRenderingSnapshot(renderer);
+            }
+            finally {
+                delete this.renderer;
+            }
+        }
+        else {
+            this.invalidate();
+        }
+    }
+    invalidate() {
+        this.delegate.viewInvalidated();
+    }
+    prepareToRenderSnapshot(renderer) {
+        this.markAsPreview(renderer.isPreview);
+        renderer.prepareToRender();
+    }
+    markAsPreview(isPreview) {
+        if (isPreview) {
+            this.element.setAttribute("data-turbo-preview", "");
+        }
+        else {
+            this.element.removeAttribute("data-turbo-preview");
+        }
+    }
+    async renderSnapshot(renderer) {
+        await renderer.render();
+    }
+    finishRenderingSnapshot(renderer) {
+        renderer.finishRendering();
+    }
+}
+
+class FrameView extends View {
+    invalidate() {
+        this.element.innerHTML = "";
+    }
+    get snapshot() {
+        return new Snapshot(this.element);
+    }
+}
+
+class LinkInterceptor {
+    constructor(delegate, element) {
+        this.clickBubbled = (event) => {
+            if (this.respondsToEventTarget(event.target)) {
+                this.clickEvent = event;
+            }
+            else {
+                delete this.clickEvent;
+            }
+        };
+        this.linkClicked = ((event) => {
+            if (this.clickEvent && this.respondsToEventTarget(event.target) && event.target instanceof Element) {
+                if (this.delegate.shouldInterceptLinkClick(event.target, event.detail.url)) {
+                    this.clickEvent.preventDefault();
+                    event.preventDefault();
+                    this.delegate.linkClickIntercepted(event.target, event.detail.url);
+                }
+            }
+            delete this.clickEvent;
+        });
+        this.willVisit = () => {
+            delete this.clickEvent;
+        };
+        this.delegate = delegate;
+        this.element = element;
+    }
+    start() {
+        this.element.addEventListener("click", this.clickBubbled);
+        document.addEventListener("turbo:click", this.linkClicked);
+        document.addEventListener("turbo:before-visit", this.willVisit);
+    }
+    stop() {
+        this.element.removeEventListener("click", this.clickBubbled);
+        document.removeEventListener("turbo:click", this.linkClicked);
+        document.removeEventListener("turbo:before-visit", this.willVisit);
+    }
+    respondsToEventTarget(target) {
+        const element = target instanceof Element
+            ? target
+            : target instanceof Node
+                ? target.parentElement
+                : null;
+        return element && element.closest("turbo-frame, html") == this.element;
+    }
+}
+
+class Renderer {
+    constructor(currentSnapshot, newSnapshot, isPreview) {
+        this.currentSnapshot = currentSnapshot;
+        this.newSnapshot = newSnapshot;
+        this.isPreview = isPreview;
+        this.promise = new Promise((resolve, reject) => this.resolvingFunctions = { resolve, reject });
+    }
+    get shouldRender() {
+        return true;
+    }
+    prepareToRender() {
+        return;
+    }
+    finishRendering() {
+        if (this.resolvingFunctions) {
+            this.resolvingFunctions.resolve();
+            delete this.resolvingFunctions;
+        }
+    }
+    createScriptElement(element) {
+        if (element.getAttribute("data-turbo-eval") == "false") {
+            return element;
+        }
+        else {
+            const createdScriptElement = document.createElement("script");
+            createdScriptElement.textContent = element.textContent;
+            createdScriptElement.async = false;
+            copyElementAttributes(createdScriptElement, element);
+            return createdScriptElement;
+        }
+    }
+    preservingPermanentElements(callback) {
+        const placeholders = relocatePermanentElements(this.currentSnapshot, this.newSnapshot);
+        callback();
+        replacePlaceholderElementsWithClonedPermanentElements(placeholders);
+    }
+    focusFirstAutofocusableElement() {
+        const element = this.newSnapshot.firstAutofocusableElement;
+        if (elementIsFocusable(element)) {
+            element.focus();
+        }
+    }
+    get currentElement() {
+        return this.currentSnapshot.element;
+    }
+    get newElement() {
+        return this.newSnapshot.element;
+    }
+}
+function replaceElementWithElement(fromElement, toElement) {
+    const parentElement = fromElement.parentElement;
+    if (parentElement) {
+        return parentElement.replaceChild(toElement, fromElement);
+    }
+}
+function copyElementAttributes(destinationElement, sourceElement) {
+    for (const { name, value } of [...sourceElement.attributes]) {
+        destinationElement.setAttribute(name, value);
+    }
+}
+function createPlaceholderForPermanentElement(permanentElement) {
+    const element = document.createElement("meta");
+    element.setAttribute("name", "turbo-permanent-placeholder");
+    element.setAttribute("content", permanentElement.id);
+    return { element, permanentElement };
+}
+function replacePlaceholderElementsWithClonedPermanentElements(placeholders) {
+    for (const { element, permanentElement } of placeholders) {
+        const clonedElement = permanentElement.cloneNode(true);
+        replaceElementWithElement(element, clonedElement);
+    }
+}
+function relocatePermanentElements(currentSnapshot, newSnapshot) {
+    return currentSnapshot.getPermanentElementsPresentInSnapshot(newSnapshot).reduce((placeholders, permanentElement) => {
+        const newElement = newSnapshot.getPermanentElementById(permanentElement.id);
+        if (newElement) {
+            const placeholder = createPlaceholderForPermanentElement(permanentElement);
+            replaceElementWithElement(permanentElement, placeholder.element);
+            replaceElementWithElement(newElement, permanentElement);
+            return [...placeholders, placeholder];
+        }
+        else {
+            return placeholders;
+        }
+    }, []);
+}
+function elementIsFocusable(element) {
+    return element && typeof element.focus == "function";
+}
+
+class FrameRenderer extends Renderer {
+    get shouldRender() {
+        return true;
+    }
+    async render() {
+        await nextAnimationFrame();
+        this.preservingPermanentElements(() => {
+            this.loadFrameElement();
+        });
+        this.scrollFrameIntoView();
+        await nextAnimationFrame();
+        this.focusFirstAutofocusableElement();
+    }
+    loadFrameElement() {
+        var _a;
+        const destinationRange = document.createRange();
+        destinationRange.selectNodeContents(this.currentElement);
+        destinationRange.deleteContents();
+        const frameElement = this.newElement;
+        const sourceRange = (_a = frameElement.ownerDocument) === null || _a === void 0 ? void 0 : _a.createRange();
+        if (sourceRange) {
+            sourceRange.selectNodeContents(frameElement);
+            this.currentElement.appendChild(sourceRange.extractContents());
+        }
+    }
+    scrollFrameIntoView() {
+        if (this.currentElement.autoscroll || this.newElement.autoscroll) {
+            const element = this.currentElement.firstElementChild;
+            const block = readScrollLogicalPosition(this.currentElement.getAttribute("data-autoscroll-block"), "end");
+            if (element) {
+                element.scrollIntoView({ block });
+                return true;
+            }
+        }
+        return false;
+    }
+}
+function readScrollLogicalPosition(value, defaultValue) {
+    if (value == "end" || value == "start" || value == "center" || value == "nearest") {
+        return value;
+    }
+    else {
+        return defaultValue;
+    }
+}
+
+class FrameController {
+    constructor(element) {
+        this.resolveVisitPromise = () => { };
+        this.element = element;
+        this.view = new FrameView(this, this.element);
+        this.appearanceObserver = new AppearanceObserver(this, this.element);
+        this.linkInterceptor = new LinkInterceptor(this, this.element);
+        this.formInterceptor = new FormInterceptor(this, this.element);
+    }
+    connect() {
+        if (this.loadingStyle == FrameLoadingStyle.lazy) {
+            this.appearanceObserver.start();
+        }
+        this.linkInterceptor.start();
+        this.formInterceptor.start();
+    }
+    disconnect() {
+        this.appearanceObserver.stop();
+        this.linkInterceptor.stop();
+        this.formInterceptor.stop();
+    }
+    sourceURLChanged() {
+        if (this.loadingStyle == FrameLoadingStyle.eager) {
+            this.loadSourceURL();
+        }
+    }
+    loadingStyleChanged() {
+        if (this.loadingStyle == FrameLoadingStyle.lazy) {
+            this.appearanceObserver.start();
+        }
+        else {
+            this.appearanceObserver.stop();
+            this.loadSourceURL();
+        }
+    }
+    async loadSourceURL() {
+        if (this.isActive && this.sourceURL && this.sourceURL != this.loadingURL) {
+            try {
+                this.loadingURL = this.sourceURL;
+                this.element.loaded = this.visit(this.sourceURL);
+                this.appearanceObserver.stop();
+                await this.element.loaded;
+            }
+            finally {
+                delete this.loadingURL;
+            }
+        }
+    }
+    async loadResponse(response) {
+        try {
+            const html = await response.responseHTML;
+            if (html) {
+                const { body } = parseHTMLDocument(html);
+                const snapshot = new Snapshot(await this.extractForeignFrameElement(body));
+                const renderer = new FrameRenderer(this.view.snapshot, snapshot, false);
+                await this.view.render(renderer);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            this.view.invalidate();
+        }
+    }
+    elementAppearedInViewport(element) {
+        this.loadSourceURL();
+    }
+    shouldInterceptLinkClick(element, url) {
+        return this.shouldInterceptNavigation(element);
+    }
+    linkClickIntercepted(element, url) {
+        this.navigateFrame(element, url);
+    }
+    shouldInterceptFormSubmission(element) {
+        return this.shouldInterceptNavigation(element);
+    }
+    formSubmissionIntercepted(element, submitter) {
+        if (this.formSubmission) {
+            this.formSubmission.stop();
+        }
+        this.formSubmission = new FormSubmission(this, element, submitter);
+        if (this.formSubmission.fetchRequest.isIdempotent) {
+            this.navigateFrame(element, this.formSubmission.fetchRequest.url.href);
+        }
+        else {
+            this.formSubmission.start();
+        }
+    }
+    prepareHeadersForRequest(headers, request) {
+        headers["Turbo-Frame"] = this.id;
+    }
+    requestStarted(request) {
+        this.element.setAttribute("busy", "");
+    }
+    requestPreventedHandlingResponse(request, response) {
+        this.resolveVisitPromise();
+    }
+    async requestSucceededWithResponse(request, response) {
+        await this.loadResponse(response);
+        this.resolveVisitPromise();
+    }
+    requestFailedWithResponse(request, response) {
+        console.error(response);
+        this.resolveVisitPromise();
+    }
+    requestErrored(request, error) {
+        console.error(error);
+        this.resolveVisitPromise();
+    }
+    requestFinished(request) {
+        this.element.removeAttribute("busy");
+    }
+    formSubmissionStarted(formSubmission) {
+    }
+    formSubmissionSucceededWithResponse(formSubmission, response) {
+        const frame = this.findFrameElement(formSubmission.formElement);
+        frame.delegate.loadResponse(response);
+    }
+    formSubmissionFailedWithResponse(formSubmission, fetchResponse) {
+        this.element.delegate.loadResponse(fetchResponse);
+    }
+    formSubmissionErrored(formSubmission, error) {
+    }
+    formSubmissionFinished(formSubmission) {
+    }
+    viewWillRenderSnapshot(snapshot, isPreview) {
+    }
+    viewRenderedSnapshot(snapshot, isPreview) {
+    }
+    viewInvalidated() {
+    }
+    async visit(url) {
+        const request = new FetchRequest(this, FetchMethod.get, expandURL(url));
+        return new Promise(resolve => {
+            this.resolveVisitPromise = () => {
+                this.resolveVisitPromise = () => { };
+                resolve();
+            };
+            request.perform();
+        });
+    }
+    navigateFrame(element, url) {
+        const frame = this.findFrameElement(element);
+        frame.src = url;
+    }
+    findFrameElement(element) {
+        var _a;
+        const id = element.getAttribute("data-turbo-frame") || this.element.getAttribute("target");
+        return (_a = getFrameElementById(id)) !== null && _a !== void 0 ? _a : this.element;
+    }
+    async extractForeignFrameElement(container) {
+        let element;
+        const id = CSS.escape(this.id);
+        if (element = activateElement(container.querySelector(`turbo-frame#${id}`))) {
+            return element;
+        }
+        if (element = activateElement(container.querySelector(`turbo-frame[src][recurse~=${id}]`))) {
+            await element.loaded;
+            return await this.extractForeignFrameElement(element);
+        }
+        console.error(`Response has no matching <turbo-frame id="${id}"> element`);
+        return new FrameElement();
+    }
+    shouldInterceptNavigation(element) {
+        const id = element.getAttribute("data-turbo-frame") || this.element.getAttribute("target");
+        if (!this.enabled || id == "_top") {
+            return false;
+        }
+        if (id) {
+            const frameElement = getFrameElementById(id);
+            if (frameElement) {
+                return !frameElement.disabled;
+            }
+        }
+        return true;
+    }
+    get id() {
+        return this.element.id;
+    }
+    get enabled() {
+        return !this.element.disabled;
+    }
+    get sourceURL() {
+        return this.element.src;
+    }
+    get loadingStyle() {
+        return this.element.loading;
+    }
+    get isLoading() {
+        return this.formSubmission !== undefined || this.loadingURL !== undefined;
+    }
+    get isActive() {
+        return this.element.isActive;
+    }
+}
+function getFrameElementById(id) {
+    if (id != null) {
+        const element = document.getElementById(id);
+        if (element instanceof FrameElement) {
+            return element;
+        }
+    }
+}
+function activateElement(element) {
+    if (element && element.ownerDocument !== document) {
+        element = document.importNode(element, true);
+    }
+    if (element instanceof FrameElement) {
+        return element;
+    }
+}
+
+const StreamActions = {
+    append() {
+        var _a;
+        (_a = this.targetElement) === null || _a === void 0 ? void 0 : _a.append(this.templateContent);
+    },
+    prepend() {
+        var _a;
+        (_a = this.targetElement) === null || _a === void 0 ? void 0 : _a.prepend(this.templateContent);
+    },
+    remove() {
+        var _a;
+        (_a = this.targetElement) === null || _a === void 0 ? void 0 : _a.remove();
+    },
+    replace() {
+        var _a;
+        (_a = this.targetElement) === null || _a === void 0 ? void 0 : _a.replaceWith(this.templateContent);
+    },
+    update() {
+        if (this.targetElement) {
+            this.targetElement.innerHTML = "";
+            this.targetElement.append(this.templateContent);
+        }
+    }
+};
+
+class StreamElement extends HTMLElement {
+    async connectedCallback() {
+        try {
+            await this.render();
+        }
+        catch (error) {
+            console.error(error);
+        }
+        finally {
+            this.disconnect();
+        }
+    }
+    async render() {
+        var _a;
+        return (_a = this.renderPromise) !== null && _a !== void 0 ? _a : (this.renderPromise = (async () => {
+            if (this.dispatchEvent(this.beforeRenderEvent)) {
+                await nextAnimationFrame();
+                this.performAction();
+            }
+        })());
+    }
+    disconnect() {
+        try {
+            this.remove();
+        }
+        catch (_a) { }
+    }
+    get performAction() {
+        if (this.action) {
+            const actionFunction = StreamActions[this.action];
+            if (actionFunction) {
+                return actionFunction;
+            }
+            this.raise("unknown action");
+        }
+        this.raise("action attribute is missing");
+    }
+    get targetElement() {
+        var _a;
+        if (this.target) {
+            return (_a = this.ownerDocument) === null || _a === void 0 ? void 0 : _a.getElementById(this.target);
+        }
+        this.raise("target attribute is missing");
+    }
+    get templateContent() {
+        return this.templateElement.content;
+    }
+    get templateElement() {
+        if (this.firstElementChild instanceof HTMLTemplateElement) {
+            return this.firstElementChild;
+        }
+        this.raise("first child element must be a <template> element");
+    }
+    get action() {
+        return this.getAttribute("action");
+    }
+    get target() {
+        return this.getAttribute("target");
+    }
+    raise(message) {
+        throw new Error(`${this.description}: ${message}`);
+    }
+    get description() {
+        var _a, _b;
+        return (_b = ((_a = this.outerHTML.match(/<[^>]+>/)) !== null && _a !== void 0 ? _a : [])[0]) !== null && _b !== void 0 ? _b : "<turbo-stream>";
+    }
+    get beforeRenderEvent() {
+        return new CustomEvent("turbo:before-stream-render", { bubbles: true, cancelable: true });
+    }
+}
+
+FrameElement.delegateConstructor = FrameController;
+customElements.define("turbo-frame", FrameElement);
+customElements.define("turbo-stream", StreamElement);
+
+(() => {
+    let element = document.currentScript;
+    if (!element)
+        return;
+    if (element.hasAttribute("data-turbo-suppress-warning"))
+        return;
+    while (element = element.parentElement) {
+        if (element == document.body) {
+            return console.warn(unindent `
         You are loading Turbo from a <script> element inside the <body> element. This is probably not what you meant to do!
 
         Load your application’s JavaScript bundle inside the <head> element instead. <script> elements in <body> are evaluated with each page change.
@@ -7,7 +1273,26 @@
 
         ——
         Suppress this warning by adding a "data-turbo-suppress-warning" attribute to: %s
-      `,e.outerHTML)})();class ${constructor(){this.hiding=!1,this.value=0,this.visible=!1,this.trickle=()=>{this.setValue(this.value+Math.random()/100)},this.stylesheetElement=this.createStylesheetElement(),this.progressElement=this.createProgressElement(),this.installStylesheetElement(),this.setValue(0)}static get defaultCSS(){return y`
+      `, element.outerHTML);
+        }
+    }
+})();
+
+class ProgressBar {
+    constructor() {
+        this.hiding = false;
+        this.value = 0;
+        this.visible = false;
+        this.trickle = () => {
+            this.setValue(this.value + Math.random() / 100);
+        };
+        this.stylesheetElement = this.createStylesheetElement();
+        this.progressElement = this.createProgressElement();
+        this.installStylesheetElement();
+        this.setValue(0);
+    }
+    static get defaultCSS() {
+        return unindent `
       .turbo-progress-bar {
         position: fixed;
         display: block;
@@ -17,8 +1302,8717 @@
         background: #0076ff;
         z-index: 9999;
         transition:
-          width ${$.animationDuration}ms ease-out,
-          opacity ${$.animationDuration/2}ms ${$.animationDuration/2}ms ease-in;
+          width ${ProgressBar.animationDuration}ms ease-out,
+          opacity ${ProgressBar.animationDuration / 2}ms ${ProgressBar.animationDuration / 2}ms ease-in;
         transform: translate3d(0, 0, 0);
       }
-    `}show(){this.visible||(this.visible=!0,this.installProgressElement(),this.startTrickling())}hide(){this.visible&&!this.hiding&&(this.hiding=!0,this.fadeProgressElement((()=>{this.uninstallProgressElement(),this.stopTrickling(),this.visible=!1,this.hiding=!1})))}setValue(e){this.value=e,this.refresh()}installStylesheetElement(){document.head.insertBefore(this.stylesheetElement,document.head.firstChild)}installProgressElement(){this.progressElement.style.width="0",this.progressElement.style.opacity="1",document.documentElement.insertBefore(this.progressElement,document.body),this.refresh()}fadeProgressElement(e){this.progressElement.style.opacity="0",setTimeout(e,1.5*$.animationDuration)}uninstallProgressElement(){this.progressElement.parentNode&&document.documentElement.removeChild(this.progressElement)}startTrickling(){this.trickleInterval||(this.trickleInterval=window.setInterval(this.trickle,$.animationDuration))}stopTrickling(){window.clearInterval(this.trickleInterval),delete this.trickleInterval}refresh(){requestAnimationFrame((()=>{this.progressElement.style.width=10+90*this.value+"%"}))}createStylesheetElement(){const e=document.createElement("style");return e.type="text/css",e.textContent=$.defaultCSS,e}createProgressElement(){const e=document.createElement("div");return e.className="turbo-progress-bar",e}}$.animationDuration=300;class D extends _{constructor(){super(...arguments),this.detailsByOuterHTML=this.children.reduce(((e,t)=>{const{outerHTML:i}=t,s=i in e?e[i]:{type:H(t),tracked:N(t),elements:[]};return Object.assign(Object.assign({},e),{[i]:Object.assign(Object.assign({},s),{elements:[...s.elements,t]})})}),{})}get trackedElementSignature(){return Object.keys(this.detailsByOuterHTML).filter((e=>this.detailsByOuterHTML[e].tracked)).join("")}getScriptElementsNotInSnapshot(e){return this.getElementsMatchingTypeNotInSnapshot("script",e)}getStylesheetElementsNotInSnapshot(e){return this.getElementsMatchingTypeNotInSnapshot("stylesheet",e)}getElementsMatchingTypeNotInSnapshot(e,t){return Object.keys(this.detailsByOuterHTML).filter((e=>!(e in t.detailsByOuterHTML))).map((e=>this.detailsByOuterHTML[e])).filter((({type:t})=>t==e)).map((({elements:[e]})=>e))}get provisionalElements(){return Object.keys(this.detailsByOuterHTML).reduce(((e,t)=>{const{type:i,tracked:s,elements:n}=this.detailsByOuterHTML[t];return null!=i||s?n.length>1?[...e,...n.slice(1)]:e:[...e,...n]}),[])}getMetaValue(e){const t=this.findMetaElementByName(e);return t?t.getAttribute("content"):null}findMetaElementByName(e){return Object.keys(this.detailsByOuterHTML).reduce(((t,i)=>{const{elements:[s]}=this.detailsByOuterHTML[i];return function(e,t){const i=e.tagName.toLowerCase();return"meta"==i&&e.getAttribute("name")==t}(s,e)?s:t}),void 0)}}function H(e){return function(e){const t=e.tagName.toLowerCase();return"script"==t}(e)?"script":function(e){const t=e.tagName.toLowerCase();return"style"==t||"link"==t&&"stylesheet"==e.getAttribute("rel")}(e)?"stylesheet":void 0}function N(e){return"reload"==e.getAttribute("data-turbo-track")}class B extends _{constructor(e,t){super(e),this.headSnapshot=t}static fromHTMLString(e=""){return this.fromDocument(b(e))}static fromElement(e){return this.fromDocument(e.ownerDocument)}static fromDocument({head:e,body:t}){return new this(t,new D(e))}clone(){return new B(this.element.cloneNode(!0),this.headSnapshot)}get headElement(){return this.headSnapshot.element}get rootLocation(){var e;return d(null!==(e=this.getSetting("root"))&&void 0!==e?e:"/")}get cacheControlValue(){return this.getSetting("cache-control")}get isPreviewable(){return"no-preview"!=this.cacheControlValue}get isCacheable(){return"no-cache"!=this.cacheControlValue}get isVisitable(){return"reload"!=this.getSetting("visit-control")}getSetting(e){return this.headSnapshot.getMetaValue(`turbo-${e}`)}}var V,z;!function(e){e.visitStart="visitStart",e.requestStart="requestStart",e.requestEnd="requestEnd",e.visitEnd="visitEnd"}(V||(V={})),function(e){e.initialized="initialized",e.started="started",e.canceled="canceled",e.failed="failed",e.completed="completed"}(z||(z={}));const U={action:"advance",historyChanged:!1};var W,K;!function(e){e[e.networkFailure=0]="networkFailure",e[e.timeoutFailure=-1]="timeoutFailure",e[e.contentTypeMismatch=-2]="contentTypeMismatch"}(W||(W={}));class Q{constructor(e,t,i,s={}){this.identifier=w(),this.timingMetrics={},this.followedRedirect=!1,this.historyChanged=!1,this.scrolled=!1,this.snapshotCached=!1,this.state=z.initialized,this.delegate=e,this.location=t,this.restorationIdentifier=i||w();const{action:n,historyChanged:r,referrer:o,snapshotHTML:a,response:l}=Object.assign(Object.assign({},U),s);this.action=n,this.historyChanged=r,this.referrer=o,this.snapshotHTML=a,this.response=l}get adapter(){return this.delegate.adapter}get view(){return this.delegate.view}get history(){return this.delegate.history}get restorationData(){return this.history.getRestorationDataForIdentifier(this.restorationIdentifier)}start(){this.state==z.initialized&&(this.recordTimingMetric(V.visitStart),this.state=z.started,this.adapter.visitStarted(this),this.delegate.visitStarted(this))}cancel(){this.state==z.started&&(this.request&&this.request.cancel(),this.cancelRender(),this.state=z.canceled)}complete(){this.state==z.started&&(this.recordTimingMetric(V.visitEnd),this.state=z.completed,this.adapter.visitCompleted(this),this.delegate.visitCompleted(this))}fail(){this.state==z.started&&(this.state=z.failed,this.adapter.visitFailed(this))}changeHistory(){var e;if(!this.historyChanged){const t=this.location.href===(null===(e=this.referrer)||void 0===e?void 0:e.href)?"replace":this.action,i=this.getHistoryMethodForAction(t);this.history.update(i,this.location,this.restorationIdentifier),this.historyChanged=!0}}issueRequest(){this.hasPreloadedResponse()?this.simulateRequest():this.shouldIssueRequest()&&!this.request&&(this.request=new S(this,o.get,this.location),this.request.perform())}simulateRequest(){this.response&&(this.startRequest(),this.recordResponse(),this.finishRequest())}startRequest(){this.recordTimingMetric(V.requestStart),this.adapter.visitRequestStarted(this)}recordResponse(e=this.response){if(this.response=e,e){const{statusCode:t}=e;G(t)?this.adapter.visitRequestCompleted(this):this.adapter.visitRequestFailedWithStatusCode(this,t)}}finishRequest(){this.recordTimingMetric(V.requestEnd),this.adapter.visitRequestFinished(this)}loadResponse(){if(this.response){const{statusCode:e,responseHTML:t}=this.response;this.render((async()=>{this.cacheSnapshot(),G(e)&&null!=t?(await this.view.renderPage(B.fromHTMLString(t)),this.adapter.visitRendered(this),this.complete()):(await this.view.renderError(B.fromHTMLString(t)),this.adapter.visitRendered(this),this.fail())}))}}getCachedSnapshot(){const e=this.view.getCachedSnapshotForLocation(this.location)||this.getPreloadedSnapshot();if(e&&(!u(this.location)||e.hasAnchor(u(this.location)))&&("restore"==this.action||e.isPreviewable))return e}getPreloadedSnapshot(){if(this.snapshotHTML)return B.fromHTMLString(this.snapshotHTML)}hasCachedSnapshot(){return null!=this.getCachedSnapshot()}loadCachedSnapshot(){const e=this.getCachedSnapshot();if(e){const t=this.shouldIssueRequest();this.render((async()=>{this.cacheSnapshot(),await this.view.renderPage(e),this.adapter.visitRendered(this),t||this.complete()}))}}followRedirect(){this.redirectedToLocation&&!this.followedRedirect&&(this.location=this.redirectedToLocation,this.history.replace(this.redirectedToLocation,this.restorationIdentifier),this.followedRedirect=!0)}requestStarted(){this.startRequest()}requestPreventedHandlingResponse(e,t){}async requestSucceededWithResponse(e,t){const i=await t.responseHTML;null==i?this.recordResponse({statusCode:W.contentTypeMismatch}):(this.redirectedToLocation=t.redirected?t.location:void 0,this.recordResponse({statusCode:t.statusCode,responseHTML:i}))}async requestFailedWithResponse(e,t){const i=await t.responseHTML;null==i?this.recordResponse({statusCode:W.contentTypeMismatch}):this.recordResponse({statusCode:t.statusCode,responseHTML:i})}requestErrored(e,t){this.recordResponse({statusCode:W.networkFailure})}requestFinished(){this.finishRequest()}performScroll(){this.scrolled||("restore"==this.action?this.scrollToRestoredPosition()||this.scrollToTop():this.scrollToAnchor()||this.scrollToTop(),this.scrolled=!0)}scrollToRestoredPosition(){const{scrollPosition:e}=this.restorationData;if(e)return this.view.scrollToPosition(e),!0}scrollToAnchor(){if(null!=u(this.location))return this.view.scrollToAnchor(u(this.location)),!0}scrollToTop(){this.view.scrollToPosition({x:0,y:0})}recordTimingMetric(e){this.timingMetrics[e]=(new Date).getTime()}getTimingMetrics(){return Object.assign({},this.timingMetrics)}getHistoryMethodForAction(e){switch(e){case"replace":return history.replaceState;case"advance":case"restore":return history.pushState}}hasPreloadedResponse(){return"object"==typeof this.response}shouldIssueRequest(){return"restore"!=this.action||!this.hasCachedSnapshot()}cacheSnapshot(){this.snapshotCached||(this.view.cacheSnapshot(),this.snapshotCached=!0)}async render(e){this.cancelRender(),await new Promise((e=>{this.frame=requestAnimationFrame((()=>e()))})),e(),delete this.frame,this.performScroll()}cancelRender(){this.frame&&(cancelAnimationFrame(this.frame),delete this.frame)}}function G(e){return e>=200&&e<300}class J{constructor(e){this.progressBar=new $,this.showProgressBar=()=>{this.progressBar.show()},this.session=e}visitProposedToLocation(e,t){this.navigator.startVisit(e,w(),t)}visitStarted(e){e.issueRequest(),e.changeHistory(),e.loadCachedSnapshot()}visitRequestStarted(e){this.progressBar.setValue(0),e.hasCachedSnapshot()||"restore"!=e.action?this.showProgressBarAfterDelay():this.showProgressBar()}visitRequestCompleted(e){e.loadResponse()}visitRequestFailedWithStatusCode(e,t){switch(t){case W.networkFailure:case W.timeoutFailure:case W.contentTypeMismatch:return this.reload();default:return e.loadResponse()}}visitRequestFinished(e){this.progressBar.setValue(1),this.hideProgressBar()}visitCompleted(e){e.followRedirect()}pageInvalidated(){this.reload()}visitFailed(e){}visitRendered(e){}showProgressBarAfterDelay(){this.progressBarTimeout=window.setTimeout(this.showProgressBar,this.session.progressBarDelay)}hideProgressBar(){this.progressBar.hide(),null!=this.progressBarTimeout&&(window.clearTimeout(this.progressBarTimeout),delete this.progressBarTimeout)}reload(){window.location.reload()}get navigator(){return this.session.navigator}}class X{constructor(e){this.started=!1,this.submitCaptured=()=>{removeEventListener("submit",this.submitBubbled,!1),addEventListener("submit",this.submitBubbled,!1)},this.submitBubbled=e=>{if(!e.defaultPrevented){const t=e.target instanceof HTMLFormElement?e.target:void 0,i=e.submitter||void 0;if(t){"dialog"!=((null==i?void 0:i.getAttribute("formmethod"))||t.method)&&this.delegate.willSubmitForm(t,i)&&(e.preventDefault(),this.delegate.formSubmitted(t,i))}}},this.delegate=e}start(){this.started||(addEventListener("submit",this.submitCaptured,!0),this.started=!0)}stop(){this.started&&(removeEventListener("submit",this.submitCaptured,!0),this.started=!1)}}class Y{constructor(e){this.element=e,this.linkInterceptor=new I(this,e),this.formInterceptor=new k(this,e)}start(){this.linkInterceptor.start(),this.formInterceptor.start()}stop(){this.linkInterceptor.stop(),this.formInterceptor.stop()}shouldInterceptLinkClick(e,t){return this.shouldRedirect(e)}linkClickIntercepted(e,t){const i=this.findFrameElement(e);i&&(i.src=t)}shouldInterceptFormSubmission(e,t){return this.shouldRedirect(e,t)}formSubmissionIntercepted(e,t){const i=this.findFrameElement(e);i&&i.delegate.formSubmissionIntercepted(e,t)}shouldRedirect(e,t){const i=this.findFrameElement(e);return!!i&&i!=e.closest("turbo-frame")}findFrameElement(e){const t=e.getAttribute("data-turbo-frame");if(t&&"_top"!=t){const e=this.element.querySelector(`#${t}:not([disabled])`);if(e instanceof c)return e}}}class Z{constructor(e){this.restorationIdentifier=w(),this.restorationData={},this.started=!1,this.pageLoaded=!1,this.onPopState=e=>{if(this.shouldHandlePopState()){const{turbo:t}=e.state||{};if(t){this.location=new URL(window.location.href);const{restorationIdentifier:e}=t;this.restorationIdentifier=e,this.delegate.historyPoppedToLocationWithRestorationIdentifier(this.location,e)}}},this.onPageLoad=async e=>{await Promise.resolve(),this.pageLoaded=!0},this.delegate=e}start(){this.started||(addEventListener("popstate",this.onPopState,!1),addEventListener("load",this.onPageLoad,!1),this.started=!0,this.replace(new URL(window.location.href)))}stop(){this.started&&(removeEventListener("popstate",this.onPopState,!1),removeEventListener("load",this.onPageLoad,!1),this.started=!1)}push(e,t){this.update(history.pushState,e,t)}replace(e,t){this.update(history.replaceState,e,t)}update(e,t,i=w()){const s={turbo:{restorationIdentifier:i}};e.call(history,s,"",t.href),this.location=t,this.restorationIdentifier=i}getRestorationDataForIdentifier(e){return this.restorationData[e]||{}}updateRestorationData(e){const{restorationIdentifier:t}=this,i=this.restorationData[t];this.restorationData[t]=Object.assign(Object.assign({},i),e)}assumeControlOfScrollRestoration(){var e;this.previousScrollRestoration||(this.previousScrollRestoration=null!==(e=history.scrollRestoration)&&void 0!==e?e:"auto",history.scrollRestoration="manual")}relinquishControlOfScrollRestoration(){this.previousScrollRestoration&&(history.scrollRestoration=this.previousScrollRestoration,delete this.previousScrollRestoration)}shouldHandlePopState(){return this.pageIsLoaded()}pageIsLoaded(){return this.pageLoaded||"complete"==document.readyState}}class ee{constructor(e){this.started=!1,this.clickCaptured=()=>{removeEventListener("click",this.clickBubbled,!1),addEventListener("click",this.clickBubbled,!1)},this.clickBubbled=e=>{if(this.clickEventIsSignificant(e)){const t=this.findLinkFromClickTarget(e.target);if(t){const i=this.getLocationForLink(t);this.delegate.willFollowLinkToLocation(t,i)&&(e.preventDefault(),this.delegate.followedLinkToLocation(t,i))}}},this.delegate=e}start(){this.started||(addEventListener("click",this.clickCaptured,!0),this.started=!0)}stop(){this.started&&(removeEventListener("click",this.clickCaptured,!0),this.started=!1)}clickEventIsSignificant(e){return!(e.target&&e.target.isContentEditable||e.defaultPrevented||e.which>1||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)}findLinkFromClickTarget(e){if(e instanceof Element)return e.closest("a[href]:not([target^=_]):not([download])")}getLocationForLink(e){return d(e.getAttribute("href")||"")}}class te{constructor(e){this.delegate=e}proposeVisit(e,t={}){this.delegate.allowsVisitingLocation(e)&&this.delegate.visitProposedToLocation(e,t)}startVisit(e,t,i={}){this.stop(),this.currentVisit=new Q(this,d(e),t,Object.assign({referrer:this.location},i)),this.currentVisit.start()}submitForm(e,t){this.stop(),this.formSubmission=new x(this,e,t,!0),this.formSubmission.fetchRequest.isIdempotent?this.proposeVisit(this.formSubmission.fetchRequest.url):this.formSubmission.start()}stop(){this.formSubmission&&(this.formSubmission.stop(),delete this.formSubmission),this.currentVisit&&(this.currentVisit.cancel(),delete this.currentVisit)}get adapter(){return this.delegate.adapter}get view(){return this.delegate.view}get history(){return this.delegate.history}formSubmissionStarted(e){}async formSubmissionSucceededWithResponse(e,t){if(e==this.formSubmission){const i=await t.responseHTML;if(i){e.method!=o.get&&this.view.clearSnapshotCache();const{statusCode:s}=t,n={response:{statusCode:s,responseHTML:i}};this.proposeVisit(t.location,n)}}}async formSubmissionFailedWithResponse(e,t){const i=await t.responseHTML;if(i){const e=B.fromHTMLString(i);await this.view.renderPage(e),this.view.clearSnapshotCache()}}formSubmissionErrored(e,t){}formSubmissionFinished(e){}visitStarted(e){this.delegate.visitStarted(e)}visitCompleted(e){this.delegate.visitCompleted(e)}get location(){return this.history.location}get restorationIdentifier(){return this.history.restorationIdentifier}}!function(e){e[e.initial=0]="initial",e[e.loading=1]="loading",e[e.interactive=2]="interactive",e[e.complete=3]="complete"}(K||(K={}));class ie{constructor(e){this.stage=K.initial,this.started=!1,this.interpretReadyState=()=>{const{readyState:e}=this;"interactive"==e?this.pageIsInteractive():"complete"==e&&this.pageIsComplete()},this.pageWillUnload=()=>{this.delegate.pageWillUnload()},this.delegate=e}start(){this.started||(this.stage==K.initial&&(this.stage=K.loading),document.addEventListener("readystatechange",this.interpretReadyState,!1),addEventListener("pagehide",this.pageWillUnload,!1),this.started=!0)}stop(){this.started&&(document.removeEventListener("readystatechange",this.interpretReadyState,!1),removeEventListener("pagehide",this.pageWillUnload,!1),this.started=!1)}pageIsInteractive(){this.stage==K.loading&&(this.stage=K.interactive,this.delegate.pageBecameInteractive())}pageIsComplete(){this.pageIsInteractive(),this.stage==K.interactive&&(this.stage=K.complete,this.delegate.pageLoaded())}get readyState(){return document.readyState}}class se{constructor(e){this.started=!1,this.onScroll=()=>{this.updatePosition({x:window.pageXOffset,y:window.pageYOffset})},this.delegate=e}start(){this.started||(addEventListener("scroll",this.onScroll,!1),this.onScroll(),this.started=!0)}stop(){this.started&&(removeEventListener("scroll",this.onScroll,!1),this.started=!1)}updatePosition(e){this.delegate.scrollPositionChanged(e)}}class ne{constructor(e){this.sources=new Set,this.started=!1,this.inspectFetchResponse=e=>{const t=function(e){var t;const i=null===(t=e.detail)||void 0===t?void 0:t.fetchResponse;if(i instanceof g)return i}(e);t&&function(e){var t;const i=null!==(t=e.contentType)&&void 0!==t?t:"";return i.startsWith(O.contentType)}(t)&&(e.preventDefault(),this.receiveMessageResponse(t))},this.receiveMessageEvent=e=>{this.started&&"string"==typeof e.data&&this.receiveMessageHTML(e.data)},this.delegate=e}start(){this.started||(this.started=!0,addEventListener("turbo:before-fetch-response",this.inspectFetchResponse,!1))}stop(){this.started&&(this.started=!1,removeEventListener("turbo:before-fetch-response",this.inspectFetchResponse,!1))}connectStreamSource(e){this.streamSourceIsConnected(e)||(this.sources.add(e),e.addEventListener("message",this.receiveMessageEvent,!1))}disconnectStreamSource(e){this.streamSourceIsConnected(e)&&(this.sources.delete(e),e.removeEventListener("message",this.receiveMessageEvent,!1))}streamSourceIsConnected(e){return this.sources.has(e)}async receiveMessageResponse(e){const t=await e.responseHTML;t&&this.receiveMessageHTML(t)}receiveMessageHTML(e){this.delegate.receivedMessageFromStream(new O(e))}}class re extends P{async render(){this.replaceHeadAndBody(),this.activateScriptElements()}replaceHeadAndBody(){const{documentElement:e,head:t,body:i}=document;e.replaceChild(this.newHead,t),e.replaceChild(this.newElement,i)}activateScriptElements(){for(const e of this.scriptElements){const t=e.parentNode;if(t){const i=this.createScriptElement(e);t.replaceChild(i,e)}}}get newHead(){return this.newSnapshot.headSnapshot.element}get scriptElements(){return[...document.documentElement.querySelectorAll("script")]}}class oe extends P{get shouldRender(){return this.newSnapshot.isVisitable&&this.trackedElementsAreIdentical}prepareToRender(){this.mergeHead()}async render(){this.replaceBody()}finishRendering(){super.finishRendering(),this.isPreview&&this.focusFirstAutofocusableElement()}get currentHeadSnapshot(){return this.currentSnapshot.headSnapshot}get newHeadSnapshot(){return this.newSnapshot.headSnapshot}get newElement(){return this.newSnapshot.element}mergeHead(){this.copyNewHeadStylesheetElements(),this.copyNewHeadScriptElements(),this.removeCurrentHeadProvisionalElements(),this.copyNewHeadProvisionalElements()}replaceBody(){this.preservingPermanentElements((()=>{this.activateNewBody(),this.assignNewBody()}))}get trackedElementsAreIdentical(){return this.currentHeadSnapshot.trackedElementSignature==this.newHeadSnapshot.trackedElementSignature}copyNewHeadStylesheetElements(){for(const e of this.newHeadStylesheetElements)document.head.appendChild(e)}copyNewHeadScriptElements(){for(const e of this.newHeadScriptElements)document.head.appendChild(this.createScriptElement(e))}removeCurrentHeadProvisionalElements(){for(const e of this.currentHeadProvisionalElements)document.head.removeChild(e)}copyNewHeadProvisionalElements(){for(const e of this.newHeadProvisionalElements)document.head.appendChild(e)}activateNewBody(){document.adoptNode(this.newElement),this.activateNewBodyScriptElements()}activateNewBodyScriptElements(){for(const e of this.newBodyScriptElements){T(e,this.createScriptElement(e))}}assignNewBody(){document.body&&this.newElement instanceof HTMLBodyElement?T(document.body,this.newElement):document.documentElement.appendChild(this.newElement)}get newHeadStylesheetElements(){return this.newHeadSnapshot.getStylesheetElementsNotInSnapshot(this.currentHeadSnapshot)}get newHeadScriptElements(){return this.newHeadSnapshot.getScriptElementsNotInSnapshot(this.currentHeadSnapshot)}get currentHeadProvisionalElements(){return this.currentHeadSnapshot.provisionalElements}get newHeadProvisionalElements(){return this.newHeadSnapshot.provisionalElements}get newBodyScriptElements(){return[...this.newElement.querySelectorAll("script")]}}class ae{constructor(e){this.keys=[],this.snapshots={},this.size=e}has(e){return m(e)in this.snapshots}get(e){if(this.has(e)){const t=this.read(e);return this.touch(e),t}}put(e,t){return this.write(e,t),this.touch(e),t}clear(){this.snapshots={}}read(e){return this.snapshots[m(e)]}write(e,t){this.snapshots[m(e)]=t}touch(e){const t=m(e),i=this.keys.indexOf(t);i>-1&&this.keys.splice(i,1),this.keys.unshift(t),this.trim()}trim(){for(const e of this.keys.splice(this.size))delete this.snapshots[e]}}class le extends A{constructor(){super(...arguments),this.snapshotCache=new ae(10),this.lastRenderedLocation=new URL(location.href)}renderPage(e,t=!1){const i=new oe(this.snapshot,e,t);return this.render(i)}renderError(e){const t=new re(this.snapshot,e,!1);this.render(t)}clearSnapshotCache(){this.snapshotCache.clear()}async cacheSnapshot(){if(this.shouldCacheSnapshot){this.delegate.viewWillCacheSnapshot();const{snapshot:e,lastRenderedLocation:t}=this;await new Promise((e=>setTimeout((()=>e()),0))),this.snapshotCache.put(t,e.clone())}}getCachedSnapshotForLocation(e){return this.snapshotCache.get(e)}get snapshot(){return B.fromElement(this.element)}get shouldCacheSnapshot(){return this.snapshot.isCacheable}}function ce(e){Object.defineProperties(e,de)}const de={absoluteURL:{get(){return this.toString()}}},ue=new class{constructor(){this.navigator=new te(this),this.history=new Z(this),this.view=new le(this,document.documentElement),this.adapter=new J(this),this.pageObserver=new ie(this),this.linkClickObserver=new ee(this),this.formSubmitObserver=new X(this),this.scrollObserver=new se(this),this.streamObserver=new ne(this),this.frameRedirector=new Y(document.documentElement),this.enabled=!0,this.progressBarDelay=500,this.started=!1}start(){this.started||(this.pageObserver.start(),this.linkClickObserver.start(),this.formSubmitObserver.start(),this.scrollObserver.start(),this.streamObserver.start(),this.frameRedirector.start(),this.history.start(),this.started=!0,this.enabled=!0)}disable(){this.enabled=!1}stop(){this.started&&(this.pageObserver.stop(),this.linkClickObserver.stop(),this.formSubmitObserver.stop(),this.scrollObserver.stop(),this.streamObserver.stop(),this.frameRedirector.stop(),this.history.stop(),this.started=!1)}registerAdapter(e){this.adapter=e}visit(e,t={}){this.navigator.proposeVisit(d(e),t)}connectStreamSource(e){this.streamObserver.connectStreamSource(e)}disconnectStreamSource(e){this.streamObserver.disconnectStreamSource(e)}renderStreamMessage(e){document.documentElement.appendChild(O.wrap(e).fragment)}clearCache(){this.view.clearSnapshotCache()}setProgressBarDelay(e){this.progressBarDelay=e}get location(){return this.history.location}get restorationIdentifier(){return this.history.restorationIdentifier}historyPoppedToLocationWithRestorationIdentifier(e){this.enabled?this.navigator.proposeVisit(e,{action:"restore",historyChanged:!0}):this.adapter.pageInvalidated()}scrollPositionChanged(e){this.history.updateRestorationData({scrollPosition:e})}willFollowLinkToLocation(e,t){return this.elementIsNavigable(e)&&this.locationIsVisitable(t)&&this.applicationAllowsFollowingLinkToLocation(e,t)}followedLinkToLocation(e,t){const i=this.getActionForLink(e);this.visit(t.href,{action:i})}allowsVisitingLocation(e){return this.applicationAllowsVisitingLocation(e)}visitProposedToLocation(e,t){ce(e),this.adapter.visitProposedToLocation(e,t)}visitStarted(e){ce(e.location),this.notifyApplicationAfterVisitingLocation(e.location)}visitCompleted(e){this.notifyApplicationAfterPageLoad(e.getTimingMetrics())}willSubmitForm(e,t){return this.elementIsNavigable(e)&&this.elementIsNavigable(t)}formSubmitted(e,t){this.navigator.submitForm(e,t)}pageBecameInteractive(){this.view.lastRenderedLocation=this.location,this.notifyApplicationAfterPageLoad()}pageLoaded(){this.history.assumeControlOfScrollRestoration()}pageWillUnload(){this.history.relinquishControlOfScrollRestoration()}receivedMessageFromStream(e){this.renderStreamMessage(e)}viewWillCacheSnapshot(){this.notifyApplicationBeforeCachingSnapshot()}viewWillRenderSnapshot({element:e},t){this.notifyApplicationBeforeRender(e)}viewRenderedSnapshot(e,t){this.view.lastRenderedLocation=this.history.location,this.notifyApplicationAfterRender()}viewInvalidated(){this.adapter.pageInvalidated()}applicationAllowsFollowingLinkToLocation(e,t){return!this.notifyApplicationAfterClickingLinkToLocation(e,t).defaultPrevented}applicationAllowsVisitingLocation(e){return!this.notifyApplicationBeforeVisitingLocation(e).defaultPrevented}notifyApplicationAfterClickingLinkToLocation(e,t){return f("turbo:click",{target:e,detail:{url:t.href},cancelable:!0})}notifyApplicationBeforeVisitingLocation(e){return f("turbo:before-visit",{detail:{url:e.href},cancelable:!0})}notifyApplicationAfterVisitingLocation(e){return f("turbo:visit",{detail:{url:e.href}})}notifyApplicationBeforeCachingSnapshot(){return f("turbo:before-cache")}notifyApplicationBeforeRender(e){return f("turbo:before-render",{detail:{newBody:e}})}notifyApplicationAfterRender(){return f("turbo:render")}notifyApplicationAfterPageLoad(e={}){return f("turbo:load",{detail:{url:this.location.href,timing:e}})}getActionForLink(e){const t=e.getAttribute("data-turbo-action");return function(e){return"advance"==e||"replace"==e||"restore"==e}(t)?t:"advance"}elementIsNavigable(e){const t=null==e?void 0:e.closest("[data-turbo]");return!t||"false"!=t.getAttribute("data-turbo")}locationIsVisitable(e){return p(e,this.snapshot.rootLocation)&&!!h(e).match(/^(?:|\.(?:htm|html|xhtml))$/)}get snapshot(){return this.view.snapshot}},{navigator:he}=ue;function pe(){ue.start()}function me(e){ue.connectStreamSource(e)}function ge(e){ue.disconnectStreamSource(e)}pe()},52:()=>{class e{init(){document.body.querySelectorAll("[x-cloak]").forEach((e=>{e.setAttribute("data-alpine-was-cloaked","")})),this.configureEventHandlers()}setMutationObserverState(e){if(!window.Alpine.version||!function(e,t){const i=e.split("."),s=t.split(".");for(let e=0;e<i.length;e++)if(!s[e]||s[e]<i[e])return!1;return!0}("2.4.0",window.Alpine.version))throw new Error("Invalid Alpine version. Please use Alpine 2.4.0 or above");window.Alpine.pauseMutationObserver=e}configureEventHandlers(){const e=()=>{window.Alpine.discoverUninitializedComponents((e=>{window.Alpine.initializeComponent(e)})),requestAnimationFrame((()=>{this.setMutationObserverState(!1)}))},t=e=>{(e.data?e.data.newBody:e.detail.newBody).querySelectorAll("[data-alpine-generated-me],[x-cloak]").forEach((e=>{e.hasAttribute("x-cloak")&&e.setAttribute("data-alpine-was-cloaked",""),e.hasAttribute("data-alpine-generated-me")&&(e.removeAttribute("data-alpine-generated-me"),void 0===e.__x_for_key&&void 0===e.__x_inserted_me&&e.remove())}))},i=()=>{this.setMutationObserverState(!0),document.body.querySelectorAll("[x-for],[x-if],[data-alpine-was-cloaked]").forEach((e=>{if(e.hasAttribute("data-alpine-was-cloaked")&&(e.setAttribute("x-cloak",""),e.removeAttribute("data-alpine-was-cloaked")),e.hasAttribute("x-for")){let t=e.nextElementSibling;for(;t&&void 0!==t.__x_for_key;){const e=t;t=t.nextElementSibling,e.setAttribute("data-alpine-generated-me",!0)}}else if(e.hasAttribute("x-if")){const t=e.nextElementSibling;t&&void 0!==t.__x_inserted_me&&t.setAttribute("data-alpine-generated-me",!0)}}))};document.addEventListener("turbo:load",e),document.addEventListener("turbolinks:load",e),document.addEventListener("turbo:before-render",t),document.addEventListener("turbolinks:before-render",t),document.addEventListener("turbo:before-cache",i),document.addEventListener("turbolinks:before-cache",i)}}var t;window.Alpine&&console.error("Alpine-turbo-drive-adapter must be included before AlpineJs"),Object.getOwnPropertyDescriptor(NodeList.prototype,"forEach")||Object.defineProperty(NodeList.prototype,"forEach",Object.getOwnPropertyDescriptor(Array.prototype,"forEach")),t=()=>{(new e).init()},"loading"===document.readyState?document.addEventListener("readystatechange",(()=>{"interactive"===document.readyState&&t()})):t()},443:function(e){e.exports=function(){"use strict";function e(e,t,i){return t in e?Object.defineProperty(e,t,{value:i,enumerable:!0,configurable:!0,writable:!0}):e[t]=i,e}function t(e,t){var i=Object.keys(e);if(Object.getOwnPropertySymbols){var s=Object.getOwnPropertySymbols(e);t&&(s=s.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),i.push.apply(i,s)}return i}function i(i){for(var s=1;s<arguments.length;s++){var n=null!=arguments[s]?arguments[s]:{};s%2?t(Object(n),!0).forEach((function(t){e(i,t,n[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(i,Object.getOwnPropertyDescriptors(n)):t(Object(n)).forEach((function(e){Object.defineProperty(i,e,Object.getOwnPropertyDescriptor(n,e))}))}return i}function s(){return new Promise((e=>{"loading"==document.readyState?document.addEventListener("DOMContentLoaded",e):e()}))}function n(e){return Array.from(new Set(e))}function r(){return navigator.userAgent.includes("Node.js")||navigator.userAgent.includes("jsdom")}function o(e,t){return e==t}function a(e,t){"template"!==e.tagName.toLowerCase()?console.warn(`Alpine: [${t}] directive should only be added to <template> tags. See https://github.com/alpinejs/alpine#${t}`):1!==e.content.childElementCount&&console.warn(`Alpine: <template> tag with [${t}] encountered with multiple element roots. Make sure <template> only has a single child element.`)}function l(e){return e.replace(/([a-z])([A-Z])/g,"$1-$2").replace(/[_\s]/,"-").toLowerCase()}function c(e){return e.toLowerCase().replace(/-(\w)/g,((e,t)=>t.toUpperCase()))}function d(e,t){if(!1===t(e))return;let i=e.firstElementChild;for(;i;)d(i,t),i=i.nextElementSibling}function u(e,t){var i;return function(){var s=this,n=arguments,r=function(){i=null,e.apply(s,n)};clearTimeout(i),i=setTimeout(r,t)}}const h=(e,t,i)=>{if(console.warn(`Alpine Error: "${i}"\n\nExpression: "${t}"\nElement:`,e),!r())throw i};function p(e,{el:t,expression:i}){try{const s=e();return s instanceof Promise?s.catch((e=>h(t,i,e))):s}catch(e){h(t,i,e)}}function m(e,t,i,s={}){return p((()=>"function"==typeof t?t.call(i):new Function(["$data",...Object.keys(s)],`var __alpine_result; with($data) { __alpine_result = ${t} }; return __alpine_result`)(i,...Object.values(s))),{el:e,expression:t})}function g(e,t,i,s={}){return p((()=>{if("function"==typeof t)return Promise.resolve(t.call(i,s.$event));let e=Function;if(e=Object.getPrototypeOf((async function(){})).constructor,Object.keys(i).includes(t)){let e=new Function(["dataContext",...Object.keys(s)],`with(dataContext) { return ${t} }`)(i,...Object.values(s));return"function"==typeof e?Promise.resolve(e.call(i,s.$event)):Promise.resolve()}return Promise.resolve(new e(["dataContext",...Object.keys(s)],`with(dataContext) { ${t} }`)(i,...Object.values(s)))}),{el:e,expression:t})}const f=/^x-(on|bind|data|text|html|model|if|for|show|cloak|transition|ref|spread)\b/;function v(e){const t=E(e.name);return f.test(t)}function b(e,t,i){let s=Array.from(e.attributes).filter(v).map(w),n=s.filter((e=>"spread"===e.type))[0];if(n){let i=m(e,n.expression,t.$data);s=s.concat(Object.entries(i).map((([e,t])=>w({name:e,value:t}))))}return i?s.filter((e=>e.type===i)):y(s)}function y(e){let t=["bind","model","show","catch-all"];return e.sort(((e,i)=>{let s=-1===t.indexOf(e.type)?"catch-all":e.type,n=-1===t.indexOf(i.type)?"catch-all":i.type;return t.indexOf(s)-t.indexOf(n)}))}function w({name:e,value:t}){const i=E(e),s=i.match(f),n=i.match(/:([a-zA-Z0-9\-:]+)/),r=i.match(/\.[^.\]]+(?=[^\]]*$)/g)||[];return{type:s?s[1]:null,value:n?n[1]:null,modifiers:r.map((e=>e.replace(".",""))),expression:t}}function S(e){return["disabled","checked","required","readonly","hidden","open","selected","autofocus","itemscope","multiple","novalidate","allowfullscreen","allowpaymentrequest","formnovalidate","autoplay","controls","loop","muted","playsinline","default","ismap","reversed","async","defer","nomodule"].includes(e)}function E(e){return e.startsWith("@")?e.replace("@","x-on:"):e.startsWith(":")?e.replace(":","x-bind:"):e}function O(e,t=Boolean){return e.split(" ").filter(t)}const x="in",C="out",_="cancelled";function k(e,t,i,s,n=!1){if(n)return t();if(e.__x_transition&&e.__x_transition.type===x)return;const r=b(e,s,"transition"),o=b(e,s,"show")[0];if(o&&o.modifiers.includes("transition")){let s=o.modifiers;if(s.includes("out")&&!s.includes("in"))return t();const n=s.includes("in")&&s.includes("out");s=n?s.filter(((e,t)=>t<s.indexOf("out"))):s,L(e,s,t,i)}else r.some((e=>["enter","enter-start","enter-end"].includes(e.value)))?F(e,s,r,t,i):t()}function A(e,t,i,s,n=!1){if(n)return t();if(e.__x_transition&&e.__x_transition.type===C)return;const r=b(e,s,"transition"),o=b(e,s,"show")[0];if(o&&o.modifiers.includes("transition")){let s=o.modifiers;if(s.includes("in")&&!s.includes("out"))return t();const n=s.includes("in")&&s.includes("out");s=n?s.filter(((e,t)=>t>s.indexOf("out"))):s,I(e,s,n,t,i)}else r.some((e=>["leave","leave-start","leave-end"].includes(e.value)))?M(e,s,r,t,i):t()}function L(e,t,i,s){T(e,t,i,(()=>{}),s,{duration:P(t,"duration",150),origin:P(t,"origin","center"),first:{opacity:0,scale:P(t,"scale",95)},second:{opacity:1,scale:100}},x)}function I(e,t,i,s,n){T(e,t,(()=>{}),s,n,{duration:i?P(t,"duration",150):P(t,"duration",150)/2,origin:P(t,"origin","center"),first:{opacity:1,scale:100},second:{opacity:0,scale:P(t,"scale",95)}},C)}function P(e,t,i){if(-1===e.indexOf(t))return i;const s=e[e.indexOf(t)+1];if(!s)return i;if("scale"===t&&!$(s))return i;if("duration"===t){let e=s.match(/([0-9]+)ms/);if(e)return e[1]}return"origin"===t&&["top","right","left","center","bottom"].includes(e[e.indexOf(t)+2])?[s,e[e.indexOf(t)+2]].join(" "):s}function T(e,t,i,s,n,r,o){e.__x_transition&&e.__x_transition.cancel&&e.__x_transition.cancel();const a=e.style.opacity,l=e.style.transform,c=e.style.transformOrigin,d=!t.includes("opacity")&&!t.includes("scale"),u=d||t.includes("opacity"),h=d||t.includes("scale"),p={start(){u&&(e.style.opacity=r.first.opacity),h&&(e.style.transform=`scale(${r.first.scale/100})`)},during(){h&&(e.style.transformOrigin=r.origin),e.style.transitionProperty=[u?"opacity":"",h?"transform":""].join(" ").trim(),e.style.transitionDuration=r.duration/1e3+"s",e.style.transitionTimingFunction="cubic-bezier(0.4, 0.0, 0.2, 1)"},show(){i()},end(){u&&(e.style.opacity=r.second.opacity),h&&(e.style.transform=`scale(${r.second.scale/100})`)},hide(){s()},cleanup(){u&&(e.style.opacity=a),h&&(e.style.transform=l),h&&(e.style.transformOrigin=c),e.style.transitionProperty=null,e.style.transitionDuration=null,e.style.transitionTimingFunction=null}};j(e,p,o,n)}const R=(e,t,i)=>"function"==typeof e?i.evaluateReturnExpression(t,e):e;function F(e,t,i,s,n){q(e,O(R((i.find((e=>"enter"===e.value))||{expression:""}).expression,e,t)),O(R((i.find((e=>"enter-start"===e.value))||{expression:""}).expression,e,t)),O(R((i.find((e=>"enter-end"===e.value))||{expression:""}).expression,e,t)),s,(()=>{}),x,n)}function M(e,t,i,s,n){q(e,O(R((i.find((e=>"leave"===e.value))||{expression:""}).expression,e,t)),O(R((i.find((e=>"leave-start"===e.value))||{expression:""}).expression,e,t)),O(R((i.find((e=>"leave-end"===e.value))||{expression:""}).expression,e,t)),(()=>{}),s,C,n)}function q(e,t,i,s,n,r,o,a){e.__x_transition&&e.__x_transition.cancel&&e.__x_transition.cancel();const l=e.__x_original_classes||[],c={start(){e.classList.add(...i)},during(){e.classList.add(...t)},show(){n()},end(){e.classList.remove(...i.filter((e=>!l.includes(e)))),e.classList.add(...s)},hide(){r()},cleanup(){e.classList.remove(...t.filter((e=>!l.includes(e)))),e.classList.remove(...s.filter((e=>!l.includes(e))))}};j(e,c,o,a)}function j(e,t,i,s){const n=D((()=>{t.hide(),e.isConnected&&t.cleanup(),delete e.__x_transition}));e.__x_transition={type:i,cancel:D((()=>{s(_),n()})),finish:n,nextFrame:null},t.start(),t.during(),e.__x_transition.nextFrame=requestAnimationFrame((()=>{let i=1e3*Number(getComputedStyle(e).transitionDuration.replace(/,.*/,"").replace("s",""));0===i&&(i=1e3*Number(getComputedStyle(e).animationDuration.replace("s",""))),t.show(),e.__x_transition.nextFrame=requestAnimationFrame((()=>{t.end(),setTimeout(e.__x_transition.finish,i)}))}))}function $(e){return!Array.isArray(e)&&!isNaN(e)}function D(e){let t=!1;return function(){t||(t=!0,e.apply(this,arguments))}}function H(e,t,i,s,n){a(t,"x-for");let r=N("function"==typeof i?e.evaluateReturnExpression(t,i):i),o=z(e,t,r,n),l=t;o.forEach(((i,a)=>{let c=B(r,i,a,o,n()),d=V(e,t,a,c),u=W(l.nextElementSibling,d);u?(delete u.__x_for_key,u.__x_for=c,e.updateElements(u,(()=>u.__x_for))):(u=U(t,l),k(u,(()=>{}),(()=>{}),e,s),u.__x_for=c,e.initializeElements(u,(()=>u.__x_for))),l=u,l.__x_for_key=d})),K(l,e)}function N(e){let t=/,([^,\}\]]*)(?:,([^,\}\]]*))?$/,i=/^\(|\)$/g,s=/([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/,n=e.match(s);if(!n)return;let r={};r.items=n[2].trim();let o=n[1].trim().replace(i,""),a=o.match(t);return a?(r.item=o.replace(t,"").trim(),r.index=a[1].trim(),a[2]&&(r.collection=a[2].trim())):r.item=o,r}function B(e,t,s,n,r){let o=r?i({},r):{};return o[e.item]=t,e.index&&(o[e.index]=s),e.collection&&(o[e.collection]=n),o}function V(e,t,i,s){let n=b(t,e,"bind").filter((e=>"key"===e.value))[0];return n?e.evaluateReturnExpression(t,n.expression,(()=>s)):i}function z(e,t,i,s){let n=b(t,e,"if")[0];if(n&&!e.evaluateReturnExpression(t,n.expression))return[];let r=e.evaluateReturnExpression(t,i.items,s);return $(r)&&r>0&&(r=Array.from(Array(r).keys(),(e=>e+1))),r}function U(e,t){let i=document.importNode(e.content,!0);return t.parentElement.insertBefore(i,t.nextElementSibling),t.nextElementSibling}function W(e,t){if(!e)return;if(void 0===e.__x_for_key)return;if(e.__x_for_key===t)return e;let i=e;for(;i;){if(i.__x_for_key===t)return i.parentElement.insertBefore(i,e);i=!(!i.nextElementSibling||void 0===i.nextElementSibling.__x_for_key)&&i.nextElementSibling}}function K(e,t){for(var i=!(!e.nextElementSibling||void 0===e.nextElementSibling.__x_for_key)&&e.nextElementSibling;i;){let e=i,s=i.nextElementSibling;A(i,(()=>{e.remove()}),(()=>{}),t),i=!(!s||void 0===s.__x_for_key)&&s}}function Q(e,t,i,s,r,a,l){var d=e.evaluateReturnExpression(t,s,r);if("value"===i){if(We.ignoreFocusedForValueBinding&&document.activeElement.isSameNode(t))return;if(void 0===d&&s.match(/\./)&&(d=""),"radio"===t.type)void 0===t.attributes.value&&"bind"===a?t.value=d:"bind"!==a&&(t.checked=o(t.value,d));else if("checkbox"===t.type)"boolean"==typeof d||[null,void 0].includes(d)||"bind"!==a?"bind"!==a&&(Array.isArray(d)?t.checked=d.some((e=>o(e,t.value))):t.checked=!!d):t.value=String(d);else if("SELECT"===t.tagName)J(t,d);else{if(t.value===d)return;t.value=d}}else if("class"===i)if(Array.isArray(d)){const e=t.__x_original_classes||[];t.setAttribute("class",n(e.concat(d)).join(" "))}else if("object"==typeof d)Object.keys(d).sort(((e,t)=>d[e]-d[t])).forEach((e=>{d[e]?O(e).forEach((e=>t.classList.add(e))):O(e).forEach((e=>t.classList.remove(e)))}));else{const e=t.__x_original_classes||[],i=d?O(d):[];t.setAttribute("class",n(e.concat(i)).join(" "))}else i=l.includes("camel")?c(i):i,[null,void 0,!1].includes(d)?t.removeAttribute(i):S(i)?G(t,i,i):G(t,i,d)}function G(e,t,i){e.getAttribute(t)!=i&&e.setAttribute(t,i)}function J(e,t){const i=[].concat(t).map((e=>e+""));Array.from(e.options).forEach((e=>{e.selected=i.includes(e.value||e.text)}))}function X(e,t,i){void 0===t&&i.match(/\./)&&(t=""),e.textContent=t}function Y(e,t,i,s){t.innerHTML=e.evaluateReturnExpression(t,i,s)}function Z(e,t,i,s,n=!1){const r=()=>{t.style.display="none",t.__x_is_shown=!1},o=()=>{1===t.style.length&&"none"===t.style.display?t.removeAttribute("style"):t.style.removeProperty("display"),t.__x_is_shown=!0};if(!0===n)return void(i?o():r());const a=(s,n)=>{i?(("none"===t.style.display||t.__x_transition)&&k(t,(()=>{o()}),n,e),s((()=>{}))):"none"!==t.style.display?A(t,(()=>{s((()=>{r()}))}),n,e):s((()=>{}))};s.includes("immediate")?a((e=>e()),(()=>{})):(e.showDirectiveLastElement&&!e.showDirectiveLastElement.contains(t)&&e.executeAndClearRemainingShowDirectiveStack(),e.showDirectiveStack.push(a),e.showDirectiveLastElement=t)}function ee(e,t,i,s,n){a(t,"x-if");const r=t.nextElementSibling&&!0===t.nextElementSibling.__x_inserted_me;if(!i||r&&!t.__x_transition)!i&&r&&A(t.nextElementSibling,(()=>{t.nextElementSibling.remove()}),(()=>{}),e,s);else{const i=document.importNode(t.content,!0);t.parentElement.insertBefore(i,t.nextElementSibling),k(t.nextElementSibling,(()=>{}),(()=>{}),e,s),e.initializeElements(t.nextElementSibling,n),t.nextElementSibling.__x_inserted_me=!0}}function te(e,t,i,s,n,r={}){const o={passive:s.includes("passive")};if(s.includes("camel")&&(i=c(i)),s.includes("away")){let a=l=>{t.contains(l.target)||t.offsetWidth<1&&t.offsetHeight<1||(ie(e,n,l,r),s.includes("once")&&document.removeEventListener(i,a,o))};document.addEventListener(i,a,o)}else{let a=s.includes("window")?window:s.includes("document")?document:t,l=c=>{a!==window&&a!==document||document.body.contains(t)?se(i)&&ne(c,s)||(s.includes("prevent")&&c.preventDefault(),s.includes("stop")&&c.stopPropagation(),s.includes("self")&&c.target!==t)||ie(e,n,c,r).then((e=>{!1===e?c.preventDefault():s.includes("once")&&a.removeEventListener(i,l,o)})):a.removeEventListener(i,l,o)};if(s.includes("debounce")){let e=s[s.indexOf("debounce")+1]||"invalid-wait",t=$(e.split("ms")[0])?Number(e.split("ms")[0]):250;l=u(l,t)}a.addEventListener(i,l,o)}}function ie(e,t,s,n){return e.evaluateCommandExpression(s.target,t,(()=>i(i({},n()),{},{$event:s})))}function se(e){return["keydown","keyup"].includes(e)}function ne(e,t){let i=t.filter((e=>!["window","document","prevent","stop"].includes(e)));if(i.includes("debounce")){let e=i.indexOf("debounce");i.splice(e,$((i[e+1]||"invalid-wait").split("ms")[0])?2:1)}if(0===i.length)return!1;if(1===i.length&&i[0]===re(e.key))return!1;const s=["ctrl","shift","alt","meta","cmd","super"].filter((e=>i.includes(e)));return i=i.filter((e=>!s.includes(e))),!(s.length>0&&s.filter((t=>("cmd"!==t&&"super"!==t||(t="meta"),e[`${t}Key`]))).length===s.length&&i[0]===re(e.key))}function re(e){switch(e){case"/":return"slash";case" ":case"Spacebar":return"space";default:return e&&l(e)}}function oe(e,t,s,n,r){var o="select"===t.tagName.toLowerCase()||["checkbox","radio"].includes(t.type)||s.includes("lazy")?"change":"input";te(e,t,o,s,`${n} = rightSideOfExpression($event, ${n})`,(()=>i(i({},r()),{},{rightSideOfExpression:ae(t,s,n)})))}function ae(e,t,i){return"radio"===e.type&&(e.hasAttribute("name")||e.setAttribute("name",i)),(i,s)=>{if(i instanceof CustomEvent&&i.detail)return i.detail;if("checkbox"===e.type){if(Array.isArray(s)){const e=t.includes("number")?le(i.target.value):i.target.value;return i.target.checked?s.concat([e]):s.filter((t=>!o(t,e)))}return i.target.checked}if("select"===e.tagName.toLowerCase()&&e.multiple)return t.includes("number")?Array.from(i.target.selectedOptions).map((e=>le(e.value||e.text))):Array.from(i.target.selectedOptions).map((e=>e.value||e.text));{const e=i.target.value;return t.includes("number")?le(e):t.includes("trim")?e.trim():e}}}function le(e){const t=e?parseFloat(e):null;return $(t)?t:e}const{isArray:ce}=Array,{getPrototypeOf:de,create:ue,defineProperty:he,defineProperties:pe,isExtensible:me,getOwnPropertyDescriptor:ge,getOwnPropertyNames:fe,getOwnPropertySymbols:ve,preventExtensions:be,hasOwnProperty:ye}=Object,{push:we,concat:Se,map:Ee}=Array.prototype;function Oe(e){return void 0===e}function xe(e){return"function"==typeof e}function Ce(e){return"object"==typeof e}const _e=new WeakMap;function ke(e,t){_e.set(e,t)}const Ae=e=>_e.get(e)||e;function Le(e,t){return e.valueIsObservable(t)?e.getProxy(t):t}function Ie(e){return ye.call(e,"value")&&(e.value=Ae(e.value)),e}function Pe(e,t,i){Se.call(fe(i),ve(i)).forEach((s=>{let n=ge(i,s);n.configurable||(n=Ne(e,n,Le)),he(t,s,n)})),be(t)}class Te{constructor(e,t){this.originalTarget=t,this.membrane=e}get(e,t){const{originalTarget:i,membrane:s}=this,n=i[t],{valueObserved:r}=s;return r(i,t),s.getProxy(n)}set(e,t,i){const{originalTarget:s,membrane:{valueMutated:n}}=this;return s[t]!==i?(s[t]=i,n(s,t)):"length"===t&&ce(s)&&n(s,t),!0}deleteProperty(e,t){const{originalTarget:i,membrane:{valueMutated:s}}=this;return delete i[t],s(i,t),!0}apply(e,t,i){}construct(e,t,i){}has(e,t){const{originalTarget:i,membrane:{valueObserved:s}}=this;return s(i,t),t in i}ownKeys(e){const{originalTarget:t}=this;return Se.call(fe(t),ve(t))}isExtensible(e){const t=me(e);if(!t)return t;const{originalTarget:i,membrane:s}=this,n=me(i);return n||Pe(s,e,i),n}setPrototypeOf(e,t){}getPrototypeOf(e){const{originalTarget:t}=this;return de(t)}getOwnPropertyDescriptor(e,t){const{originalTarget:i,membrane:s}=this,{valueObserved:n}=this.membrane;n(i,t);let r=ge(i,t);if(Oe(r))return r;const o=ge(e,t);return Oe(o)?(r=Ne(s,r,Le),r.configurable||he(e,t,r),r):o}preventExtensions(e){const{originalTarget:t,membrane:i}=this;return Pe(i,e,t),be(t),!0}defineProperty(e,t,i){const{originalTarget:s,membrane:n}=this,{valueMutated:r}=n,{configurable:o}=i;if(ye.call(i,"writable")&&!ye.call(i,"value")){const e=ge(s,t);i.value=e.value}return he(s,t,Ie(i)),!1===o&&he(e,t,Ne(n,i,Le)),r(s,t),!0}}function Re(e,t){return e.valueIsObservable(t)?e.getReadOnlyProxy(t):t}class Fe{constructor(e,t){this.originalTarget=t,this.membrane=e}get(e,t){const{membrane:i,originalTarget:s}=this,n=s[t],{valueObserved:r}=i;return r(s,t),i.getReadOnlyProxy(n)}set(e,t,i){return!1}deleteProperty(e,t){return!1}apply(e,t,i){}construct(e,t,i){}has(e,t){const{originalTarget:i,membrane:{valueObserved:s}}=this;return s(i,t),t in i}ownKeys(e){const{originalTarget:t}=this;return Se.call(fe(t),ve(t))}setPrototypeOf(e,t){}getOwnPropertyDescriptor(e,t){const{originalTarget:i,membrane:s}=this,{valueObserved:n}=s;n(i,t);let r=ge(i,t);if(Oe(r))return r;const o=ge(e,t);return Oe(o)?(r=Ne(s,r,Re),ye.call(r,"set")&&(r.set=void 0),r.configurable||he(e,t,r),r):o}preventExtensions(e){return!1}defineProperty(e,t,i){return!1}}function Me(e){let t;return ce(e)?t=[]:Ce(e)&&(t={}),t}const qe=Object.prototype;function je(e){if(null===e)return!1;if("object"!=typeof e)return!1;if(ce(e))return!0;const t=de(e);return t===qe||null===t||null===de(t)}const $e=(e,t)=>{},De=(e,t)=>{},He=e=>e;function Ne(e,t,i){const{set:s,get:n}=t;return ye.call(t,"value")?t.value=i(e,t.value):(Oe(n)||(t.get=function(){return i(e,n.call(Ae(this)))}),Oe(s)||(t.set=function(t){s.call(Ae(this),e.unwrapProxy(t))})),t}class Be{constructor(e){if(this.valueDistortion=He,this.valueMutated=De,this.valueObserved=$e,this.valueIsObservable=je,this.objectGraph=new WeakMap,!Oe(e)){const{valueDistortion:t,valueMutated:i,valueObserved:s,valueIsObservable:n}=e;this.valueDistortion=xe(t)?t:He,this.valueMutated=xe(i)?i:De,this.valueObserved=xe(s)?s:$e,this.valueIsObservable=xe(n)?n:je}}getProxy(e){const t=Ae(e),i=this.valueDistortion(t);if(this.valueIsObservable(i)){const s=this.getReactiveState(t,i);return s.readOnly===e?e:s.reactive}return i}getReadOnlyProxy(e){e=Ae(e);const t=this.valueDistortion(e);return this.valueIsObservable(t)?this.getReactiveState(e,t).readOnly:t}unwrapProxy(e){return Ae(e)}getReactiveState(e,t){const{objectGraph:i}=this;let s=i.get(t);if(s)return s;const n=this;return s={get reactive(){const i=new Te(n,t),s=new Proxy(Me(t),i);return ke(s,e),he(this,"reactive",{value:s}),s},get readOnly(){const i=new Fe(n,t),s=new Proxy(Me(t),i);return ke(s,e),he(this,"readOnly",{value:s}),s}},i.set(t,s),s}}function Ve(e,t){let i=new Be({valueMutated(e,i){t(e,i)}});return{data:i.getProxy(e),membrane:i}}function ze(e,t){let i=e.unwrapProxy(t),s={};return Object.keys(i).forEach((e=>{["$el","$refs","$nextTick","$watch"].includes(e)||(s[e]=i[e])})),s}class Ue{constructor(e,t=null){this.$el=e;const i=this.$el.getAttribute("x-data"),s=""===i?"{}":i,n=this.$el.getAttribute("x-init");let r={$el:this.$el},o=t?t.$el:this.$el;Object.entries(We.magicProperties).forEach((([e,t])=>{Object.defineProperty(r,`$${e}`,{get:function(){return t(o)}})})),this.unobservedData=t?t.getUnobservedData():m(e,s,r);let{membrane:a,data:l}=this.wrapDataInObservable(this.unobservedData);var c;this.$data=l,this.membrane=a,this.unobservedData.$el=this.$el,this.unobservedData.$refs=this.getRefsProxy(),this.nextTickStack=[],this.unobservedData.$nextTick=e=>{this.nextTickStack.push(e)},this.watchers={},this.unobservedData.$watch=(e,t)=>{this.watchers[e]||(this.watchers[e]=[]),this.watchers[e].push(t)},Object.entries(We.magicProperties).forEach((([e,t])=>{Object.defineProperty(this.unobservedData,`$${e}`,{get:function(){return t(o,this.$el)}})})),this.showDirectiveStack=[],this.showDirectiveLastElement,t||We.onBeforeComponentInitializeds.forEach((e=>e(this))),n&&!t&&(this.pauseReactivity=!0,c=this.evaluateReturnExpression(this.$el,n),this.pauseReactivity=!1),this.initializeElements(this.$el),this.listenForNewElementsToInitialize(),"function"==typeof c&&c.call(this.$data),t||setTimeout((()=>{We.onComponentInitializeds.forEach((e=>e(this)))}),0)}getUnobservedData(){return ze(this.membrane,this.$data)}wrapDataInObservable(e){var t=this;let i=u((function(){t.updateElements(t.$el)}),0);return Ve(e,((e,s)=>{t.watchers[s]?t.watchers[s].forEach((t=>t(e[s]))):Array.isArray(e)?Object.keys(t.watchers).forEach((i=>{let n=i.split(".");"length"!==s&&n.reduce(((s,n)=>(Object.is(e,s[n])&&t.watchers[i].forEach((t=>t(e))),s[n])),t.unobservedData)})):Object.keys(t.watchers).filter((e=>e.includes("."))).forEach((i=>{let n=i.split(".");s===n[n.length-1]&&n.reduce(((n,r)=>(Object.is(e,n)&&t.watchers[i].forEach((t=>t(e[s]))),n[r])),t.unobservedData)})),t.pauseReactivity||i()}))}walkAndSkipNestedComponents(e,t,i=(()=>{})){d(e,(e=>e.hasAttribute("x-data")&&!e.isSameNode(this.$el)?(e.__x||i(e),!1):t(e)))}initializeElements(e,t=(()=>{})){this.walkAndSkipNestedComponents(e,(e=>void 0===e.__x_for_key&&void 0===e.__x_inserted_me&&void this.initializeElement(e,t)),(e=>{e.__x=new Ue(e)})),this.executeAndClearRemainingShowDirectiveStack(),this.executeAndClearNextTickStack(e)}initializeElement(e,t){e.hasAttribute("class")&&b(e,this).length>0&&(e.__x_original_classes=O(e.getAttribute("class"))),this.registerListeners(e,t),this.resolveBoundAttributes(e,!0,t)}updateElements(e,t=(()=>{})){this.walkAndSkipNestedComponents(e,(e=>{if(void 0!==e.__x_for_key&&!e.isSameNode(this.$el))return!1;this.updateElement(e,t)}),(e=>{e.__x=new Ue(e)})),this.executeAndClearRemainingShowDirectiveStack(),this.executeAndClearNextTickStack(e)}executeAndClearNextTickStack(e){e===this.$el&&this.nextTickStack.length>0&&requestAnimationFrame((()=>{for(;this.nextTickStack.length>0;)this.nextTickStack.shift()()}))}executeAndClearRemainingShowDirectiveStack(){this.showDirectiveStack.reverse().map((e=>new Promise(((t,i)=>{e(t,i)})))).reduce(((e,t)=>e.then((()=>t.then((e=>{e()}))))),Promise.resolve((()=>{}))).catch((e=>{if(e!==_)throw e})),this.showDirectiveStack=[],this.showDirectiveLastElement=void 0}updateElement(e,t){this.resolveBoundAttributes(e,!1,t)}registerListeners(e,t){b(e,this).forEach((({type:i,value:s,modifiers:n,expression:r})=>{switch(i){case"on":te(this,e,s,n,r,t);break;case"model":oe(this,e,n,r,t)}}))}resolveBoundAttributes(e,t=!1,i){let s=b(e,this);s.forEach((({type:n,value:r,modifiers:o,expression:a})=>{switch(n){case"model":Q(this,e,"value",a,i,n,o);break;case"bind":if("template"===e.tagName.toLowerCase()&&"key"===r)return;Q(this,e,r,a,i,n,o);break;case"text":var l=this.evaluateReturnExpression(e,a,i);X(e,l,a);break;case"html":Y(this,e,a,i);break;case"show":l=this.evaluateReturnExpression(e,a,i),Z(this,e,l,o,t);break;case"if":if(s.some((e=>"for"===e.type)))return;l=this.evaluateReturnExpression(e,a,i),ee(this,e,l,t,i);break;case"for":H(this,e,a,t,i);break;case"cloak":e.removeAttribute("x-cloak")}}))}evaluateReturnExpression(e,t,s=(()=>{})){return m(e,t,this.$data,i(i({},s()),{},{$dispatch:this.getDispatchFunction(e)}))}evaluateCommandExpression(e,t,s=(()=>{})){return g(e,t,this.$data,i(i({},s()),{},{$dispatch:this.getDispatchFunction(e)}))}getDispatchFunction(e){return(t,i={})=>{e.dispatchEvent(new CustomEvent(t,{detail:i,bubbles:!0}))}}listenForNewElementsToInitialize(){const e=this.$el,t={childList:!0,attributes:!0,subtree:!0};new MutationObserver((e=>{for(let t=0;t<e.length;t++){const i=e[t].target.closest("[x-data]");if(i&&i.isSameNode(this.$el)){if("attributes"===e[t].type&&"x-data"===e[t].attributeName){const i=e[t].target.getAttribute("x-data")||"{}",s=m(this.$el,i,{$el:this.$el});Object.keys(s).forEach((e=>{this.$data[e]!==s[e]&&(this.$data[e]=s[e])}))}e[t].addedNodes.length>0&&e[t].addedNodes.forEach((e=>{1!==e.nodeType||e.__x_inserted_me||(!e.matches("[x-data]")||e.__x?this.initializeElements(e):e.__x=new Ue(e))}))}}})).observe(e,t)}getRefsProxy(){var e=this;return new Proxy({},{get(t,i){return"$isAlpineProxy"===i||(e.walkAndSkipNestedComponents(e.$el,(e=>{e.hasAttribute("x-ref")&&e.getAttribute("x-ref")===i&&(s=e)})),s);var s}})}}const We={version:"2.8.0",pauseMutationObserver:!1,magicProperties:{},onComponentInitializeds:[],onBeforeComponentInitializeds:[],ignoreFocusedForValueBinding:!1,start:async function(){r()||await s(),this.discoverComponents((e=>{this.initializeComponent(e)})),document.addEventListener("turbolinks:load",(()=>{this.discoverUninitializedComponents((e=>{this.initializeComponent(e)}))})),this.listenForNewUninitializedComponentsAtRunTime()},discoverComponents:function(e){document.querySelectorAll("[x-data]").forEach((t=>{e(t)}))},discoverUninitializedComponents:function(e,t=null){const i=(t||document).querySelectorAll("[x-data]");Array.from(i).filter((e=>void 0===e.__x)).forEach((t=>{e(t)}))},listenForNewUninitializedComponentsAtRunTime:function(){const e=document.querySelector("body"),t={childList:!0,attributes:!0,subtree:!0};new MutationObserver((e=>{if(!this.pauseMutationObserver)for(let t=0;t<e.length;t++)e[t].addedNodes.length>0&&e[t].addedNodes.forEach((e=>{1===e.nodeType&&(e.parentElement&&e.parentElement.closest("[x-data]")||this.discoverUninitializedComponents((e=>{this.initializeComponent(e)}),e.parentElement))}))})).observe(e,t)},initializeComponent:function(e){if(!e.__x)try{e.__x=new Ue(e)}catch(e){setTimeout((()=>{throw e}),0)}},clone:function(e,t){t.__x||(t.__x=new Ue(t,e))},addMagicProperty:function(e,t){this.magicProperties[e]=t},onComponentInitialized:function(e){this.onComponentInitializeds.push(e)},onBeforeComponentInitialized:function(e){this.onBeforeComponentInitializeds.push(e)}};return r()||(window.Alpine=We,window.deferLoadingAlpine?window.deferLoadingAlpine((function(){window.Alpine.start()})):window.Alpine.start()),We}()},80:(e,t,i)=>{"use strict";var s=i(184);i(52),i(443);i.e(689).then(i.bind(i,689)),i.e(880).then(i.bind(i,880)),window.TomSelect=i(183),(0,s.BL)()},662:()=>{},183:function(e){e.exports=function(){"use strict";function e(e,t){e.split(/\s+/).forEach((e=>{t(e)}))}class t{constructor(){this._events={}}on(t,i){e(t,(e=>{this._events[e]=this._events[e]||[],this._events[e].push(i)}))}off(t,i){var s=arguments.length;0!==s?e(t,(e=>{if(1===s)return delete this._events[e];e in this._events!=0&&this._events[e].splice(this._events[e].indexOf(i),1)})):this._events={}}trigger(t,...i){var s=this;e(t,(e=>{if(e in s._events!=0)for(let t of s._events[e])t.apply(s,i)}))}}function i(e){return e.plugins={},class extends e{constructor(...e){super(...e),this.plugins={names:[],settings:{},requested:{},loaded:{}}}static define(t,i){e.plugins[t]={name:t,fn:i}}initializePlugins(e){var t,i;const s=this,n=[];if(Array.isArray(e))e.forEach((e=>{"string"==typeof e?n.push(e):(s.plugins.settings[e.name]=e.options,n.push(e.name))}));else if(e)for(t in e)e.hasOwnProperty(t)&&(s.plugins.settings[t]=e[t],n.push(t));for(;i=n.shift();)s.require(i)}loadPlugin(t){var i=this,s=i.plugins,n=e.plugins[t];if(!e.plugins.hasOwnProperty(t))throw new Error('Unable to find "'+t+'" plugin');s.requested[t]=!0,s.loaded[t]=n.fn.apply(i,[i.plugins.settings[t]||{}]),s.names.push(t)}require(e){var t=this,i=t.plugins;if(!t.plugins.loaded.hasOwnProperty(e)){if(i.requested[e])throw new Error('Plugin has circular dependency ("'+e+'")');t.loadPlugin(e)}return i.loaded[e]}}}var s;const n="[̀-ͯ·ʾ]",r=new RegExp(n,"g");var o;const a={æ:"ae",ⱥ:"a",ø:"o"},l=new RegExp(Object.keys(a).join("|"),"g"),c=[[67,67],[160,160],[192,438],[452,652],[961,961],[1019,1019],[1083,1083],[1281,1289],[1984,1984],[5095,5095],[7429,7441],[7545,7549],[7680,7935],[8580,8580],[9398,9449],[11360,11391],[42792,42793],[42802,42851],[42873,42897],[42912,42922],[64256,64260],[65313,65338],[65345,65370]],d=e=>e.normalize("NFKD").replace(r,"").toLowerCase().replace(l,(function(e){return a[e]})),u=(e,t="|")=>{if(1==e.length)return e[0];var i=1;return e.forEach((e=>{i=Math.max(i,e.length)})),1==i?"["+e.join("")+"]":"(?:"+e.join(t)+")"},h=e=>{if(1===e.length)return[[e]];var t=[];return h(e.substring(1)).forEach((function(i){var s=i.slice(0);s[0]=e.charAt(0)+s[0],t.push(s),(s=i.slice(0)).unshift(e.charAt(0)),t.push(s)})),t},p=()=>{var e={};c.forEach((t=>{for(let s=t[0];s<=t[1];s++){let t=String.fromCharCode(s),n=d(t);if(n!=t.toLowerCase()){n in e||(e[n]=[n]);var i=new RegExp(u(e[n]),"iu");t.match(i)||e[n].push(t)}}}));var t=Object.keys(e);t=t.sort(((e,t)=>t.length-e.length)),s=new RegExp("("+u(t)+n+"*)","g");var i={};return t.sort(((e,t)=>e.length-t.length)).forEach((t=>{var s=h(t).map((t=>(t=t.map((t=>e.hasOwnProperty(t)?u(e[t]):t)),u(t,""))));i[t]=u(s)})),i},m=e=>(void 0===o&&(o=p()),e.normalize("NFKD").toLowerCase().split(s).map((e=>{if(""==e)return"";const t=d(e);if(o.hasOwnProperty(t))return o[t];const i=e.normalize("NFC");return i!=e?u([e,i]):e})).join("")),g=(e,t)=>{if(e)return e[t]},f=(e,t)=>{if(e){for(var i,s=t.split(".");(i=s.shift())&&(e=e[i]););return e}},v=(e,t,i)=>{var s,n;return e?-1===(n=(e+="").search(t.regex))?0:(s=t.string.length/e.length,0===n&&(s+=.5),s*i):0},b=e=>(e+"").replace(/([\$\(-\+\.\?\[-\^\{-\}])/g,"\\$1"),y=(e,t)=>{var i=e[t];if("function"==typeof i)return i;i&&!Array.isArray(i)&&(e[t]=[i])},w=(e,t)=>{if(Array.isArray(e))e.forEach(t);else for(var i in e)e.hasOwnProperty(i)&&t(e[i],i)},S=(e,t)=>"number"==typeof e&&"number"==typeof t?e>t?1:e<t?-1:0:(e=d(e+"").toLowerCase())>(t=d(t+"").toLowerCase())?1:t>e?-1:0;class E{constructor(e,t){this.items=e,this.settings=t||{diacritics:!0}}tokenize(e,t,i){if(!e||!e.length)return[];const s=[],n=e.split(/\s+/);var r;return i&&(r=new RegExp("^("+Object.keys(i).map(b).join("|")+"):(.*)$")),n.forEach((e=>{let i,n=null,o=null;r&&(i=e.match(r))&&(n=i[1],e=i[2]),e.length>0&&(o=b(e),this.settings.diacritics&&(o=m(o)),t&&(o="\\b"+o)),s.push({string:e,regex:o?new RegExp(o,"iu"):null,field:n})})),s}getScoreFunction(e,t){var i=this.prepareSearch(e,t);return this._getScoreFunction(i)}_getScoreFunction(e){const t=e.tokens,i=t.length;if(!i)return function(){return 0};const s=e.options.fields,n=e.weights,r=s.length,o=e.getAttrFn;if(!r)return function(){return 1};const a=1===r?function(e,t){const i=s[0].field;return v(o(t,i),e,n[i])}:function(e,t){var i=0;if(e.field){const s=o(t,e.field);!e.regex&&s?i+=1/r:i+=v(s,e,1)}else w(n,((s,n)=>{i+=v(o(t,n),e,s)}));return i/r};return 1===i?function(e){return a(t[0],e)}:"and"===e.options.conjunction?function(e){for(var s,n=0,r=0;n<i;n++){if((s=a(t[n],e))<=0)return 0;r+=s}return r/i}:function(e){var s=0;return w(t,(t=>{s+=a(t,e)})),s/i}}getSortFunction(e,t){var i=this.prepareSearch(e,t);return this._getSortFunction(i)}_getSortFunction(e){var t,i,s;const n=this,r=e.options,o=!e.query&&r.sort_empty?r.sort_empty:r.sort,a=[],l=[];if("function"==typeof o)return o.bind(this);const c=function(t,i){return"$score"===t?i.score:e.getAttrFn(n.items[i.id],t)};if(o)for(t=0,i=o.length;t<i;t++)(e.query||"$score"!==o[t].field)&&a.push(o[t]);if(e.query){for(s=!0,t=0,i=a.length;t<i;t++)if("$score"===a[t].field){s=!1;break}s&&a.unshift({field:"$score",direction:"desc"})}else for(t=0,i=a.length;t<i;t++)if("$score"===a[t].field){a.splice(t,1);break}for(t=0,i=a.length;t<i;t++)l.push("desc"===a[t].direction?-1:1);const d=a.length;if(d){if(1===d){const e=a[0].field,t=l[0];return function(i,s){return t*S(c(e,i),c(e,s))}}return function(e,t){var i,s,n;for(i=0;i<d;i++)if(n=a[i].field,s=l[i]*S(c(n,e),c(n,t)))return s;return 0}}return null}prepareSearch(e,t){const i={};var s=Object.assign({},t);if(y(s,"sort"),y(s,"sort_empty"),s.fields){y(s,"fields");const e=[];s.fields.forEach((t=>{"string"==typeof t&&(t={field:t,weight:1}),e.push(t),i[t.field]="weight"in t?t.weight:1})),s.fields=e}return{options:s,query:e.toLowerCase().trim(),tokens:this.tokenize(e,s.respect_word_boundaries,i),total:0,items:[],weights:i,getAttrFn:s.nesting?f:g}}search(e,t){var i,s,n=this;s=this.prepareSearch(e,t),t=s.options,e=s.query;const r=t.score||n._getScoreFunction(s);e.length?w(n.items,((e,n)=>{i=r(e),(!1===t.filter||i>0)&&s.items.push({score:i,id:n})})):w(n.items,((e,t)=>{s.items.push({score:1,id:t})}));const o=n._getSortFunction(s);return o&&s.items.sort(o),s.total=s.items.length,"number"==typeof t.limit&&(s.items=s.items.slice(0,t.limit)),s}}const O=e=>{if(e.jquery)return e[0];if(e instanceof HTMLElement)return e;if(x(e)){let t=document.createElement("div");return t.innerHTML=e.trim(),t.firstChild}return document.querySelector(e)},x=e=>"string"==typeof e&&e.indexOf("<")>-1,C=e=>e.replace(/['"\\]/g,"\\$&"),_=(e,t)=>{var i=document.createEvent("HTMLEvents");i.initEvent(t,!0,!1),e.dispatchEvent(i)},k=(e,t)=>{Object.assign(e.style,t)},A=(e,...t)=>{var i=I(t);(e=P(e)).map((e=>{i.map((t=>{e.classList.add(t)}))}))},L=(e,...t)=>{var i=I(t);(e=P(e)).map((e=>{i.map((t=>{e.classList.remove(t)}))}))},I=e=>{var t=[];return w(e,(e=>{"string"==typeof e&&(e=e.trim().split(/[\11\12\14\15\40]/)),Array.isArray(e)&&(t=t.concat(e))})),t.filter(Boolean)},P=e=>(Array.isArray(e)||(e=[e]),e),T=(e,t,i)=>{if(!i||i.contains(e))for(;e&&e.matches;){if(e.matches(t))return e;e=e.parentNode}},R=(e,t=0)=>t>0?e[e.length-1]:e[0],F=e=>0===Object.keys(e).length,M=(e,t)=>{if(!e)return-1;t=t||e.nodeName;for(var i=0;e=e.previousElementSibling;)e.matches(t)&&i++;return i},q=(e,t)=>{w(t,((t,i)=>{null==t?e.removeAttribute(i):e.setAttribute(i,""+t)}))},j=(e,t)=>{e.parentNode&&e.parentNode.replaceChild(t,e)},D=(e,t)=>{if(null===t)return;if("string"==typeof t){if(!t.length)return;t=new RegExp(t,"i")}const i=e=>{var i=e.data.match(t);if(i&&e.data.length>0){var s=document.createElement("span");s.className="highlight";var n=e.splitText(i.index);n.splitText(i[0].length);var r=n.cloneNode(!0);return s.appendChild(r),j(n,s),1}return 0},s=e=>{if(1===e.nodeType&&e.childNodes&&!/(script|style)/i.test(e.tagName)&&("highlight"!==e.className||"SPAN"!==e.tagName))for(var t=0;t<e.childNodes.length;++t)t+=n(e.childNodes[t])},n=e=>3===e.nodeType?i(e):(s(e),0);n(e)},H=e=>{var t=e.querySelectorAll("span.highlight");Array.prototype.forEach.call(t,(function(e){var t=e.parentNode;t.replaceChild(e.firstChild,e),t.normalize()}))},N=65,B=13,V=27,z=37,U=38,W=39,K=40,Q=8,G=46,J=9,X="undefined"!=typeof navigator&&/Mac/.test(navigator.userAgent)?"metaKey":"ctrlKey";var Y={options:[],optgroups:[],plugins:[],delimiter:",",splitOn:null,persist:!0,diacritics:!0,create:null,createOnBlur:!1,createFilter:null,highlight:!0,openOnFocus:!0,shouldOpen:null,maxOptions:50,maxItems:null,hideSelected:null,duplicates:!1,addPrecedence:!1,selectOnTab:!1,preload:null,allowEmptyOption:!1,loadThrottle:300,loadingClass:"loading",dataAttr:null,optgroupField:"optgroup",valueField:"value",labelField:"text",disabledField:"disabled",optgroupLabelField:"label",optgroupValueField:"value",lockOptgroupOrder:!1,sortField:"$order",searchField:["text"],searchConjunction:"and",mode:null,wrapperClass:"ts-wrapper",controlClass:"ts-control",dropdownClass:"ts-dropdown",dropdownContentClass:"ts-dropdown-content",itemClass:"item",optionClass:"option",dropdownParent:null,controlInput:'<input type="text" autocomplete="off" size="1" />',copyClassesToDropdown:!1,placeholder:null,hidePlaceholder:null,shouldLoad:function(e){return e.length>0},render:{}};const Z=e=>null==e?null:ee(e),ee=e=>"boolean"==typeof e?e?"1":"0":e+"",te=e=>(e+"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"),ie=(e,t)=>{var i;return function(s,n){var r=this;i&&(r.loading=Math.max(r.loading-1,0),clearTimeout(i)),i=setTimeout((function(){i=null,r.loadedSearches[s]=!0,e.call(r,s,n)}),t)}},se=(e,t,i)=>{var s,n=e.trigger,r={};for(s of(e.trigger=function(){var i=arguments[0];if(-1===t.indexOf(i))return n.apply(e,arguments);r[i]=arguments},i.apply(e,[]),e.trigger=n,t))s in r&&n.apply(e,r[s])},ne=e=>({start:e.selectionStart||0,length:(e.selectionEnd||0)-(e.selectionStart||0)}),re=(e,t=!1)=>{e&&(e.preventDefault(),t&&e.stopPropagation())},oe=(e,t,i,s)=>{e.addEventListener(t,i,s)},ae=(e,t)=>!!t&&!!t[e]&&1==(t.altKey?1:0)+(t.ctrlKey?1:0)+(t.shiftKey?1:0)+(t.metaKey?1:0),le=(e,t)=>{const i=e.getAttribute("id");return i||(e.setAttribute("id",t),t)},ce=e=>e.replace(/[\\"']/g,"\\$&"),de=(e,t)=>{t&&e.append(t)};function ue(e,t){var i=Object.assign({},Y,t),s=i.dataAttr,n=i.labelField,r=i.valueField,o=i.disabledField,a=i.optgroupField,l=i.optgroupLabelField,c=i.optgroupValueField,d=e.tagName.toLowerCase(),u=e.getAttribute("placeholder")||e.getAttribute("data-placeholder");if(!u&&!i.allowEmptyOption){let t=e.querySelector('option[value=""]');t&&(u=t.textContent)}var h,p,m,g,f,v,b,y={placeholder:u,options:[],optgroups:[],items:[],maxItems:null},S=()=>{const t=e.getAttribute(s);if(t)y.options=JSON.parse(t),w(y.options,(e=>{y.items.push(e[r])}));else{var o=e.value.trim()||"";if(!i.allowEmptyOption&&!o.length)return;const t=o.split(i.delimiter);w(t,(e=>{const t={};t[n]=e,t[r]=e,y.options.push(t)})),y.items=t}};return"select"===d?(p=y.options,m={},g=1,f=e=>{var t=Object.assign({},e.dataset),i=s&&t[s];return"string"==typeof i&&i.length&&(t=Object.assign(t,JSON.parse(i))),t},v=(e,t)=>{var s=Z(e.value);if(null!=s&&(s||i.allowEmptyOption)){if(m.hasOwnProperty(s)){if(t){var l=m[s][a];l?Array.isArray(l)?l.push(t):m[s][a]=[l,t]:m[s][a]=t}}else{var c=f(e);c[n]=c[n]||e.textContent,c[r]=c[r]||s,c[o]=c[o]||e.disabled,c[a]=c[a]||t,c.$option=e,m[s]=c,p.push(c)}e.selected&&y.items.push(s)}},b=e=>{var t,i;(i=f(e))[l]=i[l]||e.getAttribute("label")||"",i[c]=i[c]||g++,i[o]=i[o]||e.disabled,y.optgroups.push(i),t=i[c],w(e.children,(e=>{v(e,t)}))},y.maxItems=e.hasAttribute("multiple")?null:1,w(e.children,(e=>{"optgroup"===(h=e.tagName.toLowerCase())?b(e):"option"===h&&v(e)}))):S(),Object.assign({},Y,y,t)}var he=0;class pe extends(i(t)){constructor(e,t){var i;super(),this.order=0,this.isOpen=!1,this.isDisabled=!1,this.isInvalid=!1,this.isValid=!0,this.isLocked=!1,this.isFocused=!1,this.isInputHidden=!1,this.isSetup=!1,this.ignoreFocus=!1,this.hasOptions=!1,this.lastValue="",this.caretPos=0,this.loading=0,this.loadedSearches={},this.activeOption=null,this.activeItems=[],this.optgroups={},this.options={},this.userOptions={},this.items=[],he++;var s=O(e);if(s.tomselect)throw new Error("Tom Select already initialized on this element");s.tomselect=this,i=(window.getComputedStyle&&window.getComputedStyle(s,null)).getPropertyValue("direction");const n=ue(s,t);this.settings=n,this.input=s,this.tabIndex=s.tabIndex||0,this.is_select_tag="select"===s.tagName.toLowerCase(),this.rtl=/rtl/i.test(i),this.inputId=le(s,"tomselect-"+he),this.isRequired=s.required,this.sifter=new E(this.options,{diacritics:n.diacritics}),n.mode=n.mode||(1===n.maxItems?"single":"multi"),"boolean"!=typeof n.hideSelected&&(n.hideSelected="multi"===n.mode),"boolean"!=typeof n.hidePlaceholder&&(n.hidePlaceholder="multi"!==n.mode);var r=n.createFilter;"function"!=typeof r&&("string"==typeof r&&(r=new RegExp(r)),r instanceof RegExp?n.createFilter=e=>r.test(e):n.createFilter=()=>!0),this.initializePlugins(n.plugins),this.setupCallbacks(),this.setupTemplates();const o=O("<div>"),a=O("<div>"),l=this._render("dropdown"),c=O('<div role="listbox" tabindex="-1">'),d=this.input.getAttribute("class")||"",u=n.mode;var h;A(o,n.wrapperClass,d,u),A(a,n.controlClass),de(o,a),A(l,n.dropdownClass,u),n.copyClassesToDropdown&&A(l,d),A(c,n.dropdownContentClass),de(l,c),O(n.dropdownParent||o).appendChild(l),x(n.controlInput)?(h=O(n.controlInput),w(["autocorrect","autocapitalize","autocomplete"],(e=>{s.getAttribute(e)&&q(h,{[e]:s.getAttribute(e)})})),h.tabIndex=-1,a.appendChild(h),this.focus_node=h):n.controlInput?(h=O(n.controlInput),this.focus_node=h):(h=O("<input/>"),this.focus_node=a),this.wrapper=o,this.dropdown=l,this.dropdown_content=c,this.control=a,this.control_input=h,this.setup()}setup(){const e=this,t=e.settings,i=e.control_input,s=e.dropdown,n=e.dropdown_content,r=e.wrapper,o=e.control,a=e.input,l=e.focus_node,c={passive:!0},d=e.inputId+"-ts-dropdown";q(n,{id:d}),q(l,{role:"combobox","aria-haspopup":"listbox","aria-expanded":"false","aria-controls":d});const u=le(l,e.inputId+"-ts-control"),h="label[for='"+C(e.inputId)+"']",p=document.querySelector(h),m=e.focus.bind(e);if(p){oe(p,"click",m),q(p,{for:u});const t=le(p,e.inputId+"-ts-label");q(l,{"aria-labelledby":t}),q(n,{"aria-labelledby":t})}if(r.style.width=a.style.width,e.plugins.names.length){const t="plugin-"+e.plugins.names.join(" plugin-");A([r,s],t)}(null===t.maxItems||t.maxItems>1)&&e.is_select_tag&&q(a,{multiple:"multiple"}),e.settings.placeholder&&q(i,{placeholder:t.placeholder}),!e.settings.splitOn&&e.settings.delimiter&&(e.settings.splitOn=new RegExp("\\s*"+b(e.settings.delimiter)+"+\\s*")),t.load&&t.loadThrottle&&(t.load=ie(t.load,t.loadThrottle)),e.control_input.type=a.type,oe(s,"click",(t=>{const i=T(t.target,"[data-selectable]");i&&(e.onOptionSelect(t,i),re(t,!0))})),oe(o,"click",(t=>{var s=T(t.target,"[data-ts-item]",o);s&&e.onItemSelect(t,s)?re(t,!0):""==i.value&&(e.onClick(),re(t,!0))})),oe(l,"keydown",(t=>e.onKeyDown(t))),oe(i,"keypress",(t=>e.onKeyPress(t))),oe(i,"input",(t=>e.onInput(t))),oe(l,"resize",(()=>e.positionDropdown()),c),oe(l,"blur",(t=>e.onBlur(t))),oe(l,"focus",(t=>e.onFocus(t))),oe(l,"paste",(t=>e.onPaste(t)));const g=t=>{const n=t.composedPath()[0];if(!r.contains(n)&&!s.contains(n))return e.isFocused&&e.blur(),void e.inputState();n==i&&e.isOpen?t.stopPropagation():re(t,!0)};var f=()=>{e.isOpen&&e.positionDropdown()};oe(document,"mousedown",g),oe(window,"scroll",f,c),oe(window,"resize",f,c),this._destroy=()=>{document.removeEventListener("mousedown",g),window.removeEventListener("sroll",f),window.removeEventListener("resize",f),p&&p.removeEventListener("click",m)},this.revertSettings={innerHTML:a.innerHTML,tabIndex:a.tabIndex},a.tabIndex=-1,a.insertAdjacentElement("afterend",e.wrapper),e.sync(!1),t.items=[],delete t.optgroups,delete t.options,oe(a,"invalid",(t=>{e.isValid&&(e.isValid=!1,e.isInvalid=!0,e.refreshState())})),e.updateOriginalInput(),e.refreshItems(),e.close(!1),e.inputState(),e.isSetup=!0,a.disabled?e.disable():e.enable(),e.on("change",this.onChange),A(a,"tomselected","ts-hidden-accessible"),e.trigger("initialize"),!0===t.preload&&e.preload()}setupOptions(e=[],t=[]){this.addOptions(e),w(t,(e=>{this.registerOptionGroup(e)}))}setupTemplates(){var e=this,t=e.settings.labelField,i=e.settings.optgroupLabelField,s={optgroup:e=>{let t=document.createElement("div");return t.className="optgroup",t.appendChild(e.options),t},optgroup_header:(e,t)=>'<div class="optgroup-header">'+t(e[i])+"</div>",option:(e,i)=>"<div>"+i(e[t])+"</div>",item:(e,i)=>"<div>"+i(e[t])+"</div>",option_create:(e,t)=>'<div class="create">Add <strong>'+t(e.input)+"</strong>&hellip;</div>",no_results:()=>'<div class="no-results">No results found</div>',loading:()=>'<div class="spinner"></div>',not_loading:()=>{},dropdown:()=>"<div></div>"};e.settings.render=Object.assign({},s,e.settings.render)}setupCallbacks(){var e,t,i={initialize:"onInitialize",change:"onChange",item_add:"onItemAdd",item_remove:"onItemRemove",item_select:"onItemSelect",clear:"onClear",option_add:"onOptionAdd",option_remove:"onOptionRemove",option_clear:"onOptionClear",optgroup_add:"onOptionGroupAdd",optgroup_remove:"onOptionGroupRemove",optgroup_clear:"onOptionGroupClear",dropdown_open:"onDropdownOpen",dropdown_close:"onDropdownClose",type:"onType",load:"onLoad",focus:"onFocus",blur:"onBlur"};for(e in i)(t=this.settings[i[e]])&&this.on(e,t)}sync(e=!0){const t=this,i=e?ue(t.input,{delimiter:t.settings.delimiter}):t.settings;t.setupOptions(i.options,i.optgroups),t.setValue(i.items,!0),t.lastQuery=null}onClick(){var e=this;if(e.activeItems.length>0)return e.clearActiveItems(),void e.focus();e.isFocused&&e.isOpen?e.blur():e.focus()}onMouseDown(){}onChange(){_(this.input,"input"),_(this.input,"change")}onPaste(e){var t=this;t.isInputHidden||t.isLocked?re(e):t.settings.splitOn&&setTimeout((()=>{var e=t.inputValue();if(e.match(t.settings.splitOn)){var i=e.trim().split(t.settings.splitOn);w(i,(e=>{t.createItem(e)}))}}),0)}onKeyPress(e){var t=this;if(!t.isLocked){var i=String.fromCharCode(e.keyCode||e.which);return t.settings.create&&"multi"===t.settings.mode&&i===t.settings.delimiter?(t.createItem(),void re(e)):void 0}re(e)}onKeyDown(e){var t=this;if(t.isLocked)e.keyCode!==J&&re(e);else{switch(e.keyCode){case N:if(ae(X,e)&&""==t.control_input.value)return re(e),void t.selectAll();break;case V:return t.isOpen&&(re(e,!0),t.close()),void t.clearActiveItems();case K:if(!t.isOpen&&t.hasOptions)t.open();else if(t.activeOption){let e=t.getAdjacent(t.activeOption,1);e&&t.setActiveOption(e)}return void re(e);case U:if(t.activeOption){let e=t.getAdjacent(t.activeOption,-1);e&&t.setActiveOption(e)}return void re(e);case B:return void(t.canSelect(t.activeOption)?(t.onOptionSelect(e,t.activeOption),re(e)):t.settings.create&&t.createItem()&&re(e));case z:return void t.advanceSelection(-1,e);case W:return void t.advanceSelection(1,e);case J:return void(t.settings.selectOnTab&&(t.canSelect(t.activeOption)&&(t.onOptionSelect(e,t.activeOption),re(e)),t.settings.create&&t.createItem()&&re(e)));case Q:case G:return void t.deleteSelection(e)}t.isInputHidden&&!ae(X,e)&&re(e)}}onInput(e){var t=this;if(!t.isLocked){var i=t.inputValue();t.lastValue!==i&&(t.lastValue=i,t.settings.shouldLoad.call(t,i)&&t.load(i),t.refreshOptions(),t.trigger("type",i))}}onFocus(e){var t=this,i=t.isFocused;if(t.isDisabled)return t.blur(),void re(e);t.ignoreFocus||(t.isFocused=!0,"focus"===t.settings.preload&&t.preload(),i||t.trigger("focus"),t.activeItems.length||(t.showInput(),t.refreshOptions(!!t.settings.openOnFocus)),t.refreshState())}onBlur(e){if(!1!==document.hasFocus()){var t=this;if(t.isFocused){t.isFocused=!1,t.ignoreFocus=!1;var i=()=>{t.close(),t.setActiveItem(),t.setCaret(t.items.length),t.trigger("blur")};t.settings.create&&t.settings.createOnBlur?t.createItem(null,!1,i):i()}}}onOptionSelect(e,t){var i,s=this;t.parentElement&&t.parentElement.matches("[data-disabled]")||(t.classList.contains("create")?s.createItem(null,!0,(()=>{s.settings.closeAfterSelect&&s.close()})):void 0!==(i=t.dataset.value)&&(s.lastQuery=null,s.addItem(i),s.settings.closeAfterSelect&&s.close(),!s.settings.hideSelected&&e.type&&/click/.test(e.type)&&s.setActiveOption(t)))}canSelect(e){return!!(this.isOpen&&e&&this.dropdown_content.contains(e))}onItemSelect(e,t){var i=this;return!i.isLocked&&"multi"===i.settings.mode&&(re(e),i.setActiveItem(t,e),!0)}canLoad(e){return!!this.settings.load&&!this.loadedSearches.hasOwnProperty(e)}load(e){const t=this;if(!t.canLoad(e))return;A(t.wrapper,t.settings.loadingClass),t.loading++;const i=t.loadCallback.bind(t);t.settings.load.call(t,e,i)}loadCallback(e,t){const i=this;i.loading=Math.max(i.loading-1,0),i.lastQuery=null,i.clearActiveOption(),i.setupOptions(e,t),i.refreshOptions(i.isFocused&&!i.isInputHidden),i.loading||L(i.wrapper,i.settings.loadingClass),i.trigger("load",e,t)}preload(){var e=this.wrapper.classList;e.contains("preloaded")||(e.add("preloaded"),this.load(""))}setTextboxValue(e=""){var t=this.control_input;t.value!==e&&(t.value=e,_(t,"update"),this.lastValue=e)}getValue(){return this.is_select_tag&&this.input.hasAttribute("multiple")?this.items:this.items.join(this.settings.delimiter)}setValue(e,t){se(this,t?[]:["change"],(()=>{this.clear(t),this.addItems(e,t)}))}setMaxItems(e){0===e&&(e=null),this.settings.maxItems=e,this.refreshState()}setActiveItem(e,t){var i,s,n,r,o,a,l=this;if("single"!==l.settings.mode){if(!e)return l.clearActiveItems(),void(l.isFocused&&l.showInput());if("click"===(i=t&&t.type.toLowerCase())&&ae("shiftKey",t)&&l.activeItems.length){for(a=l.getLastActive(),(n=Array.prototype.indexOf.call(l.control.children,a))>(r=Array.prototype.indexOf.call(l.control.children,e))&&(o=n,n=r,r=o),s=n;s<=r;s++)e=l.control.children[s],-1===l.activeItems.indexOf(e)&&l.setActiveItemClass(e);re(t)}else"click"===i&&ae(X,t)||"keydown"===i&&ae("shiftKey",t)?e.classList.contains("active")?l.removeActiveItem(e):l.setActiveItemClass(e):(l.clearActiveItems(),l.setActiveItemClass(e));l.hideInput(),l.isFocused||l.focus()}}setActiveItemClass(e){const t=this,i=t.control.querySelector(".last-active");i&&L(i,"last-active"),A(e,"active last-active"),t.trigger("item_select",e),-1==t.activeItems.indexOf(e)&&t.activeItems.push(e)}removeActiveItem(e){var t=this.activeItems.indexOf(e);this.activeItems.splice(t,1),L(e,"active")}clearActiveItems(){L(this.activeItems,"active"),this.activeItems=[]}setActiveOption(e){e!==this.activeOption&&(this.clearActiveOption(),e&&(this.activeOption=e,q(this.focus_node,{"aria-activedescendant":e.getAttribute("id")}),q(e,{"aria-selected":"true"}),A(e,"active"),this.scrollToOption(e)))}scrollToOption(e,t){if(!e)return;const i=this.dropdown_content,s=i.clientHeight,n=i.scrollTop||0,r=e.offsetHeight,o=e.getBoundingClientRect().top-i.getBoundingClientRect().top+n;o+r>s+n?this.scroll(o-s+r,t):o<n&&this.scroll(o,t)}scroll(e,t){const i=this.dropdown_content;t&&(i.style.scrollBehavior=t),i.scrollTop=e,i.style.scrollBehavior=""}clearActiveOption(){this.activeOption&&(L(this.activeOption,"active"),q(this.activeOption,{"aria-selected":null})),this.activeOption=null,q(this.focus_node,{"aria-activedescendant":null})}selectAll(){if("single"===this.settings.mode)return;const e=this.controlChildren();e.length&&(this.hideInput(),this.close(),this.activeItems=e,A(e,"active"))}inputState(){var e=this;e.control.contains(e.control_input)&&(q(e.control_input,{placeholder:e.settings.placeholder}),e.activeItems.length>0||!e.isFocused&&e.settings.hidePlaceholder&&e.items.length>0?(e.setTextboxValue(),e.isInputHidden=!0):(e.settings.hidePlaceholder&&e.items.length>0&&q(e.control_input,{placeholder:""}),e.isInputHidden=!1),e.wrapper.classList.toggle("input-hidden",e.isInputHidden))}hideInput(){this.inputState()}showInput(){this.inputState()}inputValue(){return this.control_input.value.trim()}focus(){var e=this;e.isDisabled||(e.ignoreFocus=!0,e.control_input.offsetWidth?e.control_input.focus():e.focus_node.focus(),setTimeout((()=>{e.ignoreFocus=!1,e.onFocus()}),0))}blur(){this.focus_node.blur(),this.onBlur()}getScoreFunction(e){return this.sifter.getScoreFunction(e,this.getSearchOptions())}getSearchOptions(){var e=this.settings,t=e.sortField;return"string"==typeof e.sortField&&(t=[{field:e.sortField}]),{fields:e.searchField,conjunction:e.searchConjunction,sort:t,nesting:e.nesting}}search(e){var t,i,s,n=this,r=this.getSearchOptions();if(n.settings.score&&"function"!=typeof(s=n.settings.score.call(n,e)))throw new Error('Tom Select "score" setting must be a function that returns a function');if(e!==n.lastQuery?(n.lastQuery=e,i=n.sifter.search(e,Object.assign(r,{score:s})),n.currentResults=i):i=Object.assign({},n.currentResults),n.settings.hideSelected)for(t=i.items.length-1;t>=0;t--){let e=Z(i.items[t].id);e&&-1!==n.items.indexOf(e)&&i.items.splice(t,1)}return i}refreshOptions(e=!0){var t,i,s,n,r,o,a,l,c,d,u;const h={},p=[];var m=this,g=m.inputValue(),f=m.search(g),v=m.activeOption,b=m.settings.shouldOpen||!1,y=m.dropdown_content;for(v&&(c=v.dataset.value,d=v.closest("[data-group]")),n=f.items.length,"number"==typeof m.settings.maxOptions&&(n=Math.min(n,m.settings.maxOptions)),n>0&&(b=!0),t=0;t<n;t++){let e=f.items[t].id,n=m.options[e],a=m.getOption(e,!0);for(m.settings.hideSelected||a.classList.toggle("selected",m.items.includes(e)),r=n[m.settings.optgroupField]||"",i=0,s=(o=Array.isArray(r)?r:[r])&&o.length;i<s;i++)r=o[i],m.optgroups.hasOwnProperty(r)||(r=""),h.hasOwnProperty(r)||(h[r]=document.createDocumentFragment(),p.push(r)),i>0&&(a=a.cloneNode(!0),q(a,{id:n.$id+"-clone-"+i,"aria-selected":null}),a.classList.add("ts-cloned"),L(a,"active")),c==e&&d&&d.dataset.group===r&&(v=a),h[r].appendChild(a)}this.settings.lockOptgroupOrder&&p.sort(((e,t)=>(m.optgroups[e]&&m.optgroups[e].$order||0)-(m.optgroups[t]&&m.optgroups[t].$order||0))),a=document.createDocumentFragment(),w(p,(e=>{if(m.optgroups.hasOwnProperty(e)&&h[e].children.length){let t=document.createDocumentFragment(),i=m.render("optgroup_header",m.optgroups[e]);de(t,i),de(t,h[e]);let s=m.render("optgroup",{group:m.optgroups[e],options:t});de(a,s)}else de(a,h[e])})),y.innerHTML="",de(y,a),m.settings.highlight&&(H(y),f.query.length&&f.tokens.length&&w(f.tokens,(e=>{D(y,e.regex)})));var S=e=>{let t=m.render(e,{input:g});return t&&(b=!0,y.insertBefore(t,y.firstChild)),t};if(m.loading?S("loading"):m.settings.shouldLoad.call(m,g)?0===f.items.length&&S("no_results"):S("not_loading"),(l=m.canCreate(g))&&(u=S("option_create")),m.hasOptions=f.items.length>0||l,b){if(f.items.length>0){if(!y.contains(v)&&"single"===m.settings.mode&&m.items.length&&(v=m.getOption(m.items[0])),!y.contains(v)){let e=0;u&&!m.settings.addPrecedence&&(e=1),v=m.selectable()[e]}}else u&&(v=u);e&&!m.isOpen&&(m.open(),m.scrollToOption(v,"auto")),m.setActiveOption(v)}else m.clearActiveOption(),e&&m.isOpen&&m.close(!1)}selectable(){return this.dropdown_content.querySelectorAll("[data-selectable]")}addOption(e,t=!1){const i=this;if(Array.isArray(e))return i.addOptions(e,t),!1;const s=Z(e[i.settings.valueField]);return null!==s&&!i.options.hasOwnProperty(s)&&(e.$order=e.$order||++i.order,e.$id=i.inputId+"-opt-"+e.$order,i.options[s]=e,i.lastQuery=null,t&&(i.userOptions[s]=t,i.trigger("option_add",s,e)),s)}addOptions(e,t=!1){w(e,(e=>{this.addOption(e,t)}))}registerOption(e){return this.addOption(e)}registerOptionGroup(e){var t=Z(e[this.settings.optgroupValueField]);return null!==t&&(e.$order=e.$order||++this.order,this.optgroups[t]=e,t)}addOptionGroup(e,t){var i;t[this.settings.optgroupValueField]=e,(i=this.registerOptionGroup(t))&&this.trigger("optgroup_add",i,t)}removeOptionGroup(e){this.optgroups.hasOwnProperty(e)&&(delete this.optgroups[e],this.clearCache(),this.trigger("optgroup_remove",e))}clearOptionGroups(){this.optgroups={},this.clearCache(),this.trigger("optgroup_clear")}updateOption(e,t){const i=this;var s,n;const r=Z(e),o=Z(t[i.settings.valueField]);if(null===r)return;if(!i.options.hasOwnProperty(r))return;if("string"!=typeof o)throw new Error("Value must be set in option data");const a=i.getOption(r),l=i.getItem(r);if(t.$order=t.$order||i.options[r].$order,delete i.options[r],i.uncacheValue(o),i.options[o]=t,a){if(i.dropdown_content.contains(a)){const e=i._render("option",t);j(a,e),i.activeOption===a&&i.setActiveOption(e)}a.remove()}l&&(-1!==(n=i.items.indexOf(r))&&i.items.splice(n,1,o),s=i._render("item",t),l.classList.contains("active")&&A(s,"active"),j(l,s)),i.lastQuery=null}removeOption(e,t){const i=this;e=ee(e),i.uncacheValue(e),delete i.userOptions[e],delete i.options[e],i.lastQuery=null,i.trigger("option_remove",e),i.removeItem(e,t)}clearOptions(){this.loadedSearches={},this.userOptions={},this.clearCache();var e={};w(this.options,((t,i)=>{this.items.indexOf(i)>=0&&(e[i]=this.options[i])})),this.options=this.sifter.items=e,this.lastQuery=null,this.trigger("option_clear")}getOption(e,t=!1){const i=Z(e);if(null!==i&&this.options.hasOwnProperty(i)){const e=this.options[i];if(e.$div)return e.$div;if(t)return this._render("option",e)}return null}getAdjacent(e,t,i="option"){var s,n=this;if(!e)return null;s="item"==i?n.controlChildren():n.dropdown_content.querySelectorAll("[data-selectable]");for(let i=0;i<s.length;i++)if(s[i]==e)return t>0?s[i+1]:s[i-1];return null}getItem(e){if("object"==typeof e)return e;var t=Z(e);return null!==t?this.control.querySelector(`[data-value="${ce(t)}"]`):null}addItems(e,t){var i=this,s=Array.isArray(e)?e:[e];for(let e=0,n=(s=s.filter((e=>-1===i.items.indexOf(e)))).length;e<n;e++)i.isPending=e<n-1,i.addItem(s[e],t)}addItem(e,t){se(this,t?[]:["change","dropdown_close"],(()=>{var i,s;const n=this,r=n.settings.mode,o=Z(e);if((!o||-1===n.items.indexOf(o)||("single"===r&&n.close(),"single"!==r&&n.settings.duplicates))&&null!==o&&n.options.hasOwnProperty(o)&&("single"===r&&n.clear(t),"multi"!==r||!n.isFull())){if(i=n._render("item",n.options[o]),n.control.contains(i)&&(i=i.cloneNode(!0)),s=n.isFull(),n.items.splice(n.caretPos,0,o),n.insertAtCaret(i),n.isSetup){if(!n.isPending&&n.settings.hideSelected){let e=n.getOption(o),t=n.getAdjacent(e,1);t&&n.setActiveOption(t)}n.isPending||n.settings.closeAfterSelect||n.refreshOptions(n.isFocused&&"single"!==r),0!=n.settings.closeAfterSelect&&n.isFull()?n.close():n.isPending||n.positionDropdown(),n.trigger("item_add",o,i),n.isPending||n.updateOriginalInput({silent:t})}(!n.isPending||!s&&n.isFull())&&(n.inputState(),n.refreshState())}}))}removeItem(e=null,t){const i=this;if(!(e=i.getItem(e)))return;var s,n;const r=e.dataset.value;s=M(e),e.remove(),e.classList.contains("active")&&(n=i.activeItems.indexOf(e),i.activeItems.splice(n,1),L(e,"active")),i.items.splice(s,1),i.lastQuery=null,!i.settings.persist&&i.userOptions.hasOwnProperty(r)&&i.removeOption(r,t),s<i.caretPos&&i.setCaret(i.caretPos-1),i.updateOriginalInput({silent:t}),i.refreshState(),i.positionDropdown(),i.trigger("item_remove",r,e)}createItem(e=null,t=!0,i=(()=>{})){var s,n=this,r=n.caretPos;if(e=e||n.inputValue(),!n.canCreate(e))return i(),!1;n.lock();var o=!1,a=e=>{if(n.unlock(),!e||"object"!=typeof e)return i();var t=Z(e[n.settings.valueField]);if("string"!=typeof t)return i();n.setTextboxValue(),n.addOption(e,!0),n.setCaret(r),n.addItem(t),i(e),o=!0};return s="function"==typeof n.settings.create?n.settings.create.call(this,e,a):{[n.settings.labelField]:e,[n.settings.valueField]:e},o||a(s),!0}refreshItems(){var e=this;e.lastQuery=null,e.isSetup&&e.addItems(e.items),e.updateOriginalInput(),e.refreshState()}refreshState(){const e=this;e.refreshValidityState();const t=e.isFull(),i=e.isLocked;e.wrapper.classList.toggle("rtl",e.rtl);const s=e.wrapper.classList;s.toggle("focus",e.isFocused),s.toggle("disabled",e.isDisabled),s.toggle("required",e.isRequired),s.toggle("invalid",!e.isValid),s.toggle("locked",i),s.toggle("full",t),s.toggle("input-active",e.isFocused&&!e.isInputHidden),s.toggle("dropdown-active",e.isOpen),s.toggle("has-options",F(e.options)),s.toggle("has-items",e.items.length>0)}refreshValidityState(){var e=this;e.input.checkValidity&&(e.isValid=e.input.checkValidity(),e.isInvalid=!e.isValid)}isFull(){return null!==this.settings.maxItems&&this.items.length>=this.settings.maxItems}updateOriginalInput(e={}){const t=this;var i,s;const n=t.input.querySelector('option[value=""]');if(t.is_select_tag){const r=[];function o(e,i,s){return e||(e=O('<option value="'+te(i)+'">'+te(s)+"</option>")),e!=n&&t.input.append(e),r.push(e),e.selected=!0,e}t.input.querySelectorAll("option:checked").forEach((e=>{e.selected=!1})),0==t.items.length&&"single"==t.settings.mode?o(n,"",""):t.items.forEach((e=>{i=t.options[e],s=i[t.settings.labelField]||"",r.includes(i.$option)?o(t.input.querySelector(`option[value="${ce(e)}"]:not(:checked)`),e,s):i.$option=o(i.$option,e,s)}))}else t.input.value=t.getValue();t.isSetup&&(e.silent||t.trigger("change",t.getValue()))}open(){var e=this;e.isLocked||e.isOpen||"multi"===e.settings.mode&&e.isFull()||(e.isOpen=!0,q(e.focus_node,{"aria-expanded":"true"}),e.refreshState(),k(e.dropdown,{visibility:"hidden",display:"block"}),e.positionDropdown(),k(e.dropdown,{visibility:"visible",display:"block"}),e.focus(),e.trigger("dropdown_open",e.dropdown))}close(e=!0){var t=this,i=t.isOpen;e&&(t.setTextboxValue(),"single"===t.settings.mode&&t.items.length&&t.hideInput()),t.isOpen=!1,q(t.focus_node,{"aria-expanded":"false"}),k(t.dropdown,{display:"none"}),t.settings.hideSelected&&t.clearActiveOption(),t.refreshState(),i&&t.trigger("dropdown_close",t.dropdown)}positionDropdown(){if("body"===this.settings.dropdownParent){var e=this.control,t=e.getBoundingClientRect(),i=e.offsetHeight+t.top+window.scrollY,s=t.left+window.scrollX;k(this.dropdown,{width:t.width+"px",top:i+"px",left:s+"px"})}}clear(e){var t=this;if(t.items.length){var i=t.controlChildren();w(i,(e=>{t.removeItem(e,!0)})),t.showInput(),e||t.updateOriginalInput(),t.trigger("clear")}}insertAtCaret(e){const t=this,i=t.caretPos,s=t.control;s.insertBefore(e,s.children[i]),t.setCaret(i+1)}deleteSelection(e){var t,i,s,n,r=this;t=e&&e.keyCode===Q?-1:1,i=ne(r.control_input);const o=[];if(r.activeItems.length)n=R(r.activeItems,t),s=M(n),t>0&&s++,w(r.activeItems,(e=>o.push(e)));else if((r.isFocused||"single"===r.settings.mode)&&r.items.length){const e=r.controlChildren();t<0&&0===i.start&&0===i.length?o.push(e[r.caretPos-1]):t>0&&i.start===r.inputValue().length&&o.push(e[r.caretPos])}const a=o.map((e=>e.dataset.value));if(!a.length||"function"==typeof r.settings.onDelete&&!1===r.settings.onDelete.call(r,a,e))return!1;for(re(e,!0),void 0!==s&&r.setCaret(s);o.length;)r.removeItem(o.pop());return r.showInput(),r.positionDropdown(),r.refreshOptions(!1),!0}advanceSelection(e,t){var i,s,n=this;n.rtl&&(e*=-1),n.inputValue().length||(ae(X,t)||ae("shiftKey",t)?(s=(i=n.getLastActive(e))?i.classList.contains("active")?n.getAdjacent(i,e,"item"):i:e>0?n.control_input.nextElementSibling:n.control_input.previousElementSibling)&&(s.classList.contains("active")&&n.removeActiveItem(i),n.setActiveItemClass(s)):n.moveCaret(e))}moveCaret(e){}getLastActive(e){let t=this.control.querySelector(".last-active");if(t)return t;var i=this.control.querySelectorAll(".active");return i?R(i,e):void 0}setCaret(e){this.caretPos=this.items.length}controlChildren(){return Array.from(this.control.querySelectorAll("[data-ts-item]"))}lock(){this.isLocked=!0,this.refreshState()}unlock(){this.isLocked=!1,this.refreshState()}disable(){var e=this;e.input.disabled=!0,e.control_input.disabled=!0,e.focus_node.tabIndex=-1,e.isDisabled=!0,this.close(),e.lock()}enable(){var e=this;e.input.disabled=!1,e.control_input.disabled=!1,e.focus_node.tabIndex=e.tabIndex,e.isDisabled=!1,e.unlock()}destroy(){var e=this,t=e.revertSettings;e.trigger("destroy"),e.off(),e.wrapper.remove(),e.dropdown.remove(),e.input.innerHTML=t.innerHTML,e.input.tabIndex=t.tabIndex,L(e.input,"tomselected","ts-hidden-accessible"),e._destroy(),delete e.input.tomselect}render(e,t){return"function"!=typeof this.settings.render[e]?null:this._render(e,t)}_render(e,t){var i,s,n="";const r=this;return"option"!==e&&"item"!=e||(n=ee(t[r.settings.valueField])),null==(s=r.settings.render[e].call(this,t,te))||(s=O(s),"option"===e||"option_create"===e?t[r.settings.disabledField]?q(s,{"aria-disabled":"true"}):q(s,{"data-selectable":""}):"optgroup"===e&&(i=t.group[r.settings.optgroupValueField],q(s,{"data-group":i}),t.group[r.settings.disabledField]&&q(s,{"data-disabled":""})),"option"!==e&&"item"!==e||(q(s,{"data-value":n}),"item"===e?(A(s,r.settings.itemClass),q(s,{"data-ts-item":""})):(A(s,r.settings.optionClass),q(s,{role:"option",id:t.$id}),r.options[n].$div=s))),s}clearCache(){w(this.options,((e,t)=>{e.$div&&(e.$div.remove(),delete e.$div)}))}uncacheValue(e){const t=this.getOption(e);t&&t.remove()}canCreate(e){return this.settings.create&&e.length>0&&this.settings.createFilter.call(this,e)}hook(e,t,i){var s=this,n=s[t];s[t]=function(){var t,r;return"after"===e&&(t=n.apply(s,arguments)),r=i.apply(s,arguments),"instead"===e?r:("before"===e&&(t=n.apply(s,arguments)),t)}}}function me(){oe(this.input,"change",(()=>{this.sync()}))}function ge(){var e=this,t=e.onOptionSelect;e.settings.hideSelected=!1;var i=function(e){setTimeout((()=>{var t=e.querySelector("input");e.classList.contains("selected")?t.checked=!0:t.checked=!1}),1)};e.hook("after","setupTemplates",(()=>{var t=e.settings.render.option;e.settings.render.option=(i,s)=>{var n=O(t.call(e,i,s)),r=document.createElement("input");r.addEventListener("click",(function(e){re(e)})),r.type="checkbox";const o=Z(i[e.settings.valueField]);return o&&e.items.indexOf(o)>-1&&(r.checked=!0),n.prepend(r),n}})),e.on("item_remove",(t=>{var s=e.getOption(t);s&&(s.classList.remove("selected"),i(s))})),e.hook("instead","onOptionSelect",((s,n)=>{if(n.classList.contains("selected"))return n.classList.remove("selected"),e.removeItem(n.dataset.value),e.refreshOptions(),void re(s,!0);t.call(e,s,n),i(n)}))}function fe(e){const t=this,i=Object.assign({className:"clear-button",title:"Clear All",html:e=>`<div class="${e.className}" title="${e.title}">&times;</div>`},e);t.on("initialize",(()=>{var e=O(i.html(i));e.addEventListener("click",(e=>{t.clear(),"single"===t.settings.mode&&t.settings.allowEmptyOption&&t.addItem(""),e.preventDefault(),e.stopPropagation()})),t.control.appendChild(e)}))}function ve(){var e=this;if(!$.fn.sortable)throw new Error('The "drag_drop" plugin requires jQuery UI "sortable".');if("multi"===e.settings.mode){var t=e.lock,i=e.unlock;e.hook("instead","lock",(()=>{var i=$(e.control).data("sortable");return i&&i.disable(),t.call(e)})),e.hook("instead","unlock",(()=>{var t=$(e.control).data("sortable");return t&&t.enable(),i.call(e)})),e.on("initialize",(()=>{var t=$(e.control).sortable({items:"[data-value]",forcePlaceholderSize:!0,disabled:e.isLocked,start:(e,i)=>{i.placeholder.css("width",i.helper.css("width")),t.css({overflow:"visible"})},stop:()=>{t.css({overflow:"hidden"});var i=[];t.children("[data-value]").each((function(){this.dataset.value&&i.push(this.dataset.value)})),e.setValue(i)}})}))}}function be(e){const t=this,i=Object.assign({title:"Untitled",headerClass:"dropdown-header",titleRowClass:"dropdown-header-title",labelClass:"dropdown-header-label",closeClass:"dropdown-header-close",html:e=>'<div class="'+e.headerClass+'"><div class="'+e.titleRowClass+'"><span class="'+e.labelClass+'">'+e.title+'</span><a class="'+e.closeClass+'">&times;</a></div></div>'},e);t.on("initialize",(()=>{var e=O(i.html(i)),s=e.querySelector("."+i.closeClass);s&&s.addEventListener("click",(e=>{re(e,!0),t.close()})),t.dropdown.insertBefore(e,t.dropdown.firstChild)}))}function ye(){var e=this;e.hook("instead","setCaret",(t=>{"single"!==e.settings.mode&&e.control.contains(e.control_input)?(t=Math.max(0,Math.min(e.items.length,t)))==e.caretPos||e.isPending||e.controlChildren().forEach(((i,s)=>{s<t?e.control_input.insertAdjacentElement("beforebegin",i):e.control.appendChild(i)})):t=e.items.length,e.caretPos=t})),e.hook("instead","moveCaret",(t=>{if(!e.isFocused)return;const i=e.getLastActive(t);if(i){const s=M(i);e.setCaret(t>0?s+1:s),e.setActiveItem()}else e.setCaret(e.caretPos+t)}))}function we(){var e=this;e.settings.shouldOpen=!0,e.hook("before","setup",(()=>{e.focus_node=e.control,A(e.control_input,"dropdown-input");const t=O('<div class="dropdown-input-wrap">');t.append(e.control_input),e.dropdown.insertBefore(t,e.dropdown.firstChild)})),e.on("initialize",(()=>{e.control_input.addEventListener("keydown",(t=>{switch(t.keyCode){case V:return e.isOpen&&(re(t,!0),e.close()),void e.clearActiveItems();case J:e.focus_node.tabIndex=-1}return e.onKeyDown.call(e,t)})),e.on("blur",(()=>{e.focus_node.tabIndex=e.isDisabled?-1:e.tabIndex})),e.on("dropdown_open",(()=>{e.control_input.focus()}));const t=e.onBlur;e.hook("instead","onBlur",(i=>{if(!i||i.relatedTarget!=e.control_input)return t.call(e)})),oe(e.control_input,"blur",(()=>e.onBlur())),e.hook("before","close",(()=>{e.isOpen&&e.focus_node.focus()}))}))}function Se(){var e=this;e.on("initialize",(()=>{var t=document.createElement("span"),i=e.control_input;t.style.cssText="position:absolute; top:-99999px; left:-99999px; width:auto; padding:0; white-space:pre; ",e.wrapper.appendChild(t);var s=["letterSpacing","fontSize","fontFamily","fontWeight","textTransform"];for(const e of s)t.style[e]=i.style[e];var n=()=>{e.items.length>0?(t.textContent=i.value,i.style.width=t.clientWidth+"px"):i.style.width=""};n(),e.on("update item_add item_remove",n),oe(i,"input",n),oe(i,"keyup",n),oe(i,"blur",n),oe(i,"update",n)}))}function Ee(){var e=this,t=e.deleteSelection;this.hook("instead","deleteSelection",(i=>!!e.activeItems.length&&t.call(e,i)))}function Oe(){this.hook("instead","setActiveItem",(()=>{})),this.hook("instead","selectAll",(()=>{}))}function xe(){var e=this,t=e.onKeyDown;e.hook("instead","onKeyDown",(i=>{var s,n,r,o;if(!e.isOpen||i.keyCode!==z&&i.keyCode!==W)return t.call(e,i);o=T(e.activeOption,"[data-group]"),s=M(e.activeOption,"[data-selectable]"),o&&(o=i.keyCode===z?o.previousSibling:o.nextSibling)&&(n=(r=o.querySelectorAll("[data-selectable]"))[Math.min(r.length-1,s)])&&e.setActiveOption(n)}))}function Ce(e){const t=Object.assign({label:"&times;",title:"Remove",className:"remove",append:!0},e);var i=this;if(t.append){var s='<a href="javascript:void(0)" class="'+t.className+'" tabindex="-1" title="'+te(t.title)+'">'+t.label+"</a>";i.hook("after","setupTemplates",(()=>{var e=i.settings.render.item;i.settings.render.item=(t,n)=>{var r=O(e.call(i,t,n)),o=O(s);return r.appendChild(o),oe(o,"mousedown",(e=>{re(e,!0)})),oe(o,"click",(e=>{if(re(e,!0),!i.isLocked){var t=r.dataset.value;i.removeItem(t),i.refreshOptions(!1)}})),r}}))}}function _e(e){const t=this,i=Object.assign({text:e=>e[t.settings.labelField]},e);t.on("item_remove",(function(e){if(""===t.control_input.value.trim()){var s=t.options[e];s&&t.setTextboxValue(i.text.call(t,s))}}))}function ke(){const e=this,t=e.canLoad,i=e.clearActiveOption,s=e.loadCallback;var n,r={},o=!1;if(!e.settings.firstUrl)throw"virtual_scroll plugin requires a firstUrl() method";function a(t){return!("number"==typeof e.settings.maxOptions&&n.children.length>=e.settings.maxOptions||!(t in r)||!r[t])}e.settings.sortField=[{field:"$order"},{field:"$score"}],e.setNextUrl=function(e,t){r[e]=t},e.getUrl=function(t){if(t in r){const e=r[t];return r[t]=!1,e}return r={},e.settings.firstUrl(t)},e.hook("instead","clearActiveOption",(()=>{if(!o)return i.call(e)})),e.hook("instead","canLoad",(i=>i in r?a(i):t.call(e,i))),e.hook("instead","loadCallback",((t,i)=>{o||e.clearOptions(),s.call(e,t,i),o=!1})),e.hook("after","refreshOptions",(()=>{const t=e.lastValue;var i;a(t)?(i=e.render("loading_more",{query:t}))&&i.setAttribute("data-selectable",""):t in r&&!n.querySelector(".no-results")&&(i=e.render("no_more_results",{query:t})),i&&(A(i,e.settings.optionClass),n.append(i))})),e.on("initialize",(()=>{n=e.dropdown_content,e.settings.render=Object.assign({},{loading_more:function(){return'<div class="loading-more-results">Loading more results ... </div>'},no_more_results:function(){return'<div class="no-more-results">No more results</div>'}},e.settings.render),n.addEventListener("scroll",(function(){n.clientHeight/(n.scrollHeight-n.scrollTop)<.95||a(e.lastValue)&&(o||(o=!0,e.load.call(e,e.lastValue)))}))}))}return pe.define("change_listener",me),pe.define("checkbox_options",ge),pe.define("clear_button",fe),pe.define("drag_drop",ve),pe.define("dropdown_header",be),pe.define("caret_position",ye),pe.define("dropdown_input",we),pe.define("input_autogrow",Se),pe.define("no_backspace_delete",Ee),pe.define("no_active_items",Oe),pe.define("optgroup_columns",xe),pe.define("remove_button",Ce),pe.define("restore_on_backspace",_e),pe.define("virtual_scroll",ke),pe}()}},s={};function n(e){var t=s[e];if(void 0!==t)return t.exports;var r=s[e]={id:e,loaded:!1,exports:{}};return i[e].call(r.exports,r,r.exports,n),r.loaded=!0,r.exports}n.m=i,e=[],n.O=(t,i,s,r)=>{if(!i){var o=1/0;for(d=0;d<e.length;d++){for(var[i,s,r]=e[d],a=!0,l=0;l<i.length;l++)(!1&r||o>=r)&&Object.keys(n.O).every((e=>n.O[e](i[l])))?i.splice(l--,1):(a=!1,r<o&&(o=r));if(a){e.splice(d--,1);var c=s();void 0!==c&&(t=c)}}return t}r=r||0;for(var d=e.length;d>0&&e[d-1][2]>r;d--)e[d]=e[d-1];e[d]=[i,s,r]},n.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return n.d(t,{a:t}),t},n.d=(e,t)=>{for(var i in t)n.o(t,i)&&!n.o(e,i)&&Object.defineProperty(e,i,{enumerable:!0,get:t[i]})},n.f={},n.e=e=>Promise.all(Object.keys(n.f).reduce(((t,i)=>(n.f[i](e,t),t)),[])),n.u=e=>689===e?"js/689.js":880===e?"js/880.js":void 0,n.miniCssF=e=>"css/app.css",n.g=function(){if("object"==typeof globalThis)return globalThis;try{return this||new Function("return this")()}catch(e){if("object"==typeof window)return window}}(),n.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),t={},n.l=(e,i,s,r)=>{if(t[e])t[e].push(i);else{var o,a;if(void 0!==s)for(var l=document.getElementsByTagName("script"),c=0;c<l.length;c++){var d=l[c];if(d.getAttribute("src")==e){o=d;break}}o||(a=!0,(o=document.createElement("script")).charset="utf-8",o.timeout=120,n.nc&&o.setAttribute("nonce",n.nc),o.src=e),t[e]=[i];var u=(i,s)=>{o.onerror=o.onload=null,clearTimeout(h);var n=t[e];if(delete t[e],o.parentNode&&o.parentNode.removeChild(o),n&&n.forEach((e=>e(s))),i)return i(s)},h=setTimeout(u.bind(null,void 0,{type:"timeout",target:o}),12e4);o.onerror=u.bind(null,o.onerror),o.onload=u.bind(null,o.onload),a&&document.head.appendChild(o)}},n.r=e=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.nmd=e=>(e.paths=[],e.children||(e.children=[]),e),n.p="/",(()=>{var e={773:0,170:0};n.f.j=(t,i)=>{var s=n.o(e,t)?e[t]:void 0;if(0!==s)if(s)i.push(s[2]);else if(170!=t){var r=new Promise(((i,n)=>s=e[t]=[i,n]));i.push(s[2]=r);var o=n.p+n.u(t),a=new Error;n.l(o,(i=>{if(n.o(e,t)&&(0!==(s=e[t])&&(e[t]=void 0),s)){var r=i&&("load"===i.type?"missing":i.type),o=i&&i.target&&i.target.src;a.message="Loading chunk "+t+" failed.\n("+r+": "+o+")",a.name="ChunkLoadError",a.type=r,a.request=o,s[1](a)}}),"chunk-"+t,t)}else e[t]=0},n.O.j=t=>0===e[t];var t=(t,i)=>{var s,r,[o,a,l]=i,c=0;if(o.some((t=>0!==e[t]))){for(s in a)n.o(a,s)&&(n.m[s]=a[s]);if(l)var d=l(n)}for(t&&t(i);c<o.length;c++)r=o[c],n.o(e,r)&&e[r]&&e[r][0](),e[r]=0;return n.O(d)},i=self.webpackChunk=self.webpackChunk||[];i.forEach(t.bind(null,0)),i.push=t.bind(null,i.push.bind(i))})(),n.O(void 0,[170],(()=>n(80)));var r=n.O(void 0,[170],(()=>n(662)));r=n.O(r)})();
+    `;
+    }
+    show() {
+        if (!this.visible) {
+            this.visible = true;
+            this.installProgressElement();
+            this.startTrickling();
+        }
+    }
+    hide() {
+        if (this.visible && !this.hiding) {
+            this.hiding = true;
+            this.fadeProgressElement(() => {
+                this.uninstallProgressElement();
+                this.stopTrickling();
+                this.visible = false;
+                this.hiding = false;
+            });
+        }
+    }
+    setValue(value) {
+        this.value = value;
+        this.refresh();
+    }
+    installStylesheetElement() {
+        document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
+    }
+    installProgressElement() {
+        this.progressElement.style.width = "0";
+        this.progressElement.style.opacity = "1";
+        document.documentElement.insertBefore(this.progressElement, document.body);
+        this.refresh();
+    }
+    fadeProgressElement(callback) {
+        this.progressElement.style.opacity = "0";
+        setTimeout(callback, ProgressBar.animationDuration * 1.5);
+    }
+    uninstallProgressElement() {
+        if (this.progressElement.parentNode) {
+            document.documentElement.removeChild(this.progressElement);
+        }
+    }
+    startTrickling() {
+        if (!this.trickleInterval) {
+            this.trickleInterval = window.setInterval(this.trickle, ProgressBar.animationDuration);
+        }
+    }
+    stopTrickling() {
+        window.clearInterval(this.trickleInterval);
+        delete this.trickleInterval;
+    }
+    refresh() {
+        requestAnimationFrame(() => {
+            this.progressElement.style.width = `${10 + (this.value * 90)}%`;
+        });
+    }
+    createStylesheetElement() {
+        const element = document.createElement("style");
+        element.type = "text/css";
+        element.textContent = ProgressBar.defaultCSS;
+        return element;
+    }
+    createProgressElement() {
+        const element = document.createElement("div");
+        element.className = "turbo-progress-bar";
+        return element;
+    }
+}
+ProgressBar.animationDuration = 300;
+
+class HeadSnapshot extends Snapshot {
+    constructor() {
+        super(...arguments);
+        this.detailsByOuterHTML = this.children.reduce((result, element) => {
+            const { outerHTML } = element;
+            const details = outerHTML in result
+                ? result[outerHTML]
+                : {
+                    type: elementType(element),
+                    tracked: elementIsTracked(element),
+                    elements: []
+                };
+            return Object.assign(Object.assign({}, result), { [outerHTML]: Object.assign(Object.assign({}, details), { elements: [...details.elements, element] }) });
+        }, {});
+    }
+    get trackedElementSignature() {
+        return Object.keys(this.detailsByOuterHTML)
+            .filter(outerHTML => this.detailsByOuterHTML[outerHTML].tracked)
+            .join("");
+    }
+    getScriptElementsNotInSnapshot(snapshot) {
+        return this.getElementsMatchingTypeNotInSnapshot("script", snapshot);
+    }
+    getStylesheetElementsNotInSnapshot(snapshot) {
+        return this.getElementsMatchingTypeNotInSnapshot("stylesheet", snapshot);
+    }
+    getElementsMatchingTypeNotInSnapshot(matchedType, snapshot) {
+        return Object.keys(this.detailsByOuterHTML)
+            .filter(outerHTML => !(outerHTML in snapshot.detailsByOuterHTML))
+            .map(outerHTML => this.detailsByOuterHTML[outerHTML])
+            .filter(({ type }) => type == matchedType)
+            .map(({ elements: [element] }) => element);
+    }
+    get provisionalElements() {
+        return Object.keys(this.detailsByOuterHTML).reduce((result, outerHTML) => {
+            const { type, tracked, elements } = this.detailsByOuterHTML[outerHTML];
+            if (type == null && !tracked) {
+                return [...result, ...elements];
+            }
+            else if (elements.length > 1) {
+                return [...result, ...elements.slice(1)];
+            }
+            else {
+                return result;
+            }
+        }, []);
+    }
+    getMetaValue(name) {
+        const element = this.findMetaElementByName(name);
+        return element
+            ? element.getAttribute("content")
+            : null;
+    }
+    findMetaElementByName(name) {
+        return Object.keys(this.detailsByOuterHTML).reduce((result, outerHTML) => {
+            const { elements: [element] } = this.detailsByOuterHTML[outerHTML];
+            return elementIsMetaElementWithName(element, name) ? element : result;
+        }, undefined);
+    }
+}
+function elementType(element) {
+    if (elementIsScript(element)) {
+        return "script";
+    }
+    else if (elementIsStylesheet(element)) {
+        return "stylesheet";
+    }
+}
+function elementIsTracked(element) {
+    return element.getAttribute("data-turbo-track") == "reload";
+}
+function elementIsScript(element) {
+    const tagName = element.tagName.toLowerCase();
+    return tagName == "script";
+}
+function elementIsStylesheet(element) {
+    const tagName = element.tagName.toLowerCase();
+    return tagName == "style" || (tagName == "link" && element.getAttribute("rel") == "stylesheet");
+}
+function elementIsMetaElementWithName(element, name) {
+    const tagName = element.tagName.toLowerCase();
+    return tagName == "meta" && element.getAttribute("name") == name;
+}
+
+class PageSnapshot extends Snapshot {
+    constructor(element, headSnapshot) {
+        super(element);
+        this.headSnapshot = headSnapshot;
+    }
+    static fromHTMLString(html = "") {
+        return this.fromDocument(parseHTMLDocument(html));
+    }
+    static fromElement(element) {
+        return this.fromDocument(element.ownerDocument);
+    }
+    static fromDocument({ head, body }) {
+        return new this(body, new HeadSnapshot(head));
+    }
+    clone() {
+        return new PageSnapshot(this.element.cloneNode(true), this.headSnapshot);
+    }
+    get headElement() {
+        return this.headSnapshot.element;
+    }
+    get rootLocation() {
+        var _a;
+        const root = (_a = this.getSetting("root")) !== null && _a !== void 0 ? _a : "/";
+        return expandURL(root);
+    }
+    get cacheControlValue() {
+        return this.getSetting("cache-control");
+    }
+    get isPreviewable() {
+        return this.cacheControlValue != "no-preview";
+    }
+    get isCacheable() {
+        return this.cacheControlValue != "no-cache";
+    }
+    get isVisitable() {
+        return this.getSetting("visit-control") != "reload";
+    }
+    getSetting(name) {
+        return this.headSnapshot.getMetaValue(`turbo-${name}`);
+    }
+}
+
+var TimingMetric;
+(function (TimingMetric) {
+    TimingMetric["visitStart"] = "visitStart";
+    TimingMetric["requestStart"] = "requestStart";
+    TimingMetric["requestEnd"] = "requestEnd";
+    TimingMetric["visitEnd"] = "visitEnd";
+})(TimingMetric || (TimingMetric = {}));
+var VisitState;
+(function (VisitState) {
+    VisitState["initialized"] = "initialized";
+    VisitState["started"] = "started";
+    VisitState["canceled"] = "canceled";
+    VisitState["failed"] = "failed";
+    VisitState["completed"] = "completed";
+})(VisitState || (VisitState = {}));
+const defaultOptions = {
+    action: "advance",
+    historyChanged: false
+};
+var SystemStatusCode;
+(function (SystemStatusCode) {
+    SystemStatusCode[SystemStatusCode["networkFailure"] = 0] = "networkFailure";
+    SystemStatusCode[SystemStatusCode["timeoutFailure"] = -1] = "timeoutFailure";
+    SystemStatusCode[SystemStatusCode["contentTypeMismatch"] = -2] = "contentTypeMismatch";
+})(SystemStatusCode || (SystemStatusCode = {}));
+class Visit {
+    constructor(delegate, location, restorationIdentifier, options = {}) {
+        this.identifier = uuid();
+        this.timingMetrics = {};
+        this.followedRedirect = false;
+        this.historyChanged = false;
+        this.scrolled = false;
+        this.snapshotCached = false;
+        this.state = VisitState.initialized;
+        this.delegate = delegate;
+        this.location = location;
+        this.restorationIdentifier = restorationIdentifier || uuid();
+        const { action, historyChanged, referrer, snapshotHTML, response } = Object.assign(Object.assign({}, defaultOptions), options);
+        this.action = action;
+        this.historyChanged = historyChanged;
+        this.referrer = referrer;
+        this.snapshotHTML = snapshotHTML;
+        this.response = response;
+    }
+    get adapter() {
+        return this.delegate.adapter;
+    }
+    get view() {
+        return this.delegate.view;
+    }
+    get history() {
+        return this.delegate.history;
+    }
+    get restorationData() {
+        return this.history.getRestorationDataForIdentifier(this.restorationIdentifier);
+    }
+    start() {
+        if (this.state == VisitState.initialized) {
+            this.recordTimingMetric(TimingMetric.visitStart);
+            this.state = VisitState.started;
+            this.adapter.visitStarted(this);
+            this.delegate.visitStarted(this);
+        }
+    }
+    cancel() {
+        if (this.state == VisitState.started) {
+            if (this.request) {
+                this.request.cancel();
+            }
+            this.cancelRender();
+            this.state = VisitState.canceled;
+        }
+    }
+    complete() {
+        if (this.state == VisitState.started) {
+            this.recordTimingMetric(TimingMetric.visitEnd);
+            this.state = VisitState.completed;
+            this.adapter.visitCompleted(this);
+            this.delegate.visitCompleted(this);
+        }
+    }
+    fail() {
+        if (this.state == VisitState.started) {
+            this.state = VisitState.failed;
+            this.adapter.visitFailed(this);
+        }
+    }
+    changeHistory() {
+        var _a;
+        if (!this.historyChanged) {
+            const actionForHistory = this.location.href === ((_a = this.referrer) === null || _a === void 0 ? void 0 : _a.href) ? "replace" : this.action;
+            const method = this.getHistoryMethodForAction(actionForHistory);
+            this.history.update(method, this.location, this.restorationIdentifier);
+            this.historyChanged = true;
+        }
+    }
+    issueRequest() {
+        if (this.hasPreloadedResponse()) {
+            this.simulateRequest();
+        }
+        else if (this.shouldIssueRequest() && !this.request) {
+            this.request = new FetchRequest(this, FetchMethod.get, this.location);
+            this.request.perform();
+        }
+    }
+    simulateRequest() {
+        if (this.response) {
+            this.startRequest();
+            this.recordResponse();
+            this.finishRequest();
+        }
+    }
+    startRequest() {
+        this.recordTimingMetric(TimingMetric.requestStart);
+        this.adapter.visitRequestStarted(this);
+    }
+    recordResponse(response = this.response) {
+        this.response = response;
+        if (response) {
+            const { statusCode } = response;
+            if (isSuccessful(statusCode)) {
+                this.adapter.visitRequestCompleted(this);
+            }
+            else {
+                this.adapter.visitRequestFailedWithStatusCode(this, statusCode);
+            }
+        }
+    }
+    finishRequest() {
+        this.recordTimingMetric(TimingMetric.requestEnd);
+        this.adapter.visitRequestFinished(this);
+    }
+    loadResponse() {
+        if (this.response) {
+            const { statusCode, responseHTML } = this.response;
+            this.render(async () => {
+                this.cacheSnapshot();
+                if (isSuccessful(statusCode) && responseHTML != null) {
+                    await this.view.renderPage(PageSnapshot.fromHTMLString(responseHTML));
+                    this.adapter.visitRendered(this);
+                    this.complete();
+                }
+                else {
+                    await this.view.renderError(PageSnapshot.fromHTMLString(responseHTML));
+                    this.adapter.visitRendered(this);
+                    this.fail();
+                }
+            });
+        }
+    }
+    getCachedSnapshot() {
+        const snapshot = this.view.getCachedSnapshotForLocation(this.location) || this.getPreloadedSnapshot();
+        if (snapshot && (!getAnchor(this.location) || snapshot.hasAnchor(getAnchor(this.location)))) {
+            if (this.action == "restore" || snapshot.isPreviewable) {
+                return snapshot;
+            }
+        }
+    }
+    getPreloadedSnapshot() {
+        if (this.snapshotHTML) {
+            return PageSnapshot.fromHTMLString(this.snapshotHTML);
+        }
+    }
+    hasCachedSnapshot() {
+        return this.getCachedSnapshot() != null;
+    }
+    loadCachedSnapshot() {
+        const snapshot = this.getCachedSnapshot();
+        if (snapshot) {
+            const isPreview = this.shouldIssueRequest();
+            this.render(async () => {
+                this.cacheSnapshot();
+                await this.view.renderPage(snapshot);
+                this.adapter.visitRendered(this);
+                if (!isPreview) {
+                    this.complete();
+                }
+            });
+        }
+    }
+    followRedirect() {
+        if (this.redirectedToLocation && !this.followedRedirect) {
+            this.location = this.redirectedToLocation;
+            this.history.replace(this.redirectedToLocation, this.restorationIdentifier);
+            this.followedRedirect = true;
+        }
+    }
+    requestStarted() {
+        this.startRequest();
+    }
+    requestPreventedHandlingResponse(request, response) {
+    }
+    async requestSucceededWithResponse(request, response) {
+        const responseHTML = await response.responseHTML;
+        if (responseHTML == undefined) {
+            this.recordResponse({ statusCode: SystemStatusCode.contentTypeMismatch });
+        }
+        else {
+            this.redirectedToLocation = response.redirected ? response.location : undefined;
+            this.recordResponse({ statusCode: response.statusCode, responseHTML });
+        }
+    }
+    async requestFailedWithResponse(request, response) {
+        const responseHTML = await response.responseHTML;
+        if (responseHTML == undefined) {
+            this.recordResponse({ statusCode: SystemStatusCode.contentTypeMismatch });
+        }
+        else {
+            this.recordResponse({ statusCode: response.statusCode, responseHTML });
+        }
+    }
+    requestErrored(request, error) {
+        this.recordResponse({ statusCode: SystemStatusCode.networkFailure });
+    }
+    requestFinished() {
+        this.finishRequest();
+    }
+    performScroll() {
+        if (!this.scrolled) {
+            if (this.action == "restore") {
+                this.scrollToRestoredPosition() || this.scrollToTop();
+            }
+            else {
+                this.scrollToAnchor() || this.scrollToTop();
+            }
+            this.scrolled = true;
+        }
+    }
+    scrollToRestoredPosition() {
+        const { scrollPosition } = this.restorationData;
+        if (scrollPosition) {
+            this.view.scrollToPosition(scrollPosition);
+            return true;
+        }
+    }
+    scrollToAnchor() {
+        if (getAnchor(this.location) != null) {
+            this.view.scrollToAnchor(getAnchor(this.location));
+            return true;
+        }
+    }
+    scrollToTop() {
+        this.view.scrollToPosition({ x: 0, y: 0 });
+    }
+    recordTimingMetric(metric) {
+        this.timingMetrics[metric] = new Date().getTime();
+    }
+    getTimingMetrics() {
+        return Object.assign({}, this.timingMetrics);
+    }
+    getHistoryMethodForAction(action) {
+        switch (action) {
+            case "replace": return history.replaceState;
+            case "advance":
+            case "restore": return history.pushState;
+        }
+    }
+    hasPreloadedResponse() {
+        return typeof this.response == "object";
+    }
+    shouldIssueRequest() {
+        return this.action == "restore"
+            ? !this.hasCachedSnapshot()
+            : true;
+    }
+    cacheSnapshot() {
+        if (!this.snapshotCached) {
+            this.view.cacheSnapshot();
+            this.snapshotCached = true;
+        }
+    }
+    async render(callback) {
+        this.cancelRender();
+        await new Promise(resolve => {
+            this.frame = requestAnimationFrame(() => resolve());
+        });
+        callback();
+        delete this.frame;
+        this.performScroll();
+    }
+    cancelRender() {
+        if (this.frame) {
+            cancelAnimationFrame(this.frame);
+            delete this.frame;
+        }
+    }
+}
+function isSuccessful(statusCode) {
+    return statusCode >= 200 && statusCode < 300;
+}
+
+class BrowserAdapter {
+    constructor(session) {
+        this.progressBar = new ProgressBar;
+        this.showProgressBar = () => {
+            this.progressBar.show();
+        };
+        this.session = session;
+    }
+    visitProposedToLocation(location, options) {
+        this.navigator.startVisit(location, uuid(), options);
+    }
+    visitStarted(visit) {
+        visit.issueRequest();
+        visit.changeHistory();
+        visit.loadCachedSnapshot();
+    }
+    visitRequestStarted(visit) {
+        this.progressBar.setValue(0);
+        if (visit.hasCachedSnapshot() || visit.action != "restore") {
+            this.showProgressBarAfterDelay();
+        }
+        else {
+            this.showProgressBar();
+        }
+    }
+    visitRequestCompleted(visit) {
+        visit.loadResponse();
+    }
+    visitRequestFailedWithStatusCode(visit, statusCode) {
+        switch (statusCode) {
+            case SystemStatusCode.networkFailure:
+            case SystemStatusCode.timeoutFailure:
+            case SystemStatusCode.contentTypeMismatch:
+                return this.reload();
+            default:
+                return visit.loadResponse();
+        }
+    }
+    visitRequestFinished(visit) {
+        this.progressBar.setValue(1);
+        this.hideProgressBar();
+    }
+    visitCompleted(visit) {
+        visit.followRedirect();
+    }
+    pageInvalidated() {
+        this.reload();
+    }
+    visitFailed(visit) {
+    }
+    visitRendered(visit) {
+    }
+    showProgressBarAfterDelay() {
+        this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.session.progressBarDelay);
+    }
+    hideProgressBar() {
+        this.progressBar.hide();
+        if (this.progressBarTimeout != null) {
+            window.clearTimeout(this.progressBarTimeout);
+            delete this.progressBarTimeout;
+        }
+    }
+    reload() {
+        window.location.reload();
+    }
+    get navigator() {
+        return this.session.navigator;
+    }
+}
+
+class FormSubmitObserver {
+    constructor(delegate) {
+        this.started = false;
+        this.submitCaptured = () => {
+            removeEventListener("submit", this.submitBubbled, false);
+            addEventListener("submit", this.submitBubbled, false);
+        };
+        this.submitBubbled = ((event) => {
+            if (!event.defaultPrevented) {
+                const form = event.target instanceof HTMLFormElement ? event.target : undefined;
+                const submitter = event.submitter || undefined;
+                if (form) {
+                    const method = (submitter === null || submitter === void 0 ? void 0 : submitter.getAttribute("formmethod")) || form.method;
+                    if (method != "dialog" && this.delegate.willSubmitForm(form, submitter)) {
+                        event.preventDefault();
+                        this.delegate.formSubmitted(form, submitter);
+                    }
+                }
+            }
+        });
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            addEventListener("submit", this.submitCaptured, true);
+            this.started = true;
+        }
+    }
+    stop() {
+        if (this.started) {
+            removeEventListener("submit", this.submitCaptured, true);
+            this.started = false;
+        }
+    }
+}
+
+class FrameRedirector {
+    constructor(element) {
+        this.element = element;
+        this.linkInterceptor = new LinkInterceptor(this, element);
+        this.formInterceptor = new FormInterceptor(this, element);
+    }
+    start() {
+        this.linkInterceptor.start();
+        this.formInterceptor.start();
+    }
+    stop() {
+        this.linkInterceptor.stop();
+        this.formInterceptor.stop();
+    }
+    shouldInterceptLinkClick(element, url) {
+        return this.shouldRedirect(element);
+    }
+    linkClickIntercepted(element, url) {
+        const frame = this.findFrameElement(element);
+        if (frame) {
+            frame.src = url;
+        }
+    }
+    shouldInterceptFormSubmission(element, submitter) {
+        return this.shouldRedirect(element, submitter);
+    }
+    formSubmissionIntercepted(element, submitter) {
+        const frame = this.findFrameElement(element);
+        if (frame) {
+            frame.delegate.formSubmissionIntercepted(element, submitter);
+        }
+    }
+    shouldRedirect(element, submitter) {
+        const frame = this.findFrameElement(element);
+        return frame ? frame != element.closest("turbo-frame") : false;
+    }
+    findFrameElement(element) {
+        const id = element.getAttribute("data-turbo-frame");
+        if (id && id != "_top") {
+            const frame = this.element.querySelector(`#${id}:not([disabled])`);
+            if (frame instanceof FrameElement) {
+                return frame;
+            }
+        }
+    }
+}
+
+class History {
+    constructor(delegate) {
+        this.restorationIdentifier = uuid();
+        this.restorationData = {};
+        this.started = false;
+        this.pageLoaded = false;
+        this.onPopState = (event) => {
+            if (this.shouldHandlePopState()) {
+                const { turbo } = event.state || {};
+                if (turbo) {
+                    this.location = new URL(window.location.href);
+                    const { restorationIdentifier } = turbo;
+                    this.restorationIdentifier = restorationIdentifier;
+                    this.delegate.historyPoppedToLocationWithRestorationIdentifier(this.location, restorationIdentifier);
+                }
+            }
+        };
+        this.onPageLoad = async (event) => {
+            await nextMicrotask();
+            this.pageLoaded = true;
+        };
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            addEventListener("popstate", this.onPopState, false);
+            addEventListener("load", this.onPageLoad, false);
+            this.started = true;
+            this.replace(new URL(window.location.href));
+        }
+    }
+    stop() {
+        if (this.started) {
+            removeEventListener("popstate", this.onPopState, false);
+            removeEventListener("load", this.onPageLoad, false);
+            this.started = false;
+        }
+    }
+    push(location, restorationIdentifier) {
+        this.update(history.pushState, location, restorationIdentifier);
+    }
+    replace(location, restorationIdentifier) {
+        this.update(history.replaceState, location, restorationIdentifier);
+    }
+    update(method, location, restorationIdentifier = uuid()) {
+        const state = { turbo: { restorationIdentifier } };
+        method.call(history, state, "", location.href);
+        this.location = location;
+        this.restorationIdentifier = restorationIdentifier;
+    }
+    getRestorationDataForIdentifier(restorationIdentifier) {
+        return this.restorationData[restorationIdentifier] || {};
+    }
+    updateRestorationData(additionalData) {
+        const { restorationIdentifier } = this;
+        const restorationData = this.restorationData[restorationIdentifier];
+        this.restorationData[restorationIdentifier] = Object.assign(Object.assign({}, restorationData), additionalData);
+    }
+    assumeControlOfScrollRestoration() {
+        var _a;
+        if (!this.previousScrollRestoration) {
+            this.previousScrollRestoration = (_a = history.scrollRestoration) !== null && _a !== void 0 ? _a : "auto";
+            history.scrollRestoration = "manual";
+        }
+    }
+    relinquishControlOfScrollRestoration() {
+        if (this.previousScrollRestoration) {
+            history.scrollRestoration = this.previousScrollRestoration;
+            delete this.previousScrollRestoration;
+        }
+    }
+    shouldHandlePopState() {
+        return this.pageIsLoaded();
+    }
+    pageIsLoaded() {
+        return this.pageLoaded || document.readyState == "complete";
+    }
+}
+
+class LinkClickObserver {
+    constructor(delegate) {
+        this.started = false;
+        this.clickCaptured = () => {
+            removeEventListener("click", this.clickBubbled, false);
+            addEventListener("click", this.clickBubbled, false);
+        };
+        this.clickBubbled = (event) => {
+            if (this.clickEventIsSignificant(event)) {
+                const link = this.findLinkFromClickTarget(event.target);
+                if (link) {
+                    const location = this.getLocationForLink(link);
+                    if (this.delegate.willFollowLinkToLocation(link, location)) {
+                        event.preventDefault();
+                        this.delegate.followedLinkToLocation(link, location);
+                    }
+                }
+            }
+        };
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            addEventListener("click", this.clickCaptured, true);
+            this.started = true;
+        }
+    }
+    stop() {
+        if (this.started) {
+            removeEventListener("click", this.clickCaptured, true);
+            this.started = false;
+        }
+    }
+    clickEventIsSignificant(event) {
+        return !((event.target && event.target.isContentEditable)
+            || event.defaultPrevented
+            || event.which > 1
+            || event.altKey
+            || event.ctrlKey
+            || event.metaKey
+            || event.shiftKey);
+    }
+    findLinkFromClickTarget(target) {
+        if (target instanceof Element) {
+            return target.closest("a[href]:not([target^=_]):not([download])");
+        }
+    }
+    getLocationForLink(link) {
+        return expandURL(link.getAttribute("href") || "");
+    }
+}
+
+class Navigator {
+    constructor(delegate) {
+        this.delegate = delegate;
+    }
+    proposeVisit(location, options = {}) {
+        if (this.delegate.allowsVisitingLocation(location)) {
+            this.delegate.visitProposedToLocation(location, options);
+        }
+    }
+    startVisit(locatable, restorationIdentifier, options = {}) {
+        this.stop();
+        this.currentVisit = new Visit(this, expandURL(locatable), restorationIdentifier, Object.assign({ referrer: this.location }, options));
+        this.currentVisit.start();
+    }
+    submitForm(form, submitter) {
+        this.stop();
+        this.formSubmission = new FormSubmission(this, form, submitter, true);
+        if (this.formSubmission.fetchRequest.isIdempotent) {
+            this.proposeVisit(this.formSubmission.fetchRequest.url);
+        }
+        else {
+            this.formSubmission.start();
+        }
+    }
+    stop() {
+        if (this.formSubmission) {
+            this.formSubmission.stop();
+            delete this.formSubmission;
+        }
+        if (this.currentVisit) {
+            this.currentVisit.cancel();
+            delete this.currentVisit;
+        }
+    }
+    get adapter() {
+        return this.delegate.adapter;
+    }
+    get view() {
+        return this.delegate.view;
+    }
+    get history() {
+        return this.delegate.history;
+    }
+    formSubmissionStarted(formSubmission) {
+    }
+    async formSubmissionSucceededWithResponse(formSubmission, fetchResponse) {
+        if (formSubmission == this.formSubmission) {
+            const responseHTML = await fetchResponse.responseHTML;
+            if (responseHTML) {
+                if (formSubmission.method != FetchMethod.get) {
+                    this.view.clearSnapshotCache();
+                }
+                const { statusCode } = fetchResponse;
+                const visitOptions = { response: { statusCode, responseHTML } };
+                this.proposeVisit(fetchResponse.location, visitOptions);
+            }
+        }
+    }
+    async formSubmissionFailedWithResponse(formSubmission, fetchResponse) {
+        const responseHTML = await fetchResponse.responseHTML;
+        if (responseHTML) {
+            const snapshot = PageSnapshot.fromHTMLString(responseHTML);
+            await this.view.renderPage(snapshot);
+            this.view.clearSnapshotCache();
+        }
+    }
+    formSubmissionErrored(formSubmission, error) {
+    }
+    formSubmissionFinished(formSubmission) {
+    }
+    visitStarted(visit) {
+        this.delegate.visitStarted(visit);
+    }
+    visitCompleted(visit) {
+        this.delegate.visitCompleted(visit);
+    }
+    get location() {
+        return this.history.location;
+    }
+    get restorationIdentifier() {
+        return this.history.restorationIdentifier;
+    }
+}
+
+var PageStage;
+(function (PageStage) {
+    PageStage[PageStage["initial"] = 0] = "initial";
+    PageStage[PageStage["loading"] = 1] = "loading";
+    PageStage[PageStage["interactive"] = 2] = "interactive";
+    PageStage[PageStage["complete"] = 3] = "complete";
+})(PageStage || (PageStage = {}));
+class PageObserver {
+    constructor(delegate) {
+        this.stage = PageStage.initial;
+        this.started = false;
+        this.interpretReadyState = () => {
+            const { readyState } = this;
+            if (readyState == "interactive") {
+                this.pageIsInteractive();
+            }
+            else if (readyState == "complete") {
+                this.pageIsComplete();
+            }
+        };
+        this.pageWillUnload = () => {
+            this.delegate.pageWillUnload();
+        };
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            if (this.stage == PageStage.initial) {
+                this.stage = PageStage.loading;
+            }
+            document.addEventListener("readystatechange", this.interpretReadyState, false);
+            addEventListener("pagehide", this.pageWillUnload, false);
+            this.started = true;
+        }
+    }
+    stop() {
+        if (this.started) {
+            document.removeEventListener("readystatechange", this.interpretReadyState, false);
+            removeEventListener("pagehide", this.pageWillUnload, false);
+            this.started = false;
+        }
+    }
+    pageIsInteractive() {
+        if (this.stage == PageStage.loading) {
+            this.stage = PageStage.interactive;
+            this.delegate.pageBecameInteractive();
+        }
+    }
+    pageIsComplete() {
+        this.pageIsInteractive();
+        if (this.stage == PageStage.interactive) {
+            this.stage = PageStage.complete;
+            this.delegate.pageLoaded();
+        }
+    }
+    get readyState() {
+        return document.readyState;
+    }
+}
+
+class ScrollObserver {
+    constructor(delegate) {
+        this.started = false;
+        this.onScroll = () => {
+            this.updatePosition({ x: window.pageXOffset, y: window.pageYOffset });
+        };
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            addEventListener("scroll", this.onScroll, false);
+            this.onScroll();
+            this.started = true;
+        }
+    }
+    stop() {
+        if (this.started) {
+            removeEventListener("scroll", this.onScroll, false);
+            this.started = false;
+        }
+    }
+    updatePosition(position) {
+        this.delegate.scrollPositionChanged(position);
+    }
+}
+
+class StreamObserver {
+    constructor(delegate) {
+        this.sources = new Set;
+        this.started = false;
+        this.inspectFetchResponse = ((event) => {
+            const response = fetchResponseFromEvent(event);
+            if (response && fetchResponseIsStream(response)) {
+                event.preventDefault();
+                this.receiveMessageResponse(response);
+            }
+        });
+        this.receiveMessageEvent = (event) => {
+            if (this.started && typeof event.data == "string") {
+                this.receiveMessageHTML(event.data);
+            }
+        };
+        this.delegate = delegate;
+    }
+    start() {
+        if (!this.started) {
+            this.started = true;
+            addEventListener("turbo:before-fetch-response", this.inspectFetchResponse, false);
+        }
+    }
+    stop() {
+        if (this.started) {
+            this.started = false;
+            removeEventListener("turbo:before-fetch-response", this.inspectFetchResponse, false);
+        }
+    }
+    connectStreamSource(source) {
+        if (!this.streamSourceIsConnected(source)) {
+            this.sources.add(source);
+            source.addEventListener("message", this.receiveMessageEvent, false);
+        }
+    }
+    disconnectStreamSource(source) {
+        if (this.streamSourceIsConnected(source)) {
+            this.sources.delete(source);
+            source.removeEventListener("message", this.receiveMessageEvent, false);
+        }
+    }
+    streamSourceIsConnected(source) {
+        return this.sources.has(source);
+    }
+    async receiveMessageResponse(response) {
+        const html = await response.responseHTML;
+        if (html) {
+            this.receiveMessageHTML(html);
+        }
+    }
+    receiveMessageHTML(html) {
+        this.delegate.receivedMessageFromStream(new StreamMessage(html));
+    }
+}
+function fetchResponseFromEvent(event) {
+    var _a;
+    const fetchResponse = (_a = event.detail) === null || _a === void 0 ? void 0 : _a.fetchResponse;
+    if (fetchResponse instanceof FetchResponse) {
+        return fetchResponse;
+    }
+}
+function fetchResponseIsStream(response) {
+    var _a;
+    const contentType = (_a = response.contentType) !== null && _a !== void 0 ? _a : "";
+    return contentType.startsWith(StreamMessage.contentType);
+}
+
+function isAction(action) {
+    return action == "advance" || action == "replace" || action == "restore";
+}
+
+class ErrorRenderer extends Renderer {
+    async render() {
+        this.replaceHeadAndBody();
+        this.activateScriptElements();
+    }
+    replaceHeadAndBody() {
+        const { documentElement, head, body } = document;
+        documentElement.replaceChild(this.newHead, head);
+        documentElement.replaceChild(this.newElement, body);
+    }
+    activateScriptElements() {
+        for (const replaceableElement of this.scriptElements) {
+            const parentNode = replaceableElement.parentNode;
+            if (parentNode) {
+                const element = this.createScriptElement(replaceableElement);
+                parentNode.replaceChild(element, replaceableElement);
+            }
+        }
+    }
+    get newHead() {
+        return this.newSnapshot.headSnapshot.element;
+    }
+    get scriptElements() {
+        return [...document.documentElement.querySelectorAll("script")];
+    }
+}
+
+class PageRenderer extends Renderer {
+    get shouldRender() {
+        return this.newSnapshot.isVisitable && this.trackedElementsAreIdentical;
+    }
+    prepareToRender() {
+        this.mergeHead();
+    }
+    async render() {
+        this.replaceBody();
+    }
+    finishRendering() {
+        super.finishRendering();
+        if (this.isPreview) {
+            this.focusFirstAutofocusableElement();
+        }
+    }
+    get currentHeadSnapshot() {
+        return this.currentSnapshot.headSnapshot;
+    }
+    get newHeadSnapshot() {
+        return this.newSnapshot.headSnapshot;
+    }
+    get newElement() {
+        return this.newSnapshot.element;
+    }
+    mergeHead() {
+        this.copyNewHeadStylesheetElements();
+        this.copyNewHeadScriptElements();
+        this.removeCurrentHeadProvisionalElements();
+        this.copyNewHeadProvisionalElements();
+    }
+    replaceBody() {
+        this.preservingPermanentElements(() => {
+            this.activateNewBody();
+            this.assignNewBody();
+        });
+    }
+    get trackedElementsAreIdentical() {
+        return this.currentHeadSnapshot.trackedElementSignature == this.newHeadSnapshot.trackedElementSignature;
+    }
+    copyNewHeadStylesheetElements() {
+        for (const element of this.newHeadStylesheetElements) {
+            document.head.appendChild(element);
+        }
+    }
+    copyNewHeadScriptElements() {
+        for (const element of this.newHeadScriptElements) {
+            document.head.appendChild(this.createScriptElement(element));
+        }
+    }
+    removeCurrentHeadProvisionalElements() {
+        for (const element of this.currentHeadProvisionalElements) {
+            document.head.removeChild(element);
+        }
+    }
+    copyNewHeadProvisionalElements() {
+        for (const element of this.newHeadProvisionalElements) {
+            document.head.appendChild(element);
+        }
+    }
+    activateNewBody() {
+        document.adoptNode(this.newElement);
+        this.activateNewBodyScriptElements();
+    }
+    activateNewBodyScriptElements() {
+        for (const inertScriptElement of this.newBodyScriptElements) {
+            const activatedScriptElement = this.createScriptElement(inertScriptElement);
+            replaceElementWithElement(inertScriptElement, activatedScriptElement);
+        }
+    }
+    assignNewBody() {
+        if (document.body && this.newElement instanceof HTMLBodyElement) {
+            replaceElementWithElement(document.body, this.newElement);
+        }
+        else {
+            document.documentElement.appendChild(this.newElement);
+        }
+    }
+    get newHeadStylesheetElements() {
+        return this.newHeadSnapshot.getStylesheetElementsNotInSnapshot(this.currentHeadSnapshot);
+    }
+    get newHeadScriptElements() {
+        return this.newHeadSnapshot.getScriptElementsNotInSnapshot(this.currentHeadSnapshot);
+    }
+    get currentHeadProvisionalElements() {
+        return this.currentHeadSnapshot.provisionalElements;
+    }
+    get newHeadProvisionalElements() {
+        return this.newHeadSnapshot.provisionalElements;
+    }
+    get newBodyScriptElements() {
+        return [...this.newElement.querySelectorAll("script")];
+    }
+}
+
+class SnapshotCache {
+    constructor(size) {
+        this.keys = [];
+        this.snapshots = {};
+        this.size = size;
+    }
+    has(location) {
+        return toCacheKey(location) in this.snapshots;
+    }
+    get(location) {
+        if (this.has(location)) {
+            const snapshot = this.read(location);
+            this.touch(location);
+            return snapshot;
+        }
+    }
+    put(location, snapshot) {
+        this.write(location, snapshot);
+        this.touch(location);
+        return snapshot;
+    }
+    clear() {
+        this.snapshots = {};
+    }
+    read(location) {
+        return this.snapshots[toCacheKey(location)];
+    }
+    write(location, snapshot) {
+        this.snapshots[toCacheKey(location)] = snapshot;
+    }
+    touch(location) {
+        const key = toCacheKey(location);
+        const index = this.keys.indexOf(key);
+        if (index > -1)
+            this.keys.splice(index, 1);
+        this.keys.unshift(key);
+        this.trim();
+    }
+    trim() {
+        for (const key of this.keys.splice(this.size)) {
+            delete this.snapshots[key];
+        }
+    }
+}
+
+class PageView extends View {
+    constructor() {
+        super(...arguments);
+        this.snapshotCache = new SnapshotCache(10);
+        this.lastRenderedLocation = new URL(location.href);
+    }
+    renderPage(snapshot, isPreview = false) {
+        const renderer = new PageRenderer(this.snapshot, snapshot, isPreview);
+        return this.render(renderer);
+    }
+    renderError(snapshot) {
+        const renderer = new ErrorRenderer(this.snapshot, snapshot, false);
+        this.render(renderer);
+    }
+    clearSnapshotCache() {
+        this.snapshotCache.clear();
+    }
+    async cacheSnapshot() {
+        if (this.shouldCacheSnapshot) {
+            this.delegate.viewWillCacheSnapshot();
+            const { snapshot, lastRenderedLocation: location } = this;
+            await nextEventLoopTick();
+            this.snapshotCache.put(location, snapshot.clone());
+        }
+    }
+    getCachedSnapshotForLocation(location) {
+        return this.snapshotCache.get(location);
+    }
+    get snapshot() {
+        return PageSnapshot.fromElement(this.element);
+    }
+    get shouldCacheSnapshot() {
+        return this.snapshot.isCacheable;
+    }
+}
+
+class Session {
+    constructor() {
+        this.navigator = new Navigator(this);
+        this.history = new History(this);
+        this.view = new PageView(this, document.documentElement);
+        this.adapter = new BrowserAdapter(this);
+        this.pageObserver = new PageObserver(this);
+        this.linkClickObserver = new LinkClickObserver(this);
+        this.formSubmitObserver = new FormSubmitObserver(this);
+        this.scrollObserver = new ScrollObserver(this);
+        this.streamObserver = new StreamObserver(this);
+        this.frameRedirector = new FrameRedirector(document.documentElement);
+        this.enabled = true;
+        this.progressBarDelay = 500;
+        this.started = false;
+    }
+    start() {
+        if (!this.started) {
+            this.pageObserver.start();
+            this.linkClickObserver.start();
+            this.formSubmitObserver.start();
+            this.scrollObserver.start();
+            this.streamObserver.start();
+            this.frameRedirector.start();
+            this.history.start();
+            this.started = true;
+            this.enabled = true;
+        }
+    }
+    disable() {
+        this.enabled = false;
+    }
+    stop() {
+        if (this.started) {
+            this.pageObserver.stop();
+            this.linkClickObserver.stop();
+            this.formSubmitObserver.stop();
+            this.scrollObserver.stop();
+            this.streamObserver.stop();
+            this.frameRedirector.stop();
+            this.history.stop();
+            this.started = false;
+        }
+    }
+    registerAdapter(adapter) {
+        this.adapter = adapter;
+    }
+    visit(location, options = {}) {
+        this.navigator.proposeVisit(expandURL(location), options);
+    }
+    connectStreamSource(source) {
+        this.streamObserver.connectStreamSource(source);
+    }
+    disconnectStreamSource(source) {
+        this.streamObserver.disconnectStreamSource(source);
+    }
+    renderStreamMessage(message) {
+        document.documentElement.appendChild(StreamMessage.wrap(message).fragment);
+    }
+    clearCache() {
+        this.view.clearSnapshotCache();
+    }
+    setProgressBarDelay(delay) {
+        this.progressBarDelay = delay;
+    }
+    get location() {
+        return this.history.location;
+    }
+    get restorationIdentifier() {
+        return this.history.restorationIdentifier;
+    }
+    historyPoppedToLocationWithRestorationIdentifier(location) {
+        if (this.enabled) {
+            this.navigator.proposeVisit(location, { action: "restore", historyChanged: true });
+        }
+        else {
+            this.adapter.pageInvalidated();
+        }
+    }
+    scrollPositionChanged(position) {
+        this.history.updateRestorationData({ scrollPosition: position });
+    }
+    willFollowLinkToLocation(link, location) {
+        return this.elementIsNavigable(link)
+            && this.locationIsVisitable(location)
+            && this.applicationAllowsFollowingLinkToLocation(link, location);
+    }
+    followedLinkToLocation(link, location) {
+        const action = this.getActionForLink(link);
+        this.visit(location.href, { action });
+    }
+    allowsVisitingLocation(location) {
+        return this.applicationAllowsVisitingLocation(location);
+    }
+    visitProposedToLocation(location, options) {
+        extendURLWithDeprecatedProperties(location);
+        this.adapter.visitProposedToLocation(location, options);
+    }
+    visitStarted(visit) {
+        extendURLWithDeprecatedProperties(visit.location);
+        this.notifyApplicationAfterVisitingLocation(visit.location);
+    }
+    visitCompleted(visit) {
+        this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
+    }
+    willSubmitForm(form, submitter) {
+        return this.elementIsNavigable(form) && this.elementIsNavigable(submitter);
+    }
+    formSubmitted(form, submitter) {
+        this.navigator.submitForm(form, submitter);
+    }
+    pageBecameInteractive() {
+        this.view.lastRenderedLocation = this.location;
+        this.notifyApplicationAfterPageLoad();
+    }
+    pageLoaded() {
+        this.history.assumeControlOfScrollRestoration();
+    }
+    pageWillUnload() {
+        this.history.relinquishControlOfScrollRestoration();
+    }
+    receivedMessageFromStream(message) {
+        this.renderStreamMessage(message);
+    }
+    viewWillCacheSnapshot() {
+        this.notifyApplicationBeforeCachingSnapshot();
+    }
+    viewWillRenderSnapshot({ element }, isPreview) {
+        this.notifyApplicationBeforeRender(element);
+    }
+    viewRenderedSnapshot(snapshot, isPreview) {
+        this.view.lastRenderedLocation = this.history.location;
+        this.notifyApplicationAfterRender();
+    }
+    viewInvalidated() {
+        this.adapter.pageInvalidated();
+    }
+    applicationAllowsFollowingLinkToLocation(link, location) {
+        const event = this.notifyApplicationAfterClickingLinkToLocation(link, location);
+        return !event.defaultPrevented;
+    }
+    applicationAllowsVisitingLocation(location) {
+        const event = this.notifyApplicationBeforeVisitingLocation(location);
+        return !event.defaultPrevented;
+    }
+    notifyApplicationAfterClickingLinkToLocation(link, location) {
+        return dispatch("turbo:click", { target: link, detail: { url: location.href }, cancelable: true });
+    }
+    notifyApplicationBeforeVisitingLocation(location) {
+        return dispatch("turbo:before-visit", { detail: { url: location.href }, cancelable: true });
+    }
+    notifyApplicationAfterVisitingLocation(location) {
+        return dispatch("turbo:visit", { detail: { url: location.href } });
+    }
+    notifyApplicationBeforeCachingSnapshot() {
+        return dispatch("turbo:before-cache");
+    }
+    notifyApplicationBeforeRender(newBody) {
+        return dispatch("turbo:before-render", { detail: { newBody } });
+    }
+    notifyApplicationAfterRender() {
+        return dispatch("turbo:render");
+    }
+    notifyApplicationAfterPageLoad(timing = {}) {
+        return dispatch("turbo:load", { detail: { url: this.location.href, timing } });
+    }
+    getActionForLink(link) {
+        const action = link.getAttribute("data-turbo-action");
+        return isAction(action) ? action : "advance";
+    }
+    elementIsNavigable(element) {
+        const container = element === null || element === void 0 ? void 0 : element.closest("[data-turbo]");
+        if (container) {
+            return container.getAttribute("data-turbo") != "false";
+        }
+        else {
+            return true;
+        }
+    }
+    locationIsVisitable(location) {
+        return isPrefixedBy(location, this.snapshot.rootLocation) && isHTML(location);
+    }
+    get snapshot() {
+        return this.view.snapshot;
+    }
+}
+function extendURLWithDeprecatedProperties(url) {
+    Object.defineProperties(url, deprecatedLocationPropertyDescriptors);
+}
+const deprecatedLocationPropertyDescriptors = {
+    absoluteURL: {
+        get() {
+            return this.toString();
+        }
+    }
+};
+
+const session = new Session;
+const { navigator } = session;
+function start() {
+    session.start();
+}
+function registerAdapter(adapter) {
+    session.registerAdapter(adapter);
+}
+function visit(location, options) {
+    session.visit(location, options);
+}
+function connectStreamSource(source) {
+    session.connectStreamSource(source);
+}
+function disconnectStreamSource(source) {
+    session.disconnectStreamSource(source);
+}
+function renderStreamMessage(message) {
+    session.renderStreamMessage(message);
+}
+function clearCache() {
+    session.clearCache();
+}
+function setProgressBarDelay(delay) {
+    session.setProgressBarDelay(delay);
+}
+
+start();
+
+
+//# sourceMappingURL=turbo.es2017-esm.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/alpine-turbo-drive-adapter/dist/alpine-turbo-drive-adapter.esm.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/alpine-turbo-drive-adapter/dist/alpine-turbo-drive-adapter.esm.js ***!
+  \****************************************************************************************/
+/***/ (() => {
+
+function isValidVersion(required, current) {
+  const requiredArray = required.split('.');
+  const currentArray = current.split('.');
+
+  for (let i = 0; i < requiredArray.length; i++) {
+    if (!currentArray[i] || currentArray[i] < requiredArray[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+function beforeDomReady(callback) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        callback();
+      }
+    });
+  } else {
+    callback();
+  }
+}
+
+class Bridge {
+  init() {
+    // Tag all cloaked elements on first page load.
+    document.body.querySelectorAll('[x-cloak]').forEach(node => {
+      node.setAttribute('data-alpine-was-cloaked', '');
+    });
+    this.configureEventHandlers();
+  }
+
+  setMutationObserverState(state) {
+    if (!window.Alpine.version || !isValidVersion('2.4.0', window.Alpine.version)) {
+      throw new Error('Invalid Alpine version. Please use Alpine 2.4.0 or above');
+    }
+
+    window.Alpine.pauseMutationObserver = state;
+  }
+
+  configureEventHandlers() {
+    // Once Turbolinks finished is magic, we initialise Alpine on the new page
+    // and resume the observer
+    const initCallback = () => {
+      window.Alpine.discoverUninitializedComponents(el => {
+        window.Alpine.initializeComponent(el);
+      });
+      requestAnimationFrame(() => {
+        this.setMutationObserverState(false);
+      });
+    }; // Before swapping the body, clean up any element with x-turbolinks-cached
+    // which do not have any Alpine properties.
+    // Note, at this point all html fragments marked as data-turbolinks-permanent
+    // are already copied over from the previous page so they retain their listener
+    // and custom properties and we don't want to reset them.
+
+
+    const beforeRenderCallback = event => {
+      const newBody = event.data ? event.data.newBody : event.detail.newBody;
+      newBody.querySelectorAll('[data-alpine-generated-me],[x-cloak]').forEach(el => {
+        if (el.hasAttribute('x-cloak')) {
+          // When we get a new document body tag any cloaked elements so we can cloak
+          // them again before caching.
+          el.setAttribute('data-alpine-was-cloaked', '');
+        }
+
+        if (el.hasAttribute('data-alpine-generated-me')) {
+          el.removeAttribute('data-alpine-generated-me');
+
+          if (typeof el.__x_for_key === 'undefined' && typeof el.__x_inserted_me === 'undefined') {
+            el.remove();
+          }
+        }
+      });
+    }; // Pause the the mutation observer to avoid data races, it will be resumed by the turbolinks:load event.
+    // We mark as `data-alpine-generated-m` all elements that are crated by an Alpine templating directives.
+    // The reason is that turbolinks caches pages using cloneNode which removes listeners and custom properties
+    // So we need to propagate this infomation using a HTML attribute. I know, not ideal but I could not think
+    // of a better option.
+    // Note, we can't remove any Alpine generated element as yet because if they live inside an element
+    // marked as data-turbolinks-permanent they need to be copied into the next page.
+    // The coping process happens somewhere between before-cache and before-render.
+
+
+    const beforeCacheCallback = () => {
+      this.setMutationObserverState(true);
+      document.body.querySelectorAll('[x-for],[x-if],[data-alpine-was-cloaked]').forEach(el => {
+        // Cloak any elements again that were tagged when the page was loaded
+        if (el.hasAttribute('data-alpine-was-cloaked')) {
+          el.setAttribute('x-cloak', '');
+          el.removeAttribute('data-alpine-was-cloaked');
+        }
+
+        if (el.hasAttribute('x-for')) {
+          let nextEl = el.nextElementSibling;
+
+          while (nextEl && typeof nextEl.__x_for_key !== 'undefined') {
+            const currEl = nextEl;
+            nextEl = nextEl.nextElementSibling;
+            currEl.setAttribute('data-alpine-generated-me', true);
+          }
+        } else if (el.hasAttribute('x-if')) {
+          const ifEl = el.nextElementSibling;
+
+          if (ifEl && typeof ifEl.__x_inserted_me !== 'undefined') {
+            ifEl.setAttribute('data-alpine-generated-me', true);
+          }
+        }
+      });
+    };
+
+    document.addEventListener('turbo:load', initCallback);
+    document.addEventListener('turbolinks:load', initCallback);
+    document.addEventListener('turbo:before-render', beforeRenderCallback);
+    document.addEventListener('turbolinks:before-render', beforeRenderCallback);
+    document.addEventListener('turbo:before-cache', beforeCacheCallback);
+    document.addEventListener('turbolinks:before-cache', beforeCacheCallback);
+  }
+
+}
+
+if (window.Alpine) {
+  console.error('Alpine-turbo-drive-adapter must be included before AlpineJs');
+} // Polyfill for legacy browsers
+
+
+if (!Object.getOwnPropertyDescriptor(NodeList.prototype, 'forEach')) {
+  Object.defineProperty(NodeList.prototype, 'forEach', Object.getOwnPropertyDescriptor(Array.prototype, 'forEach'));
+} // To better suport x-cloak, we need to init the library when the DOM
+// has been downloaded but before Alpine kicks in
+
+
+beforeDomReady(() => {
+  const bridge = new Bridge();
+  bridge.init();
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/alpinejs/dist/alpine.js":
+/*!**********************************************!*\
+  !*** ./node_modules/alpinejs/dist/alpine.js ***!
+  \**********************************************/
+/***/ (function(module) {
+
+(function (global, factory) {
+   true ? module.exports = factory() :
+  0;
+}(this, (function () { 'use strict';
+
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+
+    return target;
+  }
+
+  // Thanks @stimulus:
+  // https://github.com/stimulusjs/stimulus/blob/master/packages/%40stimulus/core/src/application.ts
+  function domReady() {
+    return new Promise(resolve => {
+      if (document.readyState == "loading") {
+        document.addEventListener("DOMContentLoaded", resolve);
+      } else {
+        resolve();
+      }
+    });
+  }
+  function arrayUnique(array) {
+    return Array.from(new Set(array));
+  }
+  function isTesting() {
+    return navigator.userAgent.includes("Node.js") || navigator.userAgent.includes("jsdom");
+  }
+  function checkedAttrLooseCompare(valueA, valueB) {
+    return valueA == valueB;
+  }
+  function warnIfMalformedTemplate(el, directive) {
+    if (el.tagName.toLowerCase() !== 'template') {
+      console.warn(`Alpine: [${directive}] directive should only be added to <template> tags. See https://github.com/alpinejs/alpine#${directive}`);
+    } else if (el.content.childElementCount !== 1) {
+      console.warn(`Alpine: <template> tag with [${directive}] encountered with multiple element roots. Make sure <template> only has a single child element.`);
+    }
+  }
+  function kebabCase(subject) {
+    return subject.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[_\s]/, '-').toLowerCase();
+  }
+  function camelCase(subject) {
+    return subject.toLowerCase().replace(/-(\w)/g, (match, char) => char.toUpperCase());
+  }
+  function walk(el, callback) {
+    if (callback(el) === false) return;
+    let node = el.firstElementChild;
+
+    while (node) {
+      walk(node, callback);
+      node = node.nextElementSibling;
+    }
+  }
+  function debounce(func, wait) {
+    var timeout;
+    return function () {
+      var context = this,
+          args = arguments;
+
+      var later = function later() {
+        timeout = null;
+        func.apply(context, args);
+      };
+
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  const handleError = (el, expression, error) => {
+    console.warn(`Alpine Error: "${error}"\n\nExpression: "${expression}"\nElement:`, el);
+
+    if (!isTesting()) {
+      throw error;
+    }
+  };
+
+  function tryCatch(cb, {
+    el,
+    expression
+  }) {
+    try {
+      const value = cb();
+      return value instanceof Promise ? value.catch(e => handleError(el, expression, e)) : value;
+    } catch (e) {
+      handleError(el, expression, e);
+    }
+  }
+
+  function saferEval(el, expression, dataContext, additionalHelperVariables = {}) {
+    return tryCatch(() => {
+      if (typeof expression === 'function') {
+        return expression.call(dataContext);
+      }
+
+      return new Function(['$data', ...Object.keys(additionalHelperVariables)], `var __alpine_result; with($data) { __alpine_result = ${expression} }; return __alpine_result`)(dataContext, ...Object.values(additionalHelperVariables));
+    }, {
+      el,
+      expression
+    });
+  }
+  function saferEvalNoReturn(el, expression, dataContext, additionalHelperVariables = {}) {
+    return tryCatch(() => {
+      if (typeof expression === 'function') {
+        return Promise.resolve(expression.call(dataContext, additionalHelperVariables['$event']));
+      }
+
+      let AsyncFunction = Function;
+      /* MODERN-ONLY:START */
+
+      AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+      /* MODERN-ONLY:END */
+      // For the cases when users pass only a function reference to the caller: `x-on:click="foo"`
+      // Where "foo" is a function. Also, we'll pass the function the event instance when we call it.
+
+      if (Object.keys(dataContext).includes(expression)) {
+        let methodReference = new Function(['dataContext', ...Object.keys(additionalHelperVariables)], `with(dataContext) { return ${expression} }`)(dataContext, ...Object.values(additionalHelperVariables));
+
+        if (typeof methodReference === 'function') {
+          return Promise.resolve(methodReference.call(dataContext, additionalHelperVariables['$event']));
+        } else {
+          return Promise.resolve();
+        }
+      }
+
+      return Promise.resolve(new AsyncFunction(['dataContext', ...Object.keys(additionalHelperVariables)], `with(dataContext) { ${expression} }`)(dataContext, ...Object.values(additionalHelperVariables)));
+    }, {
+      el,
+      expression
+    });
+  }
+  const xAttrRE = /^x-(on|bind|data|text|html|model|if|for|show|cloak|transition|ref|spread)\b/;
+  function isXAttr(attr) {
+    const name = replaceAtAndColonWithStandardSyntax(attr.name);
+    return xAttrRE.test(name);
+  }
+  function getXAttrs(el, component, type) {
+    let directives = Array.from(el.attributes).filter(isXAttr).map(parseHtmlAttribute); // Get an object of directives from x-spread.
+
+    let spreadDirective = directives.filter(directive => directive.type === 'spread')[0];
+
+    if (spreadDirective) {
+      let spreadObject = saferEval(el, spreadDirective.expression, component.$data); // Add x-spread directives to the pile of existing directives.
+
+      directives = directives.concat(Object.entries(spreadObject).map(([name, value]) => parseHtmlAttribute({
+        name,
+        value
+      })));
+    }
+
+    if (type) return directives.filter(i => i.type === type);
+    return sortDirectives(directives);
+  }
+
+  function sortDirectives(directives) {
+    let directiveOrder = ['bind', 'model', 'show', 'catch-all'];
+    return directives.sort((a, b) => {
+      let typeA = directiveOrder.indexOf(a.type) === -1 ? 'catch-all' : a.type;
+      let typeB = directiveOrder.indexOf(b.type) === -1 ? 'catch-all' : b.type;
+      return directiveOrder.indexOf(typeA) - directiveOrder.indexOf(typeB);
+    });
+  }
+
+  function parseHtmlAttribute({
+    name,
+    value
+  }) {
+    const normalizedName = replaceAtAndColonWithStandardSyntax(name);
+    const typeMatch = normalizedName.match(xAttrRE);
+    const valueMatch = normalizedName.match(/:([a-zA-Z0-9\-:]+)/);
+    const modifiers = normalizedName.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
+    return {
+      type: typeMatch ? typeMatch[1] : null,
+      value: valueMatch ? valueMatch[1] : null,
+      modifiers: modifiers.map(i => i.replace('.', '')),
+      expression: value
+    };
+  }
+  function isBooleanAttr(attrName) {
+    // As per HTML spec table https://html.spec.whatwg.org/multipage/indices.html#attributes-3:boolean-attribute
+    // Array roughly ordered by estimated usage
+    const booleanAttributes = ['disabled', 'checked', 'required', 'readonly', 'hidden', 'open', 'selected', 'autofocus', 'itemscope', 'multiple', 'novalidate', 'allowfullscreen', 'allowpaymentrequest', 'formnovalidate', 'autoplay', 'controls', 'loop', 'muted', 'playsinline', 'default', 'ismap', 'reversed', 'async', 'defer', 'nomodule'];
+    return booleanAttributes.includes(attrName);
+  }
+  function replaceAtAndColonWithStandardSyntax(name) {
+    if (name.startsWith('@')) {
+      return name.replace('@', 'x-on:');
+    } else if (name.startsWith(':')) {
+      return name.replace(':', 'x-bind:');
+    }
+
+    return name;
+  }
+  function convertClassStringToArray(classList, filterFn = Boolean) {
+    return classList.split(' ').filter(filterFn);
+  }
+  const TRANSITION_TYPE_IN = 'in';
+  const TRANSITION_TYPE_OUT = 'out';
+  const TRANSITION_CANCELLED = 'cancelled';
+  function transitionIn(el, show, reject, component, forceSkip = false) {
+    // We don't want to transition on the initial page load.
+    if (forceSkip) return show();
+
+    if (el.__x_transition && el.__x_transition.type === TRANSITION_TYPE_IN) {
+      // there is already a similar transition going on, this was probably triggered by
+      // a change in a different property, let's just leave the previous one doing its job
+      return;
+    }
+
+    const attrs = getXAttrs(el, component, 'transition');
+    const showAttr = getXAttrs(el, component, 'show')[0]; // If this is triggered by a x-show.transition.
+
+    if (showAttr && showAttr.modifiers.includes('transition')) {
+      let modifiers = showAttr.modifiers; // If x-show.transition.out, we'll skip the "in" transition.
+
+      if (modifiers.includes('out') && !modifiers.includes('in')) return show();
+      const settingBothSidesOfTransition = modifiers.includes('in') && modifiers.includes('out'); // If x-show.transition.in...out... only use "in" related modifiers for this transition.
+
+      modifiers = settingBothSidesOfTransition ? modifiers.filter((i, index) => index < modifiers.indexOf('out')) : modifiers;
+      transitionHelperIn(el, modifiers, show, reject); // Otherwise, we can assume x-transition:enter.
+    } else if (attrs.some(attr => ['enter', 'enter-start', 'enter-end'].includes(attr.value))) {
+      transitionClassesIn(el, component, attrs, show, reject);
+    } else {
+      // If neither, just show that damn thing.
+      show();
+    }
+  }
+  function transitionOut(el, hide, reject, component, forceSkip = false) {
+    // We don't want to transition on the initial page load.
+    if (forceSkip) return hide();
+
+    if (el.__x_transition && el.__x_transition.type === TRANSITION_TYPE_OUT) {
+      // there is already a similar transition going on, this was probably triggered by
+      // a change in a different property, let's just leave the previous one doing its job
+      return;
+    }
+
+    const attrs = getXAttrs(el, component, 'transition');
+    const showAttr = getXAttrs(el, component, 'show')[0];
+
+    if (showAttr && showAttr.modifiers.includes('transition')) {
+      let modifiers = showAttr.modifiers;
+      if (modifiers.includes('in') && !modifiers.includes('out')) return hide();
+      const settingBothSidesOfTransition = modifiers.includes('in') && modifiers.includes('out');
+      modifiers = settingBothSidesOfTransition ? modifiers.filter((i, index) => index > modifiers.indexOf('out')) : modifiers;
+      transitionHelperOut(el, modifiers, settingBothSidesOfTransition, hide, reject);
+    } else if (attrs.some(attr => ['leave', 'leave-start', 'leave-end'].includes(attr.value))) {
+      transitionClassesOut(el, component, attrs, hide, reject);
+    } else {
+      hide();
+    }
+  }
+  function transitionHelperIn(el, modifiers, showCallback, reject) {
+    // Default values inspired by: https://material.io/design/motion/speed.html#duration
+    const styleValues = {
+      duration: modifierValue(modifiers, 'duration', 150),
+      origin: modifierValue(modifiers, 'origin', 'center'),
+      first: {
+        opacity: 0,
+        scale: modifierValue(modifiers, 'scale', 95)
+      },
+      second: {
+        opacity: 1,
+        scale: 100
+      }
+    };
+    transitionHelper(el, modifiers, showCallback, () => {}, reject, styleValues, TRANSITION_TYPE_IN);
+  }
+  function transitionHelperOut(el, modifiers, settingBothSidesOfTransition, hideCallback, reject) {
+    // Make the "out" transition .5x slower than the "in". (Visually better)
+    // HOWEVER, if they explicitly set a duration for the "out" transition,
+    // use that.
+    const duration = settingBothSidesOfTransition ? modifierValue(modifiers, 'duration', 150) : modifierValue(modifiers, 'duration', 150) / 2;
+    const styleValues = {
+      duration: duration,
+      origin: modifierValue(modifiers, 'origin', 'center'),
+      first: {
+        opacity: 1,
+        scale: 100
+      },
+      second: {
+        opacity: 0,
+        scale: modifierValue(modifiers, 'scale', 95)
+      }
+    };
+    transitionHelper(el, modifiers, () => {}, hideCallback, reject, styleValues, TRANSITION_TYPE_OUT);
+  }
+
+  function modifierValue(modifiers, key, fallback) {
+    // If the modifier isn't present, use the default.
+    if (modifiers.indexOf(key) === -1) return fallback; // If it IS present, grab the value after it: x-show.transition.duration.500ms
+
+    const rawValue = modifiers[modifiers.indexOf(key) + 1];
+    if (!rawValue) return fallback;
+
+    if (key === 'scale') {
+      // Check if the very next value is NOT a number and return the fallback.
+      // If x-show.transition.scale, we'll use the default scale value.
+      // That is how a user opts out of the opacity transition.
+      if (!isNumeric(rawValue)) return fallback;
+    }
+
+    if (key === 'duration') {
+      // Support x-show.transition.duration.500ms && duration.500
+      let match = rawValue.match(/([0-9]+)ms/);
+      if (match) return match[1];
+    }
+
+    if (key === 'origin') {
+      // Support chaining origin directions: x-show.transition.top.right
+      if (['top', 'right', 'left', 'center', 'bottom'].includes(modifiers[modifiers.indexOf(key) + 2])) {
+        return [rawValue, modifiers[modifiers.indexOf(key) + 2]].join(' ');
+      }
+    }
+
+    return rawValue;
+  }
+
+  function transitionHelper(el, modifiers, hook1, hook2, reject, styleValues, type) {
+    // clear the previous transition if exists to avoid caching the wrong styles
+    if (el.__x_transition) {
+      el.__x_transition.cancel && el.__x_transition.cancel();
+    } // If the user set these style values, we'll put them back when we're done with them.
+
+
+    const opacityCache = el.style.opacity;
+    const transformCache = el.style.transform;
+    const transformOriginCache = el.style.transformOrigin; // If no modifiers are present: x-show.transition, we'll default to both opacity and scale.
+
+    const noModifiers = !modifiers.includes('opacity') && !modifiers.includes('scale');
+    const transitionOpacity = noModifiers || modifiers.includes('opacity');
+    const transitionScale = noModifiers || modifiers.includes('scale'); // These are the explicit stages of a transition (same stages for in and for out).
+    // This way you can get a birds eye view of the hooks, and the differences
+    // between them.
+
+    const stages = {
+      start() {
+        if (transitionOpacity) el.style.opacity = styleValues.first.opacity;
+        if (transitionScale) el.style.transform = `scale(${styleValues.first.scale / 100})`;
+      },
+
+      during() {
+        if (transitionScale) el.style.transformOrigin = styleValues.origin;
+        el.style.transitionProperty = [transitionOpacity ? `opacity` : ``, transitionScale ? `transform` : ``].join(' ').trim();
+        el.style.transitionDuration = `${styleValues.duration / 1000}s`;
+        el.style.transitionTimingFunction = `cubic-bezier(0.4, 0.0, 0.2, 1)`;
+      },
+
+      show() {
+        hook1();
+      },
+
+      end() {
+        if (transitionOpacity) el.style.opacity = styleValues.second.opacity;
+        if (transitionScale) el.style.transform = `scale(${styleValues.second.scale / 100})`;
+      },
+
+      hide() {
+        hook2();
+      },
+
+      cleanup() {
+        if (transitionOpacity) el.style.opacity = opacityCache;
+        if (transitionScale) el.style.transform = transformCache;
+        if (transitionScale) el.style.transformOrigin = transformOriginCache;
+        el.style.transitionProperty = null;
+        el.style.transitionDuration = null;
+        el.style.transitionTimingFunction = null;
+      }
+
+    };
+    transition(el, stages, type, reject);
+  }
+
+  const ensureStringExpression = (expression, el, component) => {
+    return typeof expression === 'function' ? component.evaluateReturnExpression(el, expression) : expression;
+  };
+
+  function transitionClassesIn(el, component, directives, showCallback, reject) {
+    const enter = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'enter') || {
+      expression: ''
+    }).expression, el, component));
+    const enterStart = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'enter-start') || {
+      expression: ''
+    }).expression, el, component));
+    const enterEnd = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'enter-end') || {
+      expression: ''
+    }).expression, el, component));
+    transitionClasses(el, enter, enterStart, enterEnd, showCallback, () => {}, TRANSITION_TYPE_IN, reject);
+  }
+  function transitionClassesOut(el, component, directives, hideCallback, reject) {
+    const leave = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'leave') || {
+      expression: ''
+    }).expression, el, component));
+    const leaveStart = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'leave-start') || {
+      expression: ''
+    }).expression, el, component));
+    const leaveEnd = convertClassStringToArray(ensureStringExpression((directives.find(i => i.value === 'leave-end') || {
+      expression: ''
+    }).expression, el, component));
+    transitionClasses(el, leave, leaveStart, leaveEnd, () => {}, hideCallback, TRANSITION_TYPE_OUT, reject);
+  }
+  function transitionClasses(el, classesDuring, classesStart, classesEnd, hook1, hook2, type, reject) {
+    // clear the previous transition if exists to avoid caching the wrong classes
+    if (el.__x_transition) {
+      el.__x_transition.cancel && el.__x_transition.cancel();
+    }
+
+    const originalClasses = el.__x_original_classes || [];
+    const stages = {
+      start() {
+        el.classList.add(...classesStart);
+      },
+
+      during() {
+        el.classList.add(...classesDuring);
+      },
+
+      show() {
+        hook1();
+      },
+
+      end() {
+        // Don't remove classes that were in the original class attribute.
+        el.classList.remove(...classesStart.filter(i => !originalClasses.includes(i)));
+        el.classList.add(...classesEnd);
+      },
+
+      hide() {
+        hook2();
+      },
+
+      cleanup() {
+        el.classList.remove(...classesDuring.filter(i => !originalClasses.includes(i)));
+        el.classList.remove(...classesEnd.filter(i => !originalClasses.includes(i)));
+      }
+
+    };
+    transition(el, stages, type, reject);
+  }
+  function transition(el, stages, type, reject) {
+    const finish = once(() => {
+      stages.hide(); // Adding an "isConnected" check, in case the callback
+      // removed the element from the DOM.
+
+      if (el.isConnected) {
+        stages.cleanup();
+      }
+
+      delete el.__x_transition;
+    });
+    el.__x_transition = {
+      // Set transition type so we can avoid clearing transition if the direction is the same
+      type: type,
+      // create a callback for the last stages of the transition so we can call it
+      // from different point and early terminate it. Once will ensure that function
+      // is only called one time.
+      cancel: once(() => {
+        reject(TRANSITION_CANCELLED);
+        finish();
+      }),
+      finish,
+      // This store the next animation frame so we can cancel it
+      nextFrame: null
+    };
+    stages.start();
+    stages.during();
+    el.__x_transition.nextFrame = requestAnimationFrame(() => {
+      // Note: Safari's transitionDuration property will list out comma separated transition durations
+      // for every single transition property. Let's grab the first one and call it a day.
+      let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, '').replace('s', '')) * 1000;
+
+      if (duration === 0) {
+        duration = Number(getComputedStyle(el).animationDuration.replace('s', '')) * 1000;
+      }
+
+      stages.show();
+      el.__x_transition.nextFrame = requestAnimationFrame(() => {
+        stages.end();
+        setTimeout(el.__x_transition.finish, duration);
+      });
+    });
+  }
+  function isNumeric(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+  } // Thanks @vuejs
+  // https://github.com/vuejs/vue/blob/4de4649d9637262a9b007720b59f80ac72a5620c/src/shared/util.js
+
+  function once(callback) {
+    let called = false;
+    return function () {
+      if (!called) {
+        called = true;
+        callback.apply(this, arguments);
+      }
+    };
+  }
+
+  function handleForDirective(component, templateEl, expression, initialUpdate, extraVars) {
+    warnIfMalformedTemplate(templateEl, 'x-for');
+    let iteratorNames = typeof expression === 'function' ? parseForExpression(component.evaluateReturnExpression(templateEl, expression)) : parseForExpression(expression);
+    let items = evaluateItemsAndReturnEmptyIfXIfIsPresentAndFalseOnElement(component, templateEl, iteratorNames, extraVars); // As we walk the array, we'll also walk the DOM (updating/creating as we go).
+
+    let currentEl = templateEl;
+    items.forEach((item, index) => {
+      let iterationScopeVariables = getIterationScopeVariables(iteratorNames, item, index, items, extraVars());
+      let currentKey = generateKeyForIteration(component, templateEl, index, iterationScopeVariables);
+      let nextEl = lookAheadForMatchingKeyedElementAndMoveItIfFound(currentEl.nextElementSibling, currentKey); // If we haven't found a matching key, insert the element at the current position.
+
+      if (!nextEl) {
+        nextEl = addElementInLoopAfterCurrentEl(templateEl, currentEl); // And transition it in if it's not the first page load.
+
+        transitionIn(nextEl, () => {}, () => {}, component, initialUpdate);
+        nextEl.__x_for = iterationScopeVariables;
+        component.initializeElements(nextEl, () => nextEl.__x_for); // Otherwise update the element we found.
+      } else {
+        // Temporarily remove the key indicator to allow the normal "updateElements" to work.
+        delete nextEl.__x_for_key;
+        nextEl.__x_for = iterationScopeVariables;
+        component.updateElements(nextEl, () => nextEl.__x_for);
+      }
+
+      currentEl = nextEl;
+      currentEl.__x_for_key = currentKey;
+    });
+    removeAnyLeftOverElementsFromPreviousUpdate(currentEl, component);
+  } // This was taken from VueJS 2.* core. Thanks Vue!
+
+  function parseForExpression(expression) {
+    let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+    let stripParensRE = /^\(|\)$/g;
+    let forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
+    let inMatch = expression.match(forAliasRE);
+    if (!inMatch) return;
+    let res = {};
+    res.items = inMatch[2].trim();
+    let item = inMatch[1].trim().replace(stripParensRE, '');
+    let iteratorMatch = item.match(forIteratorRE);
+
+    if (iteratorMatch) {
+      res.item = item.replace(forIteratorRE, '').trim();
+      res.index = iteratorMatch[1].trim();
+
+      if (iteratorMatch[2]) {
+        res.collection = iteratorMatch[2].trim();
+      }
+    } else {
+      res.item = item;
+    }
+
+    return res;
+  }
+
+  function getIterationScopeVariables(iteratorNames, item, index, items, extraVars) {
+    // We must create a new object, so each iteration has a new scope
+    let scopeVariables = extraVars ? _objectSpread2({}, extraVars) : {};
+    scopeVariables[iteratorNames.item] = item;
+    if (iteratorNames.index) scopeVariables[iteratorNames.index] = index;
+    if (iteratorNames.collection) scopeVariables[iteratorNames.collection] = items;
+    return scopeVariables;
+  }
+
+  function generateKeyForIteration(component, el, index, iterationScopeVariables) {
+    let bindKeyAttribute = getXAttrs(el, component, 'bind').filter(attr => attr.value === 'key')[0]; // If the dev hasn't specified a key, just return the index of the iteration.
+
+    if (!bindKeyAttribute) return index;
+    return component.evaluateReturnExpression(el, bindKeyAttribute.expression, () => iterationScopeVariables);
+  }
+
+  function evaluateItemsAndReturnEmptyIfXIfIsPresentAndFalseOnElement(component, el, iteratorNames, extraVars) {
+    let ifAttribute = getXAttrs(el, component, 'if')[0];
+
+    if (ifAttribute && !component.evaluateReturnExpression(el, ifAttribute.expression)) {
+      return [];
+    }
+
+    let items = component.evaluateReturnExpression(el, iteratorNames.items, extraVars); // This adds support for the `i in n` syntax.
+
+    if (isNumeric(items) && items > 0) {
+      items = Array.from(Array(items).keys(), i => i + 1);
+    }
+
+    return items;
+  }
+
+  function addElementInLoopAfterCurrentEl(templateEl, currentEl) {
+    let clone = document.importNode(templateEl.content, true);
+    currentEl.parentElement.insertBefore(clone, currentEl.nextElementSibling);
+    return currentEl.nextElementSibling;
+  }
+
+  function lookAheadForMatchingKeyedElementAndMoveItIfFound(nextEl, currentKey) {
+    if (!nextEl) return; // If we are already past the x-for generated elements, we don't need to look ahead.
+
+    if (nextEl.__x_for_key === undefined) return; // If the the key's DO match, no need to look ahead.
+
+    if (nextEl.__x_for_key === currentKey) return nextEl; // If they don't, we'll look ahead for a match.
+    // If we find it, we'll move it to the current position in the loop.
+
+    let tmpNextEl = nextEl;
+
+    while (tmpNextEl) {
+      if (tmpNextEl.__x_for_key === currentKey) {
+        return tmpNextEl.parentElement.insertBefore(tmpNextEl, nextEl);
+      }
+
+      tmpNextEl = tmpNextEl.nextElementSibling && tmpNextEl.nextElementSibling.__x_for_key !== undefined ? tmpNextEl.nextElementSibling : false;
+    }
+  }
+
+  function removeAnyLeftOverElementsFromPreviousUpdate(currentEl, component) {
+    var nextElementFromOldLoop = currentEl.nextElementSibling && currentEl.nextElementSibling.__x_for_key !== undefined ? currentEl.nextElementSibling : false;
+
+    while (nextElementFromOldLoop) {
+      let nextElementFromOldLoopImmutable = nextElementFromOldLoop;
+      let nextSibling = nextElementFromOldLoop.nextElementSibling;
+      transitionOut(nextElementFromOldLoop, () => {
+        nextElementFromOldLoopImmutable.remove();
+      }, () => {}, component);
+      nextElementFromOldLoop = nextSibling && nextSibling.__x_for_key !== undefined ? nextSibling : false;
+    }
+  }
+
+  function handleAttributeBindingDirective(component, el, attrName, expression, extraVars, attrType, modifiers) {
+    var value = component.evaluateReturnExpression(el, expression, extraVars);
+
+    if (attrName === 'value') {
+      if (Alpine.ignoreFocusedForValueBinding && document.activeElement.isSameNode(el)) return; // If nested model key is undefined, set the default value to empty string.
+
+      if (value === undefined && expression.match(/\./)) {
+        value = '';
+      }
+
+      if (el.type === 'radio') {
+        // Set radio value from x-bind:value, if no "value" attribute exists.
+        // If there are any initial state values, radio will have a correct
+        // "checked" value since x-bind:value is processed before x-model.
+        if (el.attributes.value === undefined && attrType === 'bind') {
+          el.value = value;
+        } else if (attrType !== 'bind') {
+          el.checked = checkedAttrLooseCompare(el.value, value);
+        }
+      } else if (el.type === 'checkbox') {
+        // If we are explicitly binding a string to the :value, set the string,
+        // If the value is a boolean, leave it alone, it will be set to "on"
+        // automatically.
+        if (typeof value !== 'boolean' && ![null, undefined].includes(value) && attrType === 'bind') {
+          el.value = String(value);
+        } else if (attrType !== 'bind') {
+          if (Array.isArray(value)) {
+            // I'm purposely not using Array.includes here because it's
+            // strict, and because of Numeric/String mis-casting, I
+            // want the "includes" to be "fuzzy".
+            el.checked = value.some(val => checkedAttrLooseCompare(val, el.value));
+          } else {
+            el.checked = !!value;
+          }
+        }
+      } else if (el.tagName === 'SELECT') {
+        updateSelect(el, value);
+      } else {
+        if (el.value === value) return;
+        el.value = value;
+      }
+    } else if (attrName === 'class') {
+      if (Array.isArray(value)) {
+        const originalClasses = el.__x_original_classes || [];
+        el.setAttribute('class', arrayUnique(originalClasses.concat(value)).join(' '));
+      } else if (typeof value === 'object') {
+        // Sorting the keys / class names by their boolean value will ensure that
+        // anything that evaluates to `false` and needs to remove classes is run first.
+        const keysSortedByBooleanValue = Object.keys(value).sort((a, b) => value[a] - value[b]);
+        keysSortedByBooleanValue.forEach(classNames => {
+          if (value[classNames]) {
+            convertClassStringToArray(classNames).forEach(className => el.classList.add(className));
+          } else {
+            convertClassStringToArray(classNames).forEach(className => el.classList.remove(className));
+          }
+        });
+      } else {
+        const originalClasses = el.__x_original_classes || [];
+        const newClasses = value ? convertClassStringToArray(value) : [];
+        el.setAttribute('class', arrayUnique(originalClasses.concat(newClasses)).join(' '));
+      }
+    } else {
+      attrName = modifiers.includes('camel') ? camelCase(attrName) : attrName; // If an attribute's bound value is null, undefined or false, remove the attribute
+
+      if ([null, undefined, false].includes(value)) {
+        el.removeAttribute(attrName);
+      } else {
+        isBooleanAttr(attrName) ? setIfChanged(el, attrName, attrName) : setIfChanged(el, attrName, value);
+      }
+    }
+  }
+
+  function setIfChanged(el, attrName, value) {
+    if (el.getAttribute(attrName) != value) {
+      el.setAttribute(attrName, value);
+    }
+  }
+
+  function updateSelect(el, value) {
+    const arrayWrappedValue = [].concat(value).map(value => {
+      return value + '';
+    });
+    Array.from(el.options).forEach(option => {
+      option.selected = arrayWrappedValue.includes(option.value || option.text);
+    });
+  }
+
+  function handleTextDirective(el, output, expression) {
+    // If nested model key is undefined, set the default value to empty string.
+    if (output === undefined && expression.match(/\./)) {
+      output = '';
+    }
+
+    el.textContent = output;
+  }
+
+  function handleHtmlDirective(component, el, expression, extraVars) {
+    el.innerHTML = component.evaluateReturnExpression(el, expression, extraVars);
+  }
+
+  function handleShowDirective(component, el, value, modifiers, initialUpdate = false) {
+    const hide = () => {
+      el.style.display = 'none';
+      el.__x_is_shown = false;
+    };
+
+    const show = () => {
+      if (el.style.length === 1 && el.style.display === 'none') {
+        el.removeAttribute('style');
+      } else {
+        el.style.removeProperty('display');
+      }
+
+      el.__x_is_shown = true;
+    };
+
+    if (initialUpdate === true) {
+      if (value) {
+        show();
+      } else {
+        hide();
+      }
+
+      return;
+    }
+
+    const handle = (resolve, reject) => {
+      if (value) {
+        if (el.style.display === 'none' || el.__x_transition) {
+          transitionIn(el, () => {
+            show();
+          }, reject, component);
+        }
+
+        resolve(() => {});
+      } else {
+        if (el.style.display !== 'none') {
+          transitionOut(el, () => {
+            resolve(() => {
+              hide();
+            });
+          }, reject, component);
+        } else {
+          resolve(() => {});
+        }
+      }
+    }; // The working of x-show is a bit complex because we need to
+    // wait for any child transitions to finish before hiding
+    // some element. Also, this has to be done recursively.
+    // If x-show.immediate, foregoe the waiting.
+
+
+    if (modifiers.includes('immediate')) {
+      handle(finish => finish(), () => {});
+      return;
+    } // x-show is encountered during a DOM tree walk. If an element
+    // we encounter is NOT a child of another x-show element we
+    // can execute the previous x-show stack (if one exists).
+
+
+    if (component.showDirectiveLastElement && !component.showDirectiveLastElement.contains(el)) {
+      component.executeAndClearRemainingShowDirectiveStack();
+    }
+
+    component.showDirectiveStack.push(handle);
+    component.showDirectiveLastElement = el;
+  }
+
+  function handleIfDirective(component, el, expressionResult, initialUpdate, extraVars) {
+    warnIfMalformedTemplate(el, 'x-if');
+    const elementHasAlreadyBeenAdded = el.nextElementSibling && el.nextElementSibling.__x_inserted_me === true;
+
+    if (expressionResult && (!elementHasAlreadyBeenAdded || el.__x_transition)) {
+      const clone = document.importNode(el.content, true);
+      el.parentElement.insertBefore(clone, el.nextElementSibling);
+      transitionIn(el.nextElementSibling, () => {}, () => {}, component, initialUpdate);
+      component.initializeElements(el.nextElementSibling, extraVars);
+      el.nextElementSibling.__x_inserted_me = true;
+    } else if (!expressionResult && elementHasAlreadyBeenAdded) {
+      transitionOut(el.nextElementSibling, () => {
+        el.nextElementSibling.remove();
+      }, () => {}, component, initialUpdate);
+    }
+  }
+
+  function registerListener(component, el, event, modifiers, expression, extraVars = {}) {
+    const options = {
+      passive: modifiers.includes('passive')
+    };
+
+    if (modifiers.includes('camel')) {
+      event = camelCase(event);
+    }
+
+    if (modifiers.includes('away')) {
+      let handler = e => {
+        // Don't do anything if the click came from the element or within it.
+        if (el.contains(e.target)) return; // Don't do anything if this element isn't currently visible.
+
+        if (el.offsetWidth < 1 && el.offsetHeight < 1) return; // Now that we are sure the element is visible, AND the click
+        // is from outside it, let's run the expression.
+
+        runListenerHandler(component, expression, e, extraVars);
+
+        if (modifiers.includes('once')) {
+          document.removeEventListener(event, handler, options);
+        }
+      }; // Listen for this event at the root level.
+
+
+      document.addEventListener(event, handler, options);
+    } else {
+      let listenerTarget = modifiers.includes('window') ? window : modifiers.includes('document') ? document : el;
+
+      let handler = e => {
+        // Remove this global event handler if the element that declared it
+        // has been removed. It's now stale.
+        if (listenerTarget === window || listenerTarget === document) {
+          if (!document.body.contains(el)) {
+            listenerTarget.removeEventListener(event, handler, options);
+            return;
+          }
+        }
+
+        if (isKeyEvent(event)) {
+          if (isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) {
+            return;
+          }
+        }
+
+        if (modifiers.includes('prevent')) e.preventDefault();
+        if (modifiers.includes('stop')) e.stopPropagation(); // If the .self modifier isn't present, or if it is present and
+        // the target element matches the element we are registering the
+        // event on, run the handler
+
+        if (!modifiers.includes('self') || e.target === el) {
+          const returnValue = runListenerHandler(component, expression, e, extraVars);
+          returnValue.then(value => {
+            if (value === false) {
+              e.preventDefault();
+            } else {
+              if (modifiers.includes('once')) {
+                listenerTarget.removeEventListener(event, handler, options);
+              }
+            }
+          });
+        }
+      };
+
+      if (modifiers.includes('debounce')) {
+        let nextModifier = modifiers[modifiers.indexOf('debounce') + 1] || 'invalid-wait';
+        let wait = isNumeric(nextModifier.split('ms')[0]) ? Number(nextModifier.split('ms')[0]) : 250;
+        handler = debounce(handler, wait);
+      }
+
+      listenerTarget.addEventListener(event, handler, options);
+    }
+  }
+
+  function runListenerHandler(component, expression, e, extraVars) {
+    return component.evaluateCommandExpression(e.target, expression, () => {
+      return _objectSpread2(_objectSpread2({}, extraVars()), {}, {
+        '$event': e
+      });
+    });
+  }
+
+  function isKeyEvent(event) {
+    return ['keydown', 'keyup'].includes(event);
+  }
+
+  function isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
+    let keyModifiers = modifiers.filter(i => {
+      return !['window', 'document', 'prevent', 'stop'].includes(i);
+    });
+
+    if (keyModifiers.includes('debounce')) {
+      let debounceIndex = keyModifiers.indexOf('debounce');
+      keyModifiers.splice(debounceIndex, isNumeric((keyModifiers[debounceIndex + 1] || 'invalid-wait').split('ms')[0]) ? 2 : 1);
+    } // If no modifier is specified, we'll call it a press.
+
+
+    if (keyModifiers.length === 0) return false; // If one is passed, AND it matches the key pressed, we'll call it a press.
+
+    if (keyModifiers.length === 1 && keyModifiers[0] === keyToModifier(e.key)) return false; // The user is listening for key combinations.
+
+    const systemKeyModifiers = ['ctrl', 'shift', 'alt', 'meta', 'cmd', 'super'];
+    const selectedSystemKeyModifiers = systemKeyModifiers.filter(modifier => keyModifiers.includes(modifier));
+    keyModifiers = keyModifiers.filter(i => !selectedSystemKeyModifiers.includes(i));
+
+    if (selectedSystemKeyModifiers.length > 0) {
+      const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter(modifier => {
+        // Alias "cmd" and "super" to "meta"
+        if (modifier === 'cmd' || modifier === 'super') modifier = 'meta';
+        return e[`${modifier}Key`];
+      }); // If all the modifiers selected are pressed, ...
+
+      if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
+        // AND the remaining key is pressed as well. It's a press.
+        if (keyModifiers[0] === keyToModifier(e.key)) return false;
+      }
+    } // We'll call it NOT a valid keypress.
+
+
+    return true;
+  }
+
+  function keyToModifier(key) {
+    switch (key) {
+      case '/':
+        return 'slash';
+
+      case ' ':
+      case 'Spacebar':
+        return 'space';
+
+      default:
+        return key && kebabCase(key);
+    }
+  }
+
+  function registerModelListener(component, el, modifiers, expression, extraVars) {
+    // If the element we are binding to is a select, a radio, or checkbox
+    // we'll listen for the change event instead of the "input" event.
+    var event = el.tagName.toLowerCase() === 'select' || ['checkbox', 'radio'].includes(el.type) || modifiers.includes('lazy') ? 'change' : 'input';
+    const listenerExpression = `${expression} = rightSideOfExpression($event, ${expression})`;
+    registerListener(component, el, event, modifiers, listenerExpression, () => {
+      return _objectSpread2(_objectSpread2({}, extraVars()), {}, {
+        rightSideOfExpression: generateModelAssignmentFunction(el, modifiers, expression)
+      });
+    });
+  }
+
+  function generateModelAssignmentFunction(el, modifiers, expression) {
+    if (el.type === 'radio') {
+      // Radio buttons only work properly when they share a name attribute.
+      // People might assume we take care of that for them, because
+      // they already set a shared "x-model" attribute.
+      if (!el.hasAttribute('name')) el.setAttribute('name', expression);
+    }
+
+    return (event, currentValue) => {
+      // Check for event.detail due to an issue where IE11 handles other events as a CustomEvent.
+      if (event instanceof CustomEvent && event.detail) {
+        return event.detail;
+      } else if (el.type === 'checkbox') {
+        // If the data we are binding to is an array, toggle its value inside the array.
+        if (Array.isArray(currentValue)) {
+          const newValue = modifiers.includes('number') ? safeParseNumber(event.target.value) : event.target.value;
+          return event.target.checked ? currentValue.concat([newValue]) : currentValue.filter(el => !checkedAttrLooseCompare(el, newValue));
+        } else {
+          return event.target.checked;
+        }
+      } else if (el.tagName.toLowerCase() === 'select' && el.multiple) {
+        return modifiers.includes('number') ? Array.from(event.target.selectedOptions).map(option => {
+          const rawValue = option.value || option.text;
+          return safeParseNumber(rawValue);
+        }) : Array.from(event.target.selectedOptions).map(option => {
+          return option.value || option.text;
+        });
+      } else {
+        const rawValue = event.target.value;
+        return modifiers.includes('number') ? safeParseNumber(rawValue) : modifiers.includes('trim') ? rawValue.trim() : rawValue;
+      }
+    };
+  }
+
+  function safeParseNumber(rawValue) {
+    const number = rawValue ? parseFloat(rawValue) : null;
+    return isNumeric(number) ? number : rawValue;
+  }
+
+  /**
+   * Copyright (C) 2017 salesforce.com, inc.
+   */
+  const { isArray } = Array;
+  const { getPrototypeOf, create: ObjectCreate, defineProperty: ObjectDefineProperty, defineProperties: ObjectDefineProperties, isExtensible, getOwnPropertyDescriptor, getOwnPropertyNames, getOwnPropertySymbols, preventExtensions, hasOwnProperty, } = Object;
+  const { push: ArrayPush, concat: ArrayConcat, map: ArrayMap, } = Array.prototype;
+  function isUndefined(obj) {
+      return obj === undefined;
+  }
+  function isFunction(obj) {
+      return typeof obj === 'function';
+  }
+  function isObject(obj) {
+      return typeof obj === 'object';
+  }
+  const proxyToValueMap = new WeakMap();
+  function registerProxy(proxy, value) {
+      proxyToValueMap.set(proxy, value);
+  }
+  const unwrap = (replicaOrAny) => proxyToValueMap.get(replicaOrAny) || replicaOrAny;
+
+  function wrapValue(membrane, value) {
+      return membrane.valueIsObservable(value) ? membrane.getProxy(value) : value;
+  }
+  /**
+   * Unwrap property descriptors will set value on original descriptor
+   * We only need to unwrap if value is specified
+   * @param descriptor external descrpitor provided to define new property on original value
+   */
+  function unwrapDescriptor(descriptor) {
+      if (hasOwnProperty.call(descriptor, 'value')) {
+          descriptor.value = unwrap(descriptor.value);
+      }
+      return descriptor;
+  }
+  function lockShadowTarget(membrane, shadowTarget, originalTarget) {
+      const targetKeys = ArrayConcat.call(getOwnPropertyNames(originalTarget), getOwnPropertySymbols(originalTarget));
+      targetKeys.forEach((key) => {
+          let descriptor = getOwnPropertyDescriptor(originalTarget, key);
+          // We do not need to wrap the descriptor if configurable
+          // Because we can deal with wrapping it when user goes through
+          // Get own property descriptor. There is also a chance that this descriptor
+          // could change sometime in the future, so we can defer wrapping
+          // until we need to
+          if (!descriptor.configurable) {
+              descriptor = wrapDescriptor(membrane, descriptor, wrapValue);
+          }
+          ObjectDefineProperty(shadowTarget, key, descriptor);
+      });
+      preventExtensions(shadowTarget);
+  }
+  class ReactiveProxyHandler {
+      constructor(membrane, value) {
+          this.originalTarget = value;
+          this.membrane = membrane;
+      }
+      get(shadowTarget, key) {
+          const { originalTarget, membrane } = this;
+          const value = originalTarget[key];
+          const { valueObserved } = membrane;
+          valueObserved(originalTarget, key);
+          return membrane.getProxy(value);
+      }
+      set(shadowTarget, key, value) {
+          const { originalTarget, membrane: { valueMutated } } = this;
+          const oldValue = originalTarget[key];
+          if (oldValue !== value) {
+              originalTarget[key] = value;
+              valueMutated(originalTarget, key);
+          }
+          else if (key === 'length' && isArray(originalTarget)) {
+              // fix for issue #236: push will add the new index, and by the time length
+              // is updated, the internal length is already equal to the new length value
+              // therefore, the oldValue is equal to the value. This is the forking logic
+              // to support this use case.
+              valueMutated(originalTarget, key);
+          }
+          return true;
+      }
+      deleteProperty(shadowTarget, key) {
+          const { originalTarget, membrane: { valueMutated } } = this;
+          delete originalTarget[key];
+          valueMutated(originalTarget, key);
+          return true;
+      }
+      apply(shadowTarget, thisArg, argArray) {
+          /* No op */
+      }
+      construct(target, argArray, newTarget) {
+          /* No op */
+      }
+      has(shadowTarget, key) {
+          const { originalTarget, membrane: { valueObserved } } = this;
+          valueObserved(originalTarget, key);
+          return key in originalTarget;
+      }
+      ownKeys(shadowTarget) {
+          const { originalTarget } = this;
+          return ArrayConcat.call(getOwnPropertyNames(originalTarget), getOwnPropertySymbols(originalTarget));
+      }
+      isExtensible(shadowTarget) {
+          const shadowIsExtensible = isExtensible(shadowTarget);
+          if (!shadowIsExtensible) {
+              return shadowIsExtensible;
+          }
+          const { originalTarget, membrane } = this;
+          const targetIsExtensible = isExtensible(originalTarget);
+          if (!targetIsExtensible) {
+              lockShadowTarget(membrane, shadowTarget, originalTarget);
+          }
+          return targetIsExtensible;
+      }
+      setPrototypeOf(shadowTarget, prototype) {
+      }
+      getPrototypeOf(shadowTarget) {
+          const { originalTarget } = this;
+          return getPrototypeOf(originalTarget);
+      }
+      getOwnPropertyDescriptor(shadowTarget, key) {
+          const { originalTarget, membrane } = this;
+          const { valueObserved } = this.membrane;
+          // keys looked up via hasOwnProperty need to be reactive
+          valueObserved(originalTarget, key);
+          let desc = getOwnPropertyDescriptor(originalTarget, key);
+          if (isUndefined(desc)) {
+              return desc;
+          }
+          const shadowDescriptor = getOwnPropertyDescriptor(shadowTarget, key);
+          if (!isUndefined(shadowDescriptor)) {
+              return shadowDescriptor;
+          }
+          // Note: by accessing the descriptor, the key is marked as observed
+          // but access to the value, setter or getter (if available) cannot observe
+          // mutations, just like regular methods, in which case we just do nothing.
+          desc = wrapDescriptor(membrane, desc, wrapValue);
+          if (!desc.configurable) {
+              // If descriptor from original target is not configurable,
+              // We must copy the wrapped descriptor over to the shadow target.
+              // Otherwise, proxy will throw an invariant error.
+              // This is our last chance to lock the value.
+              // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/getOwnPropertyDescriptor#Invariants
+              ObjectDefineProperty(shadowTarget, key, desc);
+          }
+          return desc;
+      }
+      preventExtensions(shadowTarget) {
+          const { originalTarget, membrane } = this;
+          lockShadowTarget(membrane, shadowTarget, originalTarget);
+          preventExtensions(originalTarget);
+          return true;
+      }
+      defineProperty(shadowTarget, key, descriptor) {
+          const { originalTarget, membrane } = this;
+          const { valueMutated } = membrane;
+          const { configurable } = descriptor;
+          // We have to check for value in descriptor
+          // because Object.freeze(proxy) calls this method
+          // with only { configurable: false, writeable: false }
+          // Additionally, method will only be called with writeable:false
+          // if the descriptor has a value, as opposed to getter/setter
+          // So we can just check if writable is present and then see if
+          // value is present. This eliminates getter and setter descriptors
+          if (hasOwnProperty.call(descriptor, 'writable') && !hasOwnProperty.call(descriptor, 'value')) {
+              const originalDescriptor = getOwnPropertyDescriptor(originalTarget, key);
+              descriptor.value = originalDescriptor.value;
+          }
+          ObjectDefineProperty(originalTarget, key, unwrapDescriptor(descriptor));
+          if (configurable === false) {
+              ObjectDefineProperty(shadowTarget, key, wrapDescriptor(membrane, descriptor, wrapValue));
+          }
+          valueMutated(originalTarget, key);
+          return true;
+      }
+  }
+
+  function wrapReadOnlyValue(membrane, value) {
+      return membrane.valueIsObservable(value) ? membrane.getReadOnlyProxy(value) : value;
+  }
+  class ReadOnlyHandler {
+      constructor(membrane, value) {
+          this.originalTarget = value;
+          this.membrane = membrane;
+      }
+      get(shadowTarget, key) {
+          const { membrane, originalTarget } = this;
+          const value = originalTarget[key];
+          const { valueObserved } = membrane;
+          valueObserved(originalTarget, key);
+          return membrane.getReadOnlyProxy(value);
+      }
+      set(shadowTarget, key, value) {
+          return false;
+      }
+      deleteProperty(shadowTarget, key) {
+          return false;
+      }
+      apply(shadowTarget, thisArg, argArray) {
+          /* No op */
+      }
+      construct(target, argArray, newTarget) {
+          /* No op */
+      }
+      has(shadowTarget, key) {
+          const { originalTarget, membrane: { valueObserved } } = this;
+          valueObserved(originalTarget, key);
+          return key in originalTarget;
+      }
+      ownKeys(shadowTarget) {
+          const { originalTarget } = this;
+          return ArrayConcat.call(getOwnPropertyNames(originalTarget), getOwnPropertySymbols(originalTarget));
+      }
+      setPrototypeOf(shadowTarget, prototype) {
+      }
+      getOwnPropertyDescriptor(shadowTarget, key) {
+          const { originalTarget, membrane } = this;
+          const { valueObserved } = membrane;
+          // keys looked up via hasOwnProperty need to be reactive
+          valueObserved(originalTarget, key);
+          let desc = getOwnPropertyDescriptor(originalTarget, key);
+          if (isUndefined(desc)) {
+              return desc;
+          }
+          const shadowDescriptor = getOwnPropertyDescriptor(shadowTarget, key);
+          if (!isUndefined(shadowDescriptor)) {
+              return shadowDescriptor;
+          }
+          // Note: by accessing the descriptor, the key is marked as observed
+          // but access to the value or getter (if available) cannot be observed,
+          // just like regular methods, in which case we just do nothing.
+          desc = wrapDescriptor(membrane, desc, wrapReadOnlyValue);
+          if (hasOwnProperty.call(desc, 'set')) {
+              desc.set = undefined; // readOnly membrane does not allow setters
+          }
+          if (!desc.configurable) {
+              // If descriptor from original target is not configurable,
+              // We must copy the wrapped descriptor over to the shadow target.
+              // Otherwise, proxy will throw an invariant error.
+              // This is our last chance to lock the value.
+              // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/getOwnPropertyDescriptor#Invariants
+              ObjectDefineProperty(shadowTarget, key, desc);
+          }
+          return desc;
+      }
+      preventExtensions(shadowTarget) {
+          return false;
+      }
+      defineProperty(shadowTarget, key, descriptor) {
+          return false;
+      }
+  }
+  function createShadowTarget(value) {
+      let shadowTarget = undefined;
+      if (isArray(value)) {
+          shadowTarget = [];
+      }
+      else if (isObject(value)) {
+          shadowTarget = {};
+      }
+      return shadowTarget;
+  }
+  const ObjectDotPrototype = Object.prototype;
+  function defaultValueIsObservable(value) {
+      // intentionally checking for null
+      if (value === null) {
+          return false;
+      }
+      // treat all non-object types, including undefined, as non-observable values
+      if (typeof value !== 'object') {
+          return false;
+      }
+      if (isArray(value)) {
+          return true;
+      }
+      const proto = getPrototypeOf(value);
+      return (proto === ObjectDotPrototype || proto === null || getPrototypeOf(proto) === null);
+  }
+  const defaultValueObserved = (obj, key) => {
+      /* do nothing */
+  };
+  const defaultValueMutated = (obj, key) => {
+      /* do nothing */
+  };
+  const defaultValueDistortion = (value) => value;
+  function wrapDescriptor(membrane, descriptor, getValue) {
+      const { set, get } = descriptor;
+      if (hasOwnProperty.call(descriptor, 'value')) {
+          descriptor.value = getValue(membrane, descriptor.value);
+      }
+      else {
+          if (!isUndefined(get)) {
+              descriptor.get = function () {
+                  // invoking the original getter with the original target
+                  return getValue(membrane, get.call(unwrap(this)));
+              };
+          }
+          if (!isUndefined(set)) {
+              descriptor.set = function (value) {
+                  // At this point we don't have a clear indication of whether
+                  // or not a valid mutation will occur, we don't have the key,
+                  // and we are not sure why and how they are invoking this setter.
+                  // Nevertheless we preserve the original semantics by invoking the
+                  // original setter with the original target and the unwrapped value
+                  set.call(unwrap(this), membrane.unwrapProxy(value));
+              };
+          }
+      }
+      return descriptor;
+  }
+  class ReactiveMembrane {
+      constructor(options) {
+          this.valueDistortion = defaultValueDistortion;
+          this.valueMutated = defaultValueMutated;
+          this.valueObserved = defaultValueObserved;
+          this.valueIsObservable = defaultValueIsObservable;
+          this.objectGraph = new WeakMap();
+          if (!isUndefined(options)) {
+              const { valueDistortion, valueMutated, valueObserved, valueIsObservable } = options;
+              this.valueDistortion = isFunction(valueDistortion) ? valueDistortion : defaultValueDistortion;
+              this.valueMutated = isFunction(valueMutated) ? valueMutated : defaultValueMutated;
+              this.valueObserved = isFunction(valueObserved) ? valueObserved : defaultValueObserved;
+              this.valueIsObservable = isFunction(valueIsObservable) ? valueIsObservable : defaultValueIsObservable;
+          }
+      }
+      getProxy(value) {
+          const unwrappedValue = unwrap(value);
+          const distorted = this.valueDistortion(unwrappedValue);
+          if (this.valueIsObservable(distorted)) {
+              const o = this.getReactiveState(unwrappedValue, distorted);
+              // when trying to extract the writable version of a readonly
+              // we return the readonly.
+              return o.readOnly === value ? value : o.reactive;
+          }
+          return distorted;
+      }
+      getReadOnlyProxy(value) {
+          value = unwrap(value);
+          const distorted = this.valueDistortion(value);
+          if (this.valueIsObservable(distorted)) {
+              return this.getReactiveState(value, distorted).readOnly;
+          }
+          return distorted;
+      }
+      unwrapProxy(p) {
+          return unwrap(p);
+      }
+      getReactiveState(value, distortedValue) {
+          const { objectGraph, } = this;
+          let reactiveState = objectGraph.get(distortedValue);
+          if (reactiveState) {
+              return reactiveState;
+          }
+          const membrane = this;
+          reactiveState = {
+              get reactive() {
+                  const reactiveHandler = new ReactiveProxyHandler(membrane, distortedValue);
+                  // caching the reactive proxy after the first time it is accessed
+                  const proxy = new Proxy(createShadowTarget(distortedValue), reactiveHandler);
+                  registerProxy(proxy, value);
+                  ObjectDefineProperty(this, 'reactive', { value: proxy });
+                  return proxy;
+              },
+              get readOnly() {
+                  const readOnlyHandler = new ReadOnlyHandler(membrane, distortedValue);
+                  // caching the readOnly proxy after the first time it is accessed
+                  const proxy = new Proxy(createShadowTarget(distortedValue), readOnlyHandler);
+                  registerProxy(proxy, value);
+                  ObjectDefineProperty(this, 'readOnly', { value: proxy });
+                  return proxy;
+              }
+          };
+          objectGraph.set(distortedValue, reactiveState);
+          return reactiveState;
+      }
+  }
+  /** version: 0.26.0 */
+
+  function wrap(data, mutationCallback) {
+
+    let membrane = new ReactiveMembrane({
+      valueMutated(target, key) {
+        mutationCallback(target, key);
+      }
+
+    });
+    return {
+      data: membrane.getProxy(data),
+      membrane: membrane
+    };
+  }
+  function unwrap$1(membrane, observable) {
+    let unwrappedData = membrane.unwrapProxy(observable);
+    let copy = {};
+    Object.keys(unwrappedData).forEach(key => {
+      if (['$el', '$refs', '$nextTick', '$watch'].includes(key)) return;
+      copy[key] = unwrappedData[key];
+    });
+    return copy;
+  }
+
+  class Component {
+    constructor(el, componentForClone = null) {
+      this.$el = el;
+      const dataAttr = this.$el.getAttribute('x-data');
+      const dataExpression = dataAttr === '' ? '{}' : dataAttr;
+      const initExpression = this.$el.getAttribute('x-init');
+      let dataExtras = {
+        $el: this.$el
+      };
+      let canonicalComponentElementReference = componentForClone ? componentForClone.$el : this.$el;
+      Object.entries(Alpine.magicProperties).forEach(([name, callback]) => {
+        Object.defineProperty(dataExtras, `$${name}`, {
+          get: function get() {
+            return callback(canonicalComponentElementReference);
+          }
+        });
+      });
+      this.unobservedData = componentForClone ? componentForClone.getUnobservedData() : saferEval(el, dataExpression, dataExtras);
+      // Construct a Proxy-based observable. This will be used to handle reactivity.
+
+      let {
+        membrane,
+        data
+      } = this.wrapDataInObservable(this.unobservedData);
+      this.$data = data;
+      this.membrane = membrane; // After making user-supplied data methods reactive, we can now add
+      // our magic properties to the original data for access.
+
+      this.unobservedData.$el = this.$el;
+      this.unobservedData.$refs = this.getRefsProxy();
+      this.nextTickStack = [];
+
+      this.unobservedData.$nextTick = callback => {
+        this.nextTickStack.push(callback);
+      };
+
+      this.watchers = {};
+
+      this.unobservedData.$watch = (property, callback) => {
+        if (!this.watchers[property]) this.watchers[property] = [];
+        this.watchers[property].push(callback);
+      };
+      /* MODERN-ONLY:START */
+      // We remove this piece of code from the legacy build.
+      // In IE11, we have already defined our helpers at this point.
+      // Register custom magic properties.
+
+
+      Object.entries(Alpine.magicProperties).forEach(([name, callback]) => {
+        Object.defineProperty(this.unobservedData, `$${name}`, {
+          get: function get() {
+            return callback(canonicalComponentElementReference, this.$el);
+          }
+        });
+      });
+      /* MODERN-ONLY:END */
+
+      this.showDirectiveStack = [];
+      this.showDirectiveLastElement;
+      componentForClone || Alpine.onBeforeComponentInitializeds.forEach(callback => callback(this));
+      var initReturnedCallback; // If x-init is present AND we aren't cloning (skip x-init on clone)
+
+      if (initExpression && !componentForClone) {
+        // We want to allow data manipulation, but not trigger DOM updates just yet.
+        // We haven't even initialized the elements with their Alpine bindings. I mean c'mon.
+        this.pauseReactivity = true;
+        initReturnedCallback = this.evaluateReturnExpression(this.$el, initExpression);
+        this.pauseReactivity = false;
+      } // Register all our listeners and set all our attribute bindings.
+
+
+      this.initializeElements(this.$el); // Use mutation observer to detect new elements being added within this component at run-time.
+      // Alpine's just so darn flexible amirite?
+
+      this.listenForNewElementsToInitialize();
+
+      if (typeof initReturnedCallback === 'function') {
+        // Run the callback returned from the "x-init" hook to allow the user to do stuff after
+        // Alpine's got it's grubby little paws all over everything.
+        initReturnedCallback.call(this.$data);
+      }
+
+      componentForClone || setTimeout(() => {
+        Alpine.onComponentInitializeds.forEach(callback => callback(this));
+      }, 0);
+    }
+
+    getUnobservedData() {
+      return unwrap$1(this.membrane, this.$data);
+    }
+
+    wrapDataInObservable(data) {
+      var self = this;
+      let updateDom = debounce(function () {
+        self.updateElements(self.$el);
+      }, 0);
+      return wrap(data, (target, key) => {
+        if (self.watchers[key]) {
+          // If there's a watcher for this specific key, run it.
+          self.watchers[key].forEach(callback => callback(target[key]));
+        } else if (Array.isArray(target)) {
+          // Arrays are special cases, if any of the items change, we consider the array as mutated.
+          Object.keys(self.watchers).forEach(fullDotNotationKey => {
+            let dotNotationParts = fullDotNotationKey.split('.'); // Ignore length mutations since they would result in duplicate calls.
+            // For example, when calling push, we would get a mutation for the item's key
+            // and a second mutation for the length property.
+
+            if (key === 'length') return;
+            dotNotationParts.reduce((comparisonData, part) => {
+              if (Object.is(target, comparisonData[part])) {
+                self.watchers[fullDotNotationKey].forEach(callback => callback(target));
+              }
+
+              return comparisonData[part];
+            }, self.unobservedData);
+          });
+        } else {
+          // Let's walk through the watchers with "dot-notation" (foo.bar) and see
+          // if this mutation fits any of them.
+          Object.keys(self.watchers).filter(i => i.includes('.')).forEach(fullDotNotationKey => {
+            let dotNotationParts = fullDotNotationKey.split('.'); // If this dot-notation watcher's last "part" doesn't match the current
+            // key, then skip it early for performance reasons.
+
+            if (key !== dotNotationParts[dotNotationParts.length - 1]) return; // Now, walk through the dot-notation "parts" recursively to find
+            // a match, and call the watcher if one's found.
+
+            dotNotationParts.reduce((comparisonData, part) => {
+              if (Object.is(target, comparisonData)) {
+                // Run the watchers.
+                self.watchers[fullDotNotationKey].forEach(callback => callback(target[key]));
+              }
+
+              return comparisonData[part];
+            }, self.unobservedData);
+          });
+        } // Don't react to data changes for cases like the `x-created` hook.
+
+
+        if (self.pauseReactivity) return;
+        updateDom();
+      });
+    }
+
+    walkAndSkipNestedComponents(el, callback, initializeComponentCallback = () => {}) {
+      walk(el, el => {
+        // We've hit a component.
+        if (el.hasAttribute('x-data')) {
+          // If it's not the current one.
+          if (!el.isSameNode(this.$el)) {
+            // Initialize it if it's not.
+            if (!el.__x) initializeComponentCallback(el); // Now we'll let that sub-component deal with itself.
+
+            return false;
+          }
+        }
+
+        return callback(el);
+      });
+    }
+
+    initializeElements(rootEl, extraVars = () => {}) {
+      this.walkAndSkipNestedComponents(rootEl, el => {
+        // Don't touch spawns from for loop
+        if (el.__x_for_key !== undefined) return false; // Don't touch spawns from if directives
+
+        if (el.__x_inserted_me !== undefined) return false;
+        this.initializeElement(el, extraVars);
+      }, el => {
+        el.__x = new Component(el);
+      });
+      this.executeAndClearRemainingShowDirectiveStack();
+      this.executeAndClearNextTickStack(rootEl);
+    }
+
+    initializeElement(el, extraVars) {
+      // To support class attribute merging, we have to know what the element's
+      // original class attribute looked like for reference.
+      if (el.hasAttribute('class') && getXAttrs(el, this).length > 0) {
+        el.__x_original_classes = convertClassStringToArray(el.getAttribute('class'));
+      }
+
+      this.registerListeners(el, extraVars);
+      this.resolveBoundAttributes(el, true, extraVars);
+    }
+
+    updateElements(rootEl, extraVars = () => {}) {
+      this.walkAndSkipNestedComponents(rootEl, el => {
+        // Don't touch spawns from for loop (and check if the root is actually a for loop in a parent, don't skip it.)
+        if (el.__x_for_key !== undefined && !el.isSameNode(this.$el)) return false;
+        this.updateElement(el, extraVars);
+      }, el => {
+        el.__x = new Component(el);
+      });
+      this.executeAndClearRemainingShowDirectiveStack();
+      this.executeAndClearNextTickStack(rootEl);
+    }
+
+    executeAndClearNextTickStack(el) {
+      // Skip spawns from alpine directives
+      if (el === this.$el && this.nextTickStack.length > 0) {
+        // We run the tick stack after the next frame to allow any
+        // running transitions to pass the initial show stage.
+        requestAnimationFrame(() => {
+          while (this.nextTickStack.length > 0) {
+            this.nextTickStack.shift()();
+          }
+        });
+      }
+    }
+
+    executeAndClearRemainingShowDirectiveStack() {
+      // The goal here is to start all the x-show transitions
+      // and build a nested promise chain so that elements
+      // only hide when the children are finished hiding.
+      this.showDirectiveStack.reverse().map(handler => {
+        return new Promise((resolve, reject) => {
+          handler(resolve, reject);
+        });
+      }).reduce((promiseChain, promise) => {
+        return promiseChain.then(() => {
+          return promise.then(finishElement => {
+            finishElement();
+          });
+        });
+      }, Promise.resolve(() => {})).catch(e => {
+        if (e !== TRANSITION_CANCELLED) throw e;
+      }); // We've processed the handler stack. let's clear it.
+
+      this.showDirectiveStack = [];
+      this.showDirectiveLastElement = undefined;
+    }
+
+    updateElement(el, extraVars) {
+      this.resolveBoundAttributes(el, false, extraVars);
+    }
+
+    registerListeners(el, extraVars) {
+      getXAttrs(el, this).forEach(({
+        type,
+        value,
+        modifiers,
+        expression
+      }) => {
+        switch (type) {
+          case 'on':
+            registerListener(this, el, value, modifiers, expression, extraVars);
+            break;
+
+          case 'model':
+            registerModelListener(this, el, modifiers, expression, extraVars);
+            break;
+        }
+      });
+    }
+
+    resolveBoundAttributes(el, initialUpdate = false, extraVars) {
+      let attrs = getXAttrs(el, this);
+      attrs.forEach(({
+        type,
+        value,
+        modifiers,
+        expression
+      }) => {
+        switch (type) {
+          case 'model':
+            handleAttributeBindingDirective(this, el, 'value', expression, extraVars, type, modifiers);
+            break;
+
+          case 'bind':
+            // The :key binding on an x-for is special, ignore it.
+            if (el.tagName.toLowerCase() === 'template' && value === 'key') return;
+            handleAttributeBindingDirective(this, el, value, expression, extraVars, type, modifiers);
+            break;
+
+          case 'text':
+            var output = this.evaluateReturnExpression(el, expression, extraVars);
+            handleTextDirective(el, output, expression);
+            break;
+
+          case 'html':
+            handleHtmlDirective(this, el, expression, extraVars);
+            break;
+
+          case 'show':
+            var output = this.evaluateReturnExpression(el, expression, extraVars);
+            handleShowDirective(this, el, output, modifiers, initialUpdate);
+            break;
+
+          case 'if':
+            // If this element also has x-for on it, don't process x-if.
+            // We will let the "x-for" directive handle the "if"ing.
+            if (attrs.some(i => i.type === 'for')) return;
+            var output = this.evaluateReturnExpression(el, expression, extraVars);
+            handleIfDirective(this, el, output, initialUpdate, extraVars);
+            break;
+
+          case 'for':
+            handleForDirective(this, el, expression, initialUpdate, extraVars);
+            break;
+
+          case 'cloak':
+            el.removeAttribute('x-cloak');
+            break;
+        }
+      });
+    }
+
+    evaluateReturnExpression(el, expression, extraVars = () => {}) {
+      return saferEval(el, expression, this.$data, _objectSpread2(_objectSpread2({}, extraVars()), {}, {
+        $dispatch: this.getDispatchFunction(el)
+      }));
+    }
+
+    evaluateCommandExpression(el, expression, extraVars = () => {}) {
+      return saferEvalNoReturn(el, expression, this.$data, _objectSpread2(_objectSpread2({}, extraVars()), {}, {
+        $dispatch: this.getDispatchFunction(el)
+      }));
+    }
+
+    getDispatchFunction(el) {
+      return (event, detail = {}) => {
+        el.dispatchEvent(new CustomEvent(event, {
+          detail,
+          bubbles: true
+        }));
+      };
+    }
+
+    listenForNewElementsToInitialize() {
+      const targetNode = this.$el;
+      const observerOptions = {
+        childList: true,
+        attributes: true,
+        subtree: true
+      };
+      const observer = new MutationObserver(mutations => {
+        for (let i = 0; i < mutations.length; i++) {
+          // Filter out mutations triggered from child components.
+          const closestParentComponent = mutations[i].target.closest('[x-data]');
+          if (!(closestParentComponent && closestParentComponent.isSameNode(this.$el))) continue;
+
+          if (mutations[i].type === 'attributes' && mutations[i].attributeName === 'x-data') {
+            const xAttr = mutations[i].target.getAttribute('x-data') || '{}';
+            const rawData = saferEval(this.$el, xAttr, {
+              $el: this.$el
+            });
+            Object.keys(rawData).forEach(key => {
+              if (this.$data[key] !== rawData[key]) {
+                this.$data[key] = rawData[key];
+              }
+            });
+          }
+
+          if (mutations[i].addedNodes.length > 0) {
+            mutations[i].addedNodes.forEach(node => {
+              if (node.nodeType !== 1 || node.__x_inserted_me) return;
+
+              if (node.matches('[x-data]') && !node.__x) {
+                node.__x = new Component(node);
+                return;
+              }
+
+              this.initializeElements(node);
+            });
+          }
+        }
+      });
+      observer.observe(targetNode, observerOptions);
+    }
+
+    getRefsProxy() {
+      var self = this;
+      var refObj = {};
+      // One of the goals of this is to not hold elements in memory, but rather re-evaluate
+      // the DOM when the system needs something from it. This way, the framework is flexible and
+      // friendly to outside DOM changes from libraries like Vue/Livewire.
+      // For this reason, I'm using an "on-demand" proxy to fake a "$refs" object.
+
+      return new Proxy(refObj, {
+        get(object, property) {
+          if (property === '$isAlpineProxy') return true;
+          var ref; // We can't just query the DOM because it's hard to filter out refs in
+          // nested components.
+
+          self.walkAndSkipNestedComponents(self.$el, el => {
+            if (el.hasAttribute('x-ref') && el.getAttribute('x-ref') === property) {
+              ref = el;
+            }
+          });
+          return ref;
+        }
+
+      });
+    }
+
+  }
+
+  const Alpine = {
+    version: "2.8.0",
+    pauseMutationObserver: false,
+    magicProperties: {},
+    onComponentInitializeds: [],
+    onBeforeComponentInitializeds: [],
+    ignoreFocusedForValueBinding: false,
+    start: async function start() {
+      if (!isTesting()) {
+        await domReady();
+      }
+
+      this.discoverComponents(el => {
+        this.initializeComponent(el);
+      }); // It's easier and more performant to just support Turbolinks than listen
+      // to MutationObserver mutations at the document level.
+
+      document.addEventListener("turbolinks:load", () => {
+        this.discoverUninitializedComponents(el => {
+          this.initializeComponent(el);
+        });
+      });
+      this.listenForNewUninitializedComponentsAtRunTime();
+    },
+    discoverComponents: function discoverComponents(callback) {
+      const rootEls = document.querySelectorAll('[x-data]');
+      rootEls.forEach(rootEl => {
+        callback(rootEl);
+      });
+    },
+    discoverUninitializedComponents: function discoverUninitializedComponents(callback, el = null) {
+      const rootEls = (el || document).querySelectorAll('[x-data]');
+      Array.from(rootEls).filter(el => el.__x === undefined).forEach(rootEl => {
+        callback(rootEl);
+      });
+    },
+    listenForNewUninitializedComponentsAtRunTime: function listenForNewUninitializedComponentsAtRunTime() {
+      const targetNode = document.querySelector('body');
+      const observerOptions = {
+        childList: true,
+        attributes: true,
+        subtree: true
+      };
+      const observer = new MutationObserver(mutations => {
+        if (this.pauseMutationObserver) return;
+
+        for (let i = 0; i < mutations.length; i++) {
+          if (mutations[i].addedNodes.length > 0) {
+            mutations[i].addedNodes.forEach(node => {
+              // Discard non-element nodes (like line-breaks)
+              if (node.nodeType !== 1) return; // Discard any changes happening within an existing component.
+              // They will take care of themselves.
+
+              if (node.parentElement && node.parentElement.closest('[x-data]')) return;
+              this.discoverUninitializedComponents(el => {
+                this.initializeComponent(el);
+              }, node.parentElement);
+            });
+          }
+        }
+      });
+      observer.observe(targetNode, observerOptions);
+    },
+    initializeComponent: function initializeComponent(el) {
+      if (!el.__x) {
+        // Wrap in a try/catch so that we don't prevent other components
+        // from initializing when one component contains an error.
+        try {
+          el.__x = new Component(el);
+        } catch (error) {
+          setTimeout(() => {
+            throw error;
+          }, 0);
+        }
+      }
+    },
+    clone: function clone(component, newEl) {
+      if (!newEl.__x) {
+        newEl.__x = new Component(newEl, component);
+      }
+    },
+    addMagicProperty: function addMagicProperty(name, callback) {
+      this.magicProperties[name] = callback;
+    },
+    onComponentInitialized: function onComponentInitialized(callback) {
+      this.onComponentInitializeds.push(callback);
+    },
+    onBeforeComponentInitialized: function onBeforeComponentInitialized(callback) {
+      this.onBeforeComponentInitializeds.push(callback);
+    }
+  };
+
+  if (!isTesting()) {
+    window.Alpine = Alpine;
+
+    if (window.deferLoadingAlpine) {
+      window.deferLoadingAlpine(function () {
+        window.Alpine.start();
+      });
+    } else {
+      window.Alpine.start();
+    }
+  }
+
+  return Alpine;
+
+})));
+
+
+/***/ }),
+
+/***/ "./resources/js/app.js":
+/*!*****************************!*\
+  !*** ./resources/js/app.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _hotwired_turbo__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @hotwired/turbo */ "./node_modules/@hotwired/turbo/dist/turbo.es2017-esm.js");
+/* harmony import */ var alpine_turbo_drive_adapter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! alpine-turbo-drive-adapter */ "./node_modules/alpine-turbo-drive-adapter/dist/alpine-turbo-drive-adapter.esm.js");
+/* harmony import */ var alpine_turbo_drive_adapter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(alpine_turbo_drive_adapter__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var alpinejs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! alpinejs */ "./node_modules/alpinejs/dist/alpine.js");
+/* harmony import */ var alpinejs__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(alpinejs__WEBPACK_IMPORTED_MODULE_2__);
+
+__webpack_require__.e(/*! import() */ "resources_js_bootstrap_js").then(__webpack_require__.bind(__webpack_require__, /*! ./bootstrap */ "./resources/js/bootstrap.js"));
+__webpack_require__.e(/*! import() */ "resources_js_elements_turbo-echo-stream-tag_js").then(__webpack_require__.bind(__webpack_require__, /*! ./elements/turbo-echo-stream-tag */ "./resources/js/elements/turbo-echo-stream-tag.js"));
+
+
+// import('tom-select');
+window.TomSelect = __webpack_require__(/*! tom-select */ "./node_modules/tom-select/dist/js/tom-select.complete.js");
+(0,_hotwired_turbo__WEBPACK_IMPORTED_MODULE_0__.start)();
+
+/***/ }),
+
+/***/ "./resources/css/app.css":
+/*!*******************************!*\
+  !*** ./resources/css/app.css ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./node_modules/tom-select/dist/js/tom-select.complete.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/tom-select/dist/js/tom-select.complete.js ***!
+  \****************************************************************/
+/***/ (function(module) {
+
+/**
+* Tom Select v2.0.0
+* Licensed under the Apache License, Version 2.0 (the "License");
+*/
+
+(function (global, factory) {
+	 true ? module.exports = factory() :
+	0;
+}(this, (function () { 'use strict';
+
+	/**
+	 * MicroEvent - to make any js object an event emitter
+	 *
+	 * - pure javascript - server compatible, browser compatible
+	 * - dont rely on the browser doms
+	 * - super simple - you get it immediatly, no mistery, no magic involved
+	 *
+	 * @author Jerome Etienne (https://github.com/jeromeetienne)
+	 */
+
+	/**
+	 * Execute callback for each event in space separated list of event names
+	 *
+	 */
+	function forEvents(events, callback) {
+	  events.split(/\s+/).forEach(event => {
+	    callback(event);
+	  });
+	}
+
+	class MicroEvent {
+	  constructor() {
+	    this._events = {};
+	  }
+
+	  on(events, fct) {
+	    forEvents(events, event => {
+	      this._events[event] = this._events[event] || [];
+
+	      this._events[event].push(fct);
+	    });
+	  }
+
+	  off(events, fct) {
+	    var n = arguments.length;
+
+	    if (n === 0) {
+	      this._events = {};
+	      return;
+	    }
+
+	    forEvents(events, event => {
+	      if (n === 1) return delete this._events[event];
+	      if (event in this._events === false) return;
+
+	      this._events[event].splice(this._events[event].indexOf(fct), 1);
+	    });
+	  }
+
+	  trigger(events, ...args) {
+	    var self = this;
+	    forEvents(events, event => {
+	      if (event in self._events === false) return;
+
+	      for (let fct of self._events[event]) {
+	        fct.apply(self, args);
+	      }
+	    });
+	  }
+
+	}
+
+	/**
+	 * microplugin.js
+	 * Copyright (c) 2013 Brian Reavis & contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 * @author Brian Reavis <brian@thirdroute.com>
+	 */
+	function MicroPlugin(Interface) {
+	  Interface.plugins = {};
+	  return class extends Interface {
+	    constructor(...args) {
+	      super(...args);
+	      this.plugins = {
+	        names: [],
+	        settings: {},
+	        requested: {},
+	        loaded: {}
+	      };
+	    }
+
+	    /**
+	     * Registers a plugin.
+	     *
+	     * @param {function} fn
+	     */
+	    static define(name, fn) {
+	      Interface.plugins[name] = {
+	        'name': name,
+	        'fn': fn
+	      };
+	    }
+	    /**
+	     * Initializes the listed plugins (with options).
+	     * Acceptable formats:
+	     *
+	     * List (without options):
+	     *   ['a', 'b', 'c']
+	     *
+	     * List (with options):
+	     *   [{'name': 'a', options: {}}, {'name': 'b', options: {}}]
+	     *
+	     * Hash (with options):
+	     *   {'a': { ... }, 'b': { ... }, 'c': { ... }}
+	     *
+	     * @param {array|object} plugins
+	     */
+
+
+	    initializePlugins(plugins) {
+	      var key, name;
+	      const self = this;
+	      const queue = [];
+
+	      if (Array.isArray(plugins)) {
+	        plugins.forEach(plugin => {
+	          if (typeof plugin === 'string') {
+	            queue.push(plugin);
+	          } else {
+	            self.plugins.settings[plugin.name] = plugin.options;
+	            queue.push(plugin.name);
+	          }
+	        });
+	      } else if (plugins) {
+	        for (key in plugins) {
+	          if (plugins.hasOwnProperty(key)) {
+	            self.plugins.settings[key] = plugins[key];
+	            queue.push(key);
+	          }
+	        }
+	      }
+
+	      while (name = queue.shift()) {
+	        self.require(name);
+	      }
+	    }
+
+	    loadPlugin(name) {
+	      var self = this;
+	      var plugins = self.plugins;
+	      var plugin = Interface.plugins[name];
+
+	      if (!Interface.plugins.hasOwnProperty(name)) {
+	        throw new Error('Unable to find "' + name + '" plugin');
+	      }
+
+	      plugins.requested[name] = true;
+	      plugins.loaded[name] = plugin.fn.apply(self, [self.plugins.settings[name] || {}]);
+	      plugins.names.push(name);
+	    }
+	    /**
+	     * Initializes a plugin.
+	     *
+	     */
+
+
+	    require(name) {
+	      var self = this;
+	      var plugins = self.plugins;
+
+	      if (!self.plugins.loaded.hasOwnProperty(name)) {
+	        if (plugins.requested[name]) {
+	          throw new Error('Plugin has circular dependency ("' + name + '")');
+	        }
+
+	        self.loadPlugin(name);
+	      }
+
+	      return plugins.loaded[name];
+	    }
+
+	  };
+	}
+
+	// https://github.com/andrewrk/node-diacritics/blob/master/index.js
+	var latin_pat;
+	const accent_pat = '[\u0300-\u036F\u{b7}\u{2be}]'; // \u{2bc}
+
+	const accent_reg = new RegExp(accent_pat, 'g');
+	var diacritic_patterns;
+	const latin_convert = {
+	  'æ': 'ae',
+	  'ⱥ': 'a',
+	  'ø': 'o'
+	};
+	const convert_pat = new RegExp(Object.keys(latin_convert).join('|'), 'g');
+	/**
+	 * code points generated from toCodePoints();
+	 * removed 65339 to 65345
+	 */
+
+	const code_points = [[67, 67], [160, 160], [192, 438], [452, 652], [961, 961], [1019, 1019], [1083, 1083], [1281, 1289], [1984, 1984], [5095, 5095], [7429, 7441], [7545, 7549], [7680, 7935], [8580, 8580], [9398, 9449], [11360, 11391], [42792, 42793], [42802, 42851], [42873, 42897], [42912, 42922], [64256, 64260], [65313, 65338], [65345, 65370]];
+	/**
+	 * Remove accents
+	 * via https://github.com/krisk/Fuse/issues/133#issuecomment-318692703
+	 *
+	 */
+
+	const asciifold = str => {
+	  return str.normalize('NFKD').replace(accent_reg, '').toLowerCase().replace(convert_pat, function (foreignletter) {
+	    return latin_convert[foreignletter];
+	  });
+	};
+	/**
+	 * Convert array of strings to a regular expression
+	 *	ex ['ab','a'] => (?:ab|a)
+	 * 	ex ['a','b'] => [ab]
+	 *
+	 */
+
+
+	const arrayToPattern = (chars, glue = '|') => {
+	  if (chars.length == 1) {
+	    return chars[0];
+	  }
+
+	  var longest = 1;
+	  chars.forEach(a => {
+	    longest = Math.max(longest, a.length);
+	  });
+
+	  if (longest == 1) {
+	    return '[' + chars.join('') + ']';
+	  }
+
+	  return '(?:' + chars.join(glue) + ')';
+	};
+	/**
+	 * Get all possible combinations of substrings that add up to the given string
+	 * https://stackoverflow.com/questions/30169587/find-all-the-combination-of-substrings-that-add-up-to-the-given-string
+	 *
+	 */
+
+	const allSubstrings = input => {
+	  if (input.length === 1) return [[input]];
+	  var result = [];
+	  allSubstrings(input.substring(1)).forEach(function (subresult) {
+	    var tmp = subresult.slice(0);
+	    tmp[0] = input.charAt(0) + tmp[0];
+	    result.push(tmp);
+	    tmp = subresult.slice(0);
+	    tmp.unshift(input.charAt(0));
+	    result.push(tmp);
+	  });
+	  return result;
+	};
+	/**
+	 * Generate a list of diacritics from the list of code points
+	 *
+	 */
+
+	const generateDiacritics = () => {
+	  var diacritics = {};
+	  code_points.forEach(code_range => {
+	    for (let i = code_range[0]; i <= code_range[1]; i++) {
+	      let diacritic = String.fromCharCode(i);
+	      let latin = asciifold(diacritic);
+
+	      if (latin == diacritic.toLowerCase()) {
+	        continue;
+	      }
+
+	      if (!(latin in diacritics)) {
+	        diacritics[latin] = [latin];
+	      }
+
+	      var patt = new RegExp(arrayToPattern(diacritics[latin]), 'iu');
+
+	      if (diacritic.match(patt)) {
+	        continue;
+	      }
+
+	      diacritics[latin].push(diacritic);
+	    }
+	  });
+	  var latin_chars = Object.keys(diacritics); // latin character pattern
+	  // match longer substrings first
+
+	  latin_chars = latin_chars.sort((a, b) => b.length - a.length);
+	  latin_pat = new RegExp('(' + arrayToPattern(latin_chars) + accent_pat + '*)', 'g'); // build diacritic patterns
+	  // ae needs: 
+	  //	(?:(?:ae|Æ|Ǽ|Ǣ)|(?:A|Ⓐ|Ａ...)(?:E|ɛ|Ⓔ...))
+
+	  var diacritic_patterns = {};
+	  latin_chars.sort((a, b) => a.length - b.length).forEach(latin => {
+	    var substrings = allSubstrings(latin);
+	    var pattern = substrings.map(sub_pat => {
+	      sub_pat = sub_pat.map(l => {
+	        if (diacritics.hasOwnProperty(l)) {
+	          return arrayToPattern(diacritics[l]);
+	        }
+
+	        return l;
+	      });
+	      return arrayToPattern(sub_pat, '');
+	    });
+	    diacritic_patterns[latin] = arrayToPattern(pattern);
+	  });
+	  return diacritic_patterns;
+	};
+	/**
+	 * Expand a regular expression pattern to include diacritics
+	 * 	eg /a/ becomes /aⓐａẚàáâầấẫẩãāăằắẵẳȧǡäǟảåǻǎȁȃạậặḁąⱥɐɑAⒶＡÀÁÂẦẤẪẨÃĀĂẰẮẴẲȦǠÄǞẢÅǺǍȀȂẠẬẶḀĄȺⱯ/
+	 *
+	 */
+
+	const diacriticRegexPoints = regex => {
+	  if (diacritic_patterns === undefined) {
+	    diacritic_patterns = generateDiacritics();
+	  }
+
+	  const decomposed = regex.normalize('NFKD').toLowerCase();
+	  return decomposed.split(latin_pat).map(part => {
+	    if (part == '') {
+	      return '';
+	    } // "ﬄ" or "ffl"
+
+
+	    const no_accent = asciifold(part);
+
+	    if (diacritic_patterns.hasOwnProperty(no_accent)) {
+	      return diacritic_patterns[no_accent];
+	    } // 'أهلا' (\u{623}\u{647}\u{644}\u{627}) or 'أهلا' (\u{627}\u{654}\u{647}\u{644}\u{627})
+
+
+	    const composed_part = part.normalize('NFC');
+
+	    if (composed_part != part) {
+	      return arrayToPattern([part, composed_part]);
+	    }
+
+	    return part;
+	  }).join('');
+	};
+
+	// @ts-ignore TS2691 "An import path cannot end with a '.ts' extension"
+
+	/**
+	 * A property getter resolving dot-notation
+	 * @param  {Object}  obj     The root object to fetch property on
+	 * @param  {String}  name    The optionally dotted property name to fetch
+	 * @return {Object}          The resolved property value
+	 */
+	const getAttr = (obj, name) => {
+	  if (!obj) return;
+	  return obj[name];
+	};
+	/**
+	 * A property getter resolving dot-notation
+	 * @param  {Object}  obj     The root object to fetch property on
+	 * @param  {String}  name    The optionally dotted property name to fetch
+	 * @return {Object}          The resolved property value
+	 */
+
+	const getAttrNesting = (obj, name) => {
+	  if (!obj) return;
+	  var part,
+	      names = name.split(".");
+
+	  while ((part = names.shift()) && (obj = obj[part]));
+
+	  return obj;
+	};
+	/**
+	 * Calculates how close of a match the
+	 * given value is against a search token.
+	 *
+	 */
+
+	const scoreValue = (value, token, weight) => {
+	  var score, pos;
+	  if (!value) return 0;
+	  value = value + '';
+	  pos = value.search(token.regex);
+	  if (pos === -1) return 0;
+	  score = token.string.length / value.length;
+	  if (pos === 0) score += 0.5;
+	  return score * weight;
+	};
+	/**
+	 *
+	 * https://stackoverflow.com/questions/63006601/why-does-u-throw-an-invalid-escape-error
+	 */
+
+	const escape_regex = str => {
+	  return (str + '').replace(/([\$\(-\+\.\?\[-\^\{-\}])/g, '\\$1');
+	};
+	/**
+	 * Cast object property to an array if it exists and has a value
+	 *
+	 */
+
+	const propToArray = (obj, key) => {
+	  var value = obj[key];
+	  if (typeof value == 'function') return value;
+
+	  if (value && !Array.isArray(value)) {
+	    obj[key] = [value];
+	  }
+	};
+	/**
+	 * Iterates over arrays and hashes.
+	 *
+	 * ```
+	 * iterate(this.items, function(item, id) {
+	 *    // invoked for each item
+	 * });
+	 * ```
+	 *
+	 */
+
+	const iterate = (object, callback) => {
+	  if (Array.isArray(object)) {
+	    object.forEach(callback);
+	  } else {
+	    for (var key in object) {
+	      if (object.hasOwnProperty(key)) {
+	        callback(object[key], key);
+	      }
+	    }
+	  }
+	};
+	const cmp = (a, b) => {
+	  if (typeof a === 'number' && typeof b === 'number') {
+	    return a > b ? 1 : a < b ? -1 : 0;
+	  }
+
+	  a = asciifold(a + '').toLowerCase();
+	  b = asciifold(b + '').toLowerCase();
+	  if (a > b) return 1;
+	  if (b > a) return -1;
+	  return 0;
+	};
+
+	/**
+	 * sifter.js
+	 * Copyright (c) 2013–2020 Brian Reavis & contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 * @author Brian Reavis <brian@thirdroute.com>
+	 */
+
+	class Sifter {
+	  // []|{};
+
+	  /**
+	   * Textually searches arrays and hashes of objects
+	   * by property (or multiple properties). Designed
+	   * specifically for autocomplete.
+	   *
+	   */
+	  constructor(items, settings) {
+	    this.items = items;
+	    this.settings = settings || {
+	      diacritics: true
+	    };
+	  }
+
+	  /**
+	   * Splits a search string into an array of individual
+	   * regexps to be used to match results.
+	   *
+	   */
+	  tokenize(query, respect_word_boundaries, weights) {
+	    if (!query || !query.length) return [];
+	    const tokens = [];
+	    const words = query.split(/\s+/);
+	    var field_regex;
+
+	    if (weights) {
+	      field_regex = new RegExp('^(' + Object.keys(weights).map(escape_regex).join('|') + ')\:(.*)$');
+	    }
+
+	    words.forEach(word => {
+	      let field_match;
+	      let field = null;
+	      let regex = null; // look for "field:query" tokens
+
+	      if (field_regex && (field_match = word.match(field_regex))) {
+	        field = field_match[1];
+	        word = field_match[2];
+	      }
+
+	      if (word.length > 0) {
+	        regex = escape_regex(word);
+
+	        if (this.settings.diacritics) {
+	          regex = diacriticRegexPoints(regex);
+	        }
+
+	        if (respect_word_boundaries) regex = "\\b" + regex;
+	      }
+
+	      tokens.push({
+	        string: word,
+	        regex: regex ? new RegExp(regex, 'iu') : null,
+	        field: field
+	      });
+	    });
+	    return tokens;
+	  }
+
+	  /**
+	   * Returns a function to be used to score individual results.
+	   *
+	   * Good matches will have a higher score than poor matches.
+	   * If an item is not a match, 0 will be returned by the function.
+	   *
+	   * @returns {function}
+	   */
+	  getScoreFunction(query, options) {
+	    var search = this.prepareSearch(query, options);
+	    return this._getScoreFunction(search);
+	  }
+
+	  _getScoreFunction(search) {
+	    const tokens = search.tokens,
+	          token_count = tokens.length;
+
+	    if (!token_count) {
+	      return function () {
+	        return 0;
+	      };
+	    }
+
+	    const fields = search.options.fields,
+	          weights = search.weights,
+	          field_count = fields.length,
+	          getAttrFn = search.getAttrFn;
+
+	    if (!field_count) {
+	      return function () {
+	        return 1;
+	      };
+	    }
+	    /**
+	     * Calculates the score of an object
+	     * against the search query.
+	     *
+	     */
+
+
+	    const scoreObject = function () {
+	      if (field_count === 1) {
+	        return function (token, data) {
+	          const field = fields[0].field;
+	          return scoreValue(getAttrFn(data, field), token, weights[field]);
+	        };
+	      }
+
+	      return function (token, data) {
+	        var sum = 0; // is the token specific to a field?
+
+	        if (token.field) {
+	          const value = getAttrFn(data, token.field);
+
+	          if (!token.regex && value) {
+	            sum += 1 / field_count;
+	          } else {
+	            sum += scoreValue(value, token, 1);
+	          }
+	        } else {
+	          iterate(weights, (weight, field) => {
+	            sum += scoreValue(getAttrFn(data, field), token, weight);
+	          });
+	        }
+
+	        return sum / field_count;
+	      };
+	    }();
+
+	    if (token_count === 1) {
+	      return function (data) {
+	        return scoreObject(tokens[0], data);
+	      };
+	    }
+
+	    if (search.options.conjunction === 'and') {
+	      return function (data) {
+	        var i = 0,
+	            score,
+	            sum = 0;
+
+	        for (; i < token_count; i++) {
+	          score = scoreObject(tokens[i], data);
+	          if (score <= 0) return 0;
+	          sum += score;
+	        }
+
+	        return sum / token_count;
+	      };
+	    } else {
+	      return function (data) {
+	        var sum = 0;
+	        iterate(tokens, token => {
+	          sum += scoreObject(token, data);
+	        });
+	        return sum / token_count;
+	      };
+	    }
+	  }
+
+	  /**
+	   * Returns a function that can be used to compare two
+	   * results, for sorting purposes. If no sorting should
+	   * be performed, `null` will be returned.
+	   *
+	   * @return function(a,b)
+	   */
+	  getSortFunction(query, options) {
+	    var search = this.prepareSearch(query, options);
+	    return this._getSortFunction(search);
+	  }
+
+	  _getSortFunction(search) {
+	    var i, n, implicit_score;
+	    const self = this,
+	          options = search.options,
+	          sort = !search.query && options.sort_empty ? options.sort_empty : options.sort,
+	          sort_flds = [],
+	          multipliers = [];
+
+	    if (typeof sort == 'function') {
+	      return sort.bind(this);
+	    }
+	    /**
+	     * Fetches the specified sort field value
+	     * from a search result item.
+	     *
+	     */
+
+
+	    const get_field = function get_field(name, result) {
+	      if (name === '$score') return result.score;
+	      return search.getAttrFn(self.items[result.id], name);
+	    }; // parse options
+
+
+	    if (sort) {
+	      for (i = 0, n = sort.length; i < n; i++) {
+	        if (search.query || sort[i].field !== '$score') {
+	          sort_flds.push(sort[i]);
+	        }
+	      }
+	    } // the "$score" field is implied to be the primary
+	    // sort field, unless it's manually specified
+
+
+	    if (search.query) {
+	      implicit_score = true;
+
+	      for (i = 0, n = sort_flds.length; i < n; i++) {
+	        if (sort_flds[i].field === '$score') {
+	          implicit_score = false;
+	          break;
+	        }
+	      }
+
+	      if (implicit_score) {
+	        sort_flds.unshift({
+	          field: '$score',
+	          direction: 'desc'
+	        });
+	      }
+	    } else {
+	      for (i = 0, n = sort_flds.length; i < n; i++) {
+	        if (sort_flds[i].field === '$score') {
+	          sort_flds.splice(i, 1);
+	          break;
+	        }
+	      }
+	    }
+
+	    for (i = 0, n = sort_flds.length; i < n; i++) {
+	      multipliers.push(sort_flds[i].direction === 'desc' ? -1 : 1);
+	    } // build function
+
+
+	    const sort_flds_count = sort_flds.length;
+
+	    if (!sort_flds_count) {
+	      return null;
+	    } else if (sort_flds_count === 1) {
+	      const sort_fld = sort_flds[0].field;
+	      const multiplier = multipliers[0];
+	      return function (a, b) {
+	        return multiplier * cmp(get_field(sort_fld, a), get_field(sort_fld, b));
+	      };
+	    } else {
+	      return function (a, b) {
+	        var i, result, field;
+
+	        for (i = 0; i < sort_flds_count; i++) {
+	          field = sort_flds[i].field;
+	          result = multipliers[i] * cmp(get_field(field, a), get_field(field, b));
+	          if (result) return result;
+	        }
+
+	        return 0;
+	      };
+	    }
+	  }
+
+	  /**
+	   * Parses a search query and returns an object
+	   * with tokens and fields ready to be populated
+	   * with results.
+	   *
+	   */
+	  prepareSearch(query, optsUser) {
+	    const weights = {};
+	    var options = Object.assign({}, optsUser);
+	    propToArray(options, 'sort');
+	    propToArray(options, 'sort_empty'); // convert fields to new format
+
+	    if (options.fields) {
+	      propToArray(options, 'fields');
+	      const fields = [];
+	      options.fields.forEach(field => {
+	        if (typeof field == 'string') {
+	          field = {
+	            field: field,
+	            weight: 1
+	          };
+	        }
+
+	        fields.push(field);
+	        weights[field.field] = 'weight' in field ? field.weight : 1;
+	      });
+	      options.fields = fields;
+	    }
+
+	    return {
+	      options: options,
+	      query: query.toLowerCase().trim(),
+	      tokens: this.tokenize(query, options.respect_word_boundaries, weights),
+	      total: 0,
+	      items: [],
+	      weights: weights,
+	      getAttrFn: options.nesting ? getAttrNesting : getAttr
+	    };
+	  }
+
+	  /**
+	   * Searches through all items and returns a sorted array of matches.
+	   *
+	   */
+	  search(query, options) {
+	    var self = this,
+	        score,
+	        search;
+	    search = this.prepareSearch(query, options);
+	    options = search.options;
+	    query = search.query; // generate result scoring function
+
+	    const fn_score = options.score || self._getScoreFunction(search); // perform search and sort
+
+
+	    if (query.length) {
+	      iterate(self.items, (item, id) => {
+	        score = fn_score(item);
+
+	        if (options.filter === false || score > 0) {
+	          search.items.push({
+	            'score': score,
+	            'id': id
+	          });
+	        }
+	      });
+	    } else {
+	      iterate(self.items, (item, id) => {
+	        search.items.push({
+	          'score': 1,
+	          'id': id
+	        });
+	      });
+	    }
+
+	    const fn_sort = self._getSortFunction(search);
+
+	    if (fn_sort) search.items.sort(fn_sort); // apply limits
+
+	    search.total = search.items.length;
+
+	    if (typeof options.limit === 'number') {
+	      search.items = search.items.slice(0, options.limit);
+	    }
+
+	    return search;
+	  }
+
+	}
+
+	/**
+	 * Return a dom element from either a dom query string, jQuery object, a dom element or html string
+	 * https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
+	 *
+	 * param query should be {}
+	 */
+
+	const getDom = query => {
+	  if (query.jquery) {
+	    return query[0];
+	  }
+
+	  if (query instanceof HTMLElement) {
+	    return query;
+	  }
+
+	  if (isHtmlString(query)) {
+	    let div = document.createElement('div');
+	    div.innerHTML = query.trim(); // Never return a text node of whitespace as the result
+
+	    return div.firstChild;
+	  }
+
+	  return document.querySelector(query);
+	};
+	const isHtmlString = arg => {
+	  if (typeof arg === 'string' && arg.indexOf('<') > -1) {
+	    return true;
+	  }
+
+	  return false;
+	};
+	const escapeQuery = query => {
+	  return query.replace(/['"\\]/g, '\\$&');
+	};
+	/**
+	 * Dispatch an event
+	 *
+	 */
+
+	const triggerEvent = (dom_el, event_name) => {
+	  var event = document.createEvent('HTMLEvents');
+	  event.initEvent(event_name, true, false);
+	  dom_el.dispatchEvent(event);
+	};
+	/**
+	 * Apply CSS rules to a dom element
+	 *
+	 */
+
+	const applyCSS = (dom_el, css) => {
+	  Object.assign(dom_el.style, css);
+	};
+	/**
+	 * Add css classes
+	 *
+	 */
+
+	const addClasses = (elmts, ...classes) => {
+	  var norm_classes = classesArray(classes);
+	  elmts = castAsArray(elmts);
+	  elmts.map(el => {
+	    norm_classes.map(cls => {
+	      el.classList.add(cls);
+	    });
+	  });
+	};
+	/**
+	 * Remove css classes
+	 *
+	 */
+
+	const removeClasses = (elmts, ...classes) => {
+	  var norm_classes = classesArray(classes);
+	  elmts = castAsArray(elmts);
+	  elmts.map(el => {
+	    norm_classes.map(cls => {
+	      el.classList.remove(cls);
+	    });
+	  });
+	};
+	/**
+	 * Return arguments
+	 *
+	 */
+
+	const classesArray = args => {
+	  var classes = [];
+	  iterate(args, _classes => {
+	    if (typeof _classes === 'string') {
+	      _classes = _classes.trim().split(/[\11\12\14\15\40]/);
+	    }
+
+	    if (Array.isArray(_classes)) {
+	      classes = classes.concat(_classes);
+	    }
+	  });
+	  return classes.filter(Boolean);
+	};
+	/**
+	 * Create an array from arg if it's not already an array
+	 *
+	 */
+
+	const castAsArray = arg => {
+	  if (!Array.isArray(arg)) {
+	    arg = [arg];
+	  }
+
+	  return arg;
+	};
+	/**
+	 * Get the closest node to the evt.target matching the selector
+	 * Stops at wrapper
+	 *
+	 */
+
+	const parentMatch = (target, selector, wrapper) => {
+	  if (wrapper && !wrapper.contains(target)) {
+	    return;
+	  }
+
+	  while (target && target.matches) {
+	    if (target.matches(selector)) {
+	      return target;
+	    }
+
+	    target = target.parentNode;
+	  }
+	};
+	/**
+	 * Get the first or last item from an array
+	 *
+	 * > 0 - right (last)
+	 * <= 0 - left (first)
+	 *
+	 */
+
+	const getTail = (list, direction = 0) => {
+	  if (direction > 0) {
+	    return list[list.length - 1];
+	  }
+
+	  return list[0];
+	};
+	/**
+	 * Return true if an object is empty
+	 *
+	 */
+
+	const isEmptyObject = obj => {
+	  return Object.keys(obj).length === 0;
+	};
+	/**
+	 * Get the index of an element amongst sibling nodes of the same type
+	 *
+	 */
+
+	const nodeIndex = (el, amongst) => {
+	  if (!el) return -1;
+	  amongst = amongst || el.nodeName;
+	  var i = 0;
+
+	  while (el = el.previousElementSibling) {
+	    if (el.matches(amongst)) {
+	      i++;
+	    }
+	  }
+
+	  return i;
+	};
+	/**
+	 * Set attributes of an element
+	 *
+	 */
+
+	const setAttr = (el, attrs) => {
+	  iterate(attrs, (val, attr) => {
+	    if (val == null) {
+	      el.removeAttribute(attr);
+	    } else {
+	      el.setAttribute(attr, '' + val);
+	    }
+	  });
+	};
+	/**
+	 * Replace a node
+	 */
+
+	const replaceNode = (existing, replacement) => {
+	  if (existing.parentNode) existing.parentNode.replaceChild(replacement, existing);
+	};
+
+	/**
+	 * highlight v3 | MIT license | Johann Burkard <jb@eaio.com>
+	 * Highlights arbitrary terms in a node.
+	 *
+	 * - Modified by Marshal <beatgates@gmail.com> 2011-6-24 (added regex)
+	 * - Modified by Brian Reavis <brian@thirdroute.com> 2012-8-27 (cleanup)
+	 */
+	const highlight = (element, regex) => {
+	  if (regex === null) return; // convet string to regex
+
+	  if (typeof regex === 'string') {
+	    if (!regex.length) return;
+	    regex = new RegExp(regex, 'i');
+	  } // Wrap matching part of text node with highlighting <span>, e.g.
+	  // Soccer  ->  <span class="highlight">Soc</span>cer  for regex = /soc/i
+
+
+	  const highlightText = node => {
+	    var match = node.data.match(regex);
+
+	    if (match && node.data.length > 0) {
+	      var spannode = document.createElement('span');
+	      spannode.className = 'highlight';
+	      var middlebit = node.splitText(match.index);
+	      middlebit.splitText(match[0].length);
+	      var middleclone = middlebit.cloneNode(true);
+	      spannode.appendChild(middleclone);
+	      replaceNode(middlebit, spannode);
+	      return 1;
+	    }
+
+	    return 0;
+	  }; // Recurse element node, looking for child text nodes to highlight, unless element
+	  // is childless, <script>, <style>, or already highlighted: <span class="hightlight">
+
+
+	  const highlightChildren = node => {
+	    if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName) && (node.className !== 'highlight' || node.tagName !== 'SPAN')) {
+	      for (var i = 0; i < node.childNodes.length; ++i) {
+	        i += highlightRecursive(node.childNodes[i]);
+	      }
+	    }
+	  };
+
+	  const highlightRecursive = node => {
+	    if (node.nodeType === 3) {
+	      return highlightText(node);
+	    }
+
+	    highlightChildren(node);
+	    return 0;
+	  };
+
+	  highlightRecursive(element);
+	};
+	/**
+	 * removeHighlight fn copied from highlight v5 and
+	 * edited to remove with(), pass js strict mode, and use without jquery
+	 */
+
+	const removeHighlight = el => {
+	  var elements = el.querySelectorAll("span.highlight");
+	  Array.prototype.forEach.call(elements, function (el) {
+	    var parent = el.parentNode;
+	    parent.replaceChild(el.firstChild, el);
+	    parent.normalize();
+	  });
+	};
+
+	const KEY_A = 65;
+	const KEY_RETURN = 13;
+	const KEY_ESC = 27;
+	const KEY_LEFT = 37;
+	const KEY_UP = 38;
+	const KEY_RIGHT = 39;
+	const KEY_DOWN = 40;
+	const KEY_BACKSPACE = 8;
+	const KEY_DELETE = 46;
+	const KEY_TAB = 9;
+	const IS_MAC = typeof navigator === 'undefined' ? false : /Mac/.test(navigator.userAgent);
+	const KEY_SHORTCUT = IS_MAC ? 'metaKey' : 'ctrlKey'; // ctrl key or apple key for ma
+
+	var defaults = {
+	  options: [],
+	  optgroups: [],
+	  plugins: [],
+	  delimiter: ',',
+	  splitOn: null,
+	  // regexp or string for splitting up values from a paste command
+	  persist: true,
+	  diacritics: true,
+	  create: null,
+	  createOnBlur: false,
+	  createFilter: null,
+	  highlight: true,
+	  openOnFocus: true,
+	  shouldOpen: null,
+	  maxOptions: 50,
+	  maxItems: null,
+	  hideSelected: null,
+	  duplicates: false,
+	  addPrecedence: false,
+	  selectOnTab: false,
+	  preload: null,
+	  allowEmptyOption: false,
+	  //closeAfterSelect: false,
+	  loadThrottle: 300,
+	  loadingClass: 'loading',
+	  dataAttr: null,
+	  //'data-data',
+	  optgroupField: 'optgroup',
+	  valueField: 'value',
+	  labelField: 'text',
+	  disabledField: 'disabled',
+	  optgroupLabelField: 'label',
+	  optgroupValueField: 'value',
+	  lockOptgroupOrder: false,
+	  sortField: '$order',
+	  searchField: ['text'],
+	  searchConjunction: 'and',
+	  mode: null,
+	  wrapperClass: 'ts-wrapper',
+	  controlClass: 'ts-control',
+	  dropdownClass: 'ts-dropdown',
+	  dropdownContentClass: 'ts-dropdown-content',
+	  itemClass: 'item',
+	  optionClass: 'option',
+	  dropdownParent: null,
+	  controlInput: '<input type="text" autocomplete="off" size="1" />',
+	  copyClassesToDropdown: false,
+	  placeholder: null,
+	  hidePlaceholder: null,
+	  shouldLoad: function (query) {
+	    return query.length > 0;
+	  },
+
+	  /*
+	  load                 : null, // function(query, callback) { ... }
+	  score                : null, // function(search) { ... }
+	  onInitialize         : null, // function() { ... }
+	  onChange             : null, // function(value) { ... }
+	  onItemAdd            : null, // function(value, $item) { ... }
+	  onItemRemove         : null, // function(value) { ... }
+	  onClear              : null, // function() { ... }
+	  onOptionAdd          : null, // function(value, data) { ... }
+	  onOptionRemove       : null, // function(value) { ... }
+	  onOptionClear        : null, // function() { ... }
+	  onOptionGroupAdd     : null, // function(id, data) { ... }
+	  onOptionGroupRemove  : null, // function(id) { ... }
+	  onOptionGroupClear   : null, // function() { ... }
+	  onDropdownOpen       : null, // function(dropdown) { ... }
+	  onDropdownClose      : null, // function(dropdown) { ... }
+	  onType               : null, // function(str) { ... }
+	  onDelete             : null, // function(values) { ... }
+	  */
+	  render: {
+	    /*
+	    item: null,
+	    optgroup: null,
+	    optgroup_header: null,
+	    option: null,
+	    option_create: null
+	    */
+	  }
+	};
+
+	/**
+	 * Converts a scalar to its best string representation
+	 * for hash keys and HTML attribute values.
+	 *
+	 * Transformations:
+	 *   'str'     -> 'str'
+	 *   null      -> ''
+	 *   undefined -> ''
+	 *   true      -> '1'
+	 *   false     -> '0'
+	 *   0         -> '0'
+	 *   1         -> '1'
+	 *
+	 */
+	const hash_key = value => {
+	  if (typeof value === 'undefined' || value === null) return null;
+	  return get_hash(value);
+	};
+	const get_hash = value => {
+	  if (typeof value === 'boolean') return value ? '1' : '0';
+	  return value + '';
+	};
+	/**
+	 * Escapes a string for use within HTML.
+	 *
+	 */
+
+	const escape_html = str => {
+	  return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	};
+	/**
+	 * Debounce the user provided load function
+	 *
+	 */
+
+	const loadDebounce = (fn, delay) => {
+	  var timeout;
+	  return function (value, callback) {
+	    var self = this;
+
+	    if (timeout) {
+	      self.loading = Math.max(self.loading - 1, 0);
+	      clearTimeout(timeout);
+	    }
+
+	    timeout = setTimeout(function () {
+	      timeout = null;
+	      self.loadedSearches[value] = true;
+	      fn.call(self, value, callback);
+	    }, delay);
+	  };
+	};
+	/**
+	 * Debounce all fired events types listed in `types`
+	 * while executing the provided `fn`.
+	 *
+	 */
+
+	const debounce_events = (self, types, fn) => {
+	  var type;
+	  var trigger = self.trigger;
+	  var event_args = {}; // override trigger method
+
+	  self.trigger = function () {
+	    var type = arguments[0];
+
+	    if (types.indexOf(type) !== -1) {
+	      event_args[type] = arguments;
+	    } else {
+	      return trigger.apply(self, arguments);
+	    }
+	  }; // invoke provided function
+
+
+	  fn.apply(self, []);
+	  self.trigger = trigger; // trigger queued events
+
+	  for (type of types) {
+	    if (type in event_args) {
+	      trigger.apply(self, event_args[type]);
+	    }
+	  }
+	};
+	/**
+	 * Determines the current selection within a text input control.
+	 * Returns an object containing:
+	 *   - start
+	 *   - length
+	 *
+	 */
+
+	const getSelection = input => {
+	  return {
+	    start: input.selectionStart || 0,
+	    length: (input.selectionEnd || 0) - (input.selectionStart || 0)
+	  };
+	};
+	/**
+	 * Prevent default
+	 *
+	 */
+
+	const preventDefault = (evt, stop = false) => {
+	  if (evt) {
+	    evt.preventDefault();
+
+	    if (stop) {
+	      evt.stopPropagation();
+	    }
+	  }
+	};
+	/**
+	 * Prevent default
+	 *
+	 */
+
+	const addEvent = (target, type, callback, options) => {
+	  target.addEventListener(type, callback, options);
+	};
+	/**
+	 * Return true if the requested key is down
+	 * Will return false if more than one control character is pressed ( when [ctrl+shift+a] != [ctrl+a] )
+	 * The current evt may not always set ( eg calling advanceSelection() )
+	 *
+	 */
+
+	const isKeyDown = (key_name, evt) => {
+	  if (!evt) {
+	    return false;
+	  }
+
+	  if (!evt[key_name]) {
+	    return false;
+	  }
+
+	  var count = (evt.altKey ? 1 : 0) + (evt.ctrlKey ? 1 : 0) + (evt.shiftKey ? 1 : 0) + (evt.metaKey ? 1 : 0);
+
+	  if (count === 1) {
+	    return true;
+	  }
+
+	  return false;
+	};
+	/**
+	 * Get the id of an element
+	 * If the id attribute is not set, set the attribute with the given id
+	 *
+	 */
+
+	const getId = (el, id) => {
+	  const existing_id = el.getAttribute('id');
+
+	  if (existing_id) {
+	    return existing_id;
+	  }
+
+	  el.setAttribute('id', id);
+	  return id;
+	};
+	/**
+	 * Returns a string with backslashes added before characters that need to be escaped.
+	 */
+
+	const addSlashes = str => {
+	  return str.replace(/[\\"']/g, '\\$&');
+	};
+	/**
+	 *
+	 */
+
+	const append = (parent, node) => {
+	  if (node) parent.append(node);
+	};
+
+	function getSettings(input, settings_user) {
+	  var settings = Object.assign({}, defaults, settings_user);
+	  var attr_data = settings.dataAttr;
+	  var field_label = settings.labelField;
+	  var field_value = settings.valueField;
+	  var field_disabled = settings.disabledField;
+	  var field_optgroup = settings.optgroupField;
+	  var field_optgroup_label = settings.optgroupLabelField;
+	  var field_optgroup_value = settings.optgroupValueField;
+	  var tag_name = input.tagName.toLowerCase();
+	  var placeholder = input.getAttribute('placeholder') || input.getAttribute('data-placeholder');
+
+	  if (!placeholder && !settings.allowEmptyOption) {
+	    let option = input.querySelector('option[value=""]');
+
+	    if (option) {
+	      placeholder = option.textContent;
+	    }
+	  }
+
+	  var settings_element = {
+	    placeholder: placeholder,
+	    options: [],
+	    optgroups: [],
+	    items: [],
+	    maxItems: null
+	  };
+	  /**
+	   * Initialize from a <select> element.
+	   *
+	   */
+
+	  var init_select = () => {
+	    var tagName;
+	    var options = settings_element.options;
+	    var optionsMap = {};
+	    var group_count = 1;
+
+	    var readData = el => {
+	      var data = Object.assign({}, el.dataset); // get plain object from DOMStringMap
+
+	      var json = attr_data && data[attr_data];
+
+	      if (typeof json === 'string' && json.length) {
+	        data = Object.assign(data, JSON.parse(json));
+	      }
+
+	      return data;
+	    };
+
+	    var addOption = (option, group) => {
+	      var value = hash_key(option.value);
+	      if (value == null) return;
+	      if (!value && !settings.allowEmptyOption) return; // if the option already exists, it's probably been
+	      // duplicated in another optgroup. in this case, push
+	      // the current group to the "optgroup" property on the
+	      // existing option so that it's rendered in both places.
+
+	      if (optionsMap.hasOwnProperty(value)) {
+	        if (group) {
+	          var arr = optionsMap[value][field_optgroup];
+
+	          if (!arr) {
+	            optionsMap[value][field_optgroup] = group;
+	          } else if (!Array.isArray(arr)) {
+	            optionsMap[value][field_optgroup] = [arr, group];
+	          } else {
+	            arr.push(group);
+	          }
+	        }
+	      } else {
+	        var option_data = readData(option);
+	        option_data[field_label] = option_data[field_label] || option.textContent;
+	        option_data[field_value] = option_data[field_value] || value;
+	        option_data[field_disabled] = option_data[field_disabled] || option.disabled;
+	        option_data[field_optgroup] = option_data[field_optgroup] || group;
+	        option_data.$option = option;
+	        optionsMap[value] = option_data;
+	        options.push(option_data);
+	      }
+
+	      if (option.selected) {
+	        settings_element.items.push(value);
+	      }
+	    };
+
+	    var addGroup = optgroup => {
+	      var id, optgroup_data;
+	      optgroup_data = readData(optgroup);
+	      optgroup_data[field_optgroup_label] = optgroup_data[field_optgroup_label] || optgroup.getAttribute('label') || '';
+	      optgroup_data[field_optgroup_value] = optgroup_data[field_optgroup_value] || group_count++;
+	      optgroup_data[field_disabled] = optgroup_data[field_disabled] || optgroup.disabled;
+	      settings_element.optgroups.push(optgroup_data);
+	      id = optgroup_data[field_optgroup_value];
+	      iterate(optgroup.children, option => {
+	        addOption(option, id);
+	      });
+	    };
+
+	    settings_element.maxItems = input.hasAttribute('multiple') ? null : 1;
+	    iterate(input.children, child => {
+	      tagName = child.tagName.toLowerCase();
+
+	      if (tagName === 'optgroup') {
+	        addGroup(child);
+	      } else if (tagName === 'option') {
+	        addOption(child);
+	      }
+	    });
+	  };
+	  /**
+	   * Initialize from a <input type="text"> element.
+	   *
+	   */
+
+
+	  var init_textbox = () => {
+	    const data_raw = input.getAttribute(attr_data);
+
+	    if (!data_raw) {
+	      var value = input.value.trim() || '';
+	      if (!settings.allowEmptyOption && !value.length) return;
+	      const values = value.split(settings.delimiter);
+	      iterate(values, value => {
+	        const option = {};
+	        option[field_label] = value;
+	        option[field_value] = value;
+	        settings_element.options.push(option);
+	      });
+	      settings_element.items = values;
+	    } else {
+	      settings_element.options = JSON.parse(data_raw);
+	      iterate(settings_element.options, opt => {
+	        settings_element.items.push(opt[field_value]);
+	      });
+	    }
+	  };
+
+	  if (tag_name === 'select') {
+	    init_select();
+	  } else {
+	    init_textbox();
+	  }
+
+	  return Object.assign({}, defaults, settings_element, settings_user);
+	}
+
+	var instance_i = 0;
+	class TomSelect extends MicroPlugin(MicroEvent) {
+	  // @deprecated 1.8
+	  constructor(input_arg, user_settings) {
+	    super();
+	    this.order = 0;
+	    this.isOpen = false;
+	    this.isDisabled = false;
+	    this.isInvalid = false;
+	    this.isValid = true;
+	    this.isLocked = false;
+	    this.isFocused = false;
+	    this.isInputHidden = false;
+	    this.isSetup = false;
+	    this.ignoreFocus = false;
+	    this.hasOptions = false;
+	    this.lastValue = '';
+	    this.caretPos = 0;
+	    this.loading = 0;
+	    this.loadedSearches = {};
+	    this.activeOption = null;
+	    this.activeItems = [];
+	    this.optgroups = {};
+	    this.options = {};
+	    this.userOptions = {};
+	    this.items = [];
+	    instance_i++;
+	    var dir;
+	    var input = getDom(input_arg);
+
+	    if (input.tomselect) {
+	      throw new Error('Tom Select already initialized on this element');
+	    }
+
+	    input.tomselect = this; // detect rtl environment
+
+	    var computedStyle = window.getComputedStyle && window.getComputedStyle(input, null);
+	    dir = computedStyle.getPropertyValue('direction'); // setup default state
+
+	    const settings = getSettings(input, user_settings);
+	    this.settings = settings;
+	    this.input = input;
+	    this.tabIndex = input.tabIndex || 0;
+	    this.is_select_tag = input.tagName.toLowerCase() === 'select';
+	    this.rtl = /rtl/i.test(dir);
+	    this.inputId = getId(input, 'tomselect-' + instance_i);
+	    this.isRequired = input.required; // search system
+
+	    this.sifter = new Sifter(this.options, {
+	      diacritics: settings.diacritics
+	    }); // option-dependent defaults
+
+	    settings.mode = settings.mode || (settings.maxItems === 1 ? 'single' : 'multi');
+
+	    if (typeof settings.hideSelected !== 'boolean') {
+	      settings.hideSelected = settings.mode === 'multi';
+	    }
+
+	    if (typeof settings.hidePlaceholder !== 'boolean') {
+	      settings.hidePlaceholder = settings.mode !== 'multi';
+	    } // set up createFilter callback
+
+
+	    var filter = settings.createFilter;
+
+	    if (typeof filter !== 'function') {
+	      if (typeof filter === 'string') {
+	        filter = new RegExp(filter);
+	      }
+
+	      if (filter instanceof RegExp) {
+	        settings.createFilter = input => filter.test(input);
+	      } else {
+	        settings.createFilter = () => true;
+	      }
+	    }
+
+	    this.initializePlugins(settings.plugins);
+	    this.setupCallbacks();
+	    this.setupTemplates(); // Create all elements
+
+	    const wrapper = getDom('<div>');
+	    const control = getDom('<div>');
+
+	    const dropdown = this._render('dropdown');
+
+	    const dropdown_content = getDom(`<div role="listbox" tabindex="-1">`);
+	    const classes = this.input.getAttribute('class') || '';
+	    const inputMode = settings.mode;
+	    var control_input;
+	    addClasses(wrapper, settings.wrapperClass, classes, inputMode);
+	    addClasses(control, settings.controlClass);
+	    append(wrapper, control);
+	    addClasses(dropdown, settings.dropdownClass, inputMode);
+
+	    if (settings.copyClassesToDropdown) {
+	      addClasses(dropdown, classes);
+	    }
+
+	    addClasses(dropdown_content, settings.dropdownContentClass);
+	    append(dropdown, dropdown_content);
+	    getDom(settings.dropdownParent || wrapper).appendChild(dropdown); // default controlInput
+
+	    if (isHtmlString(settings.controlInput)) {
+	      control_input = getDom(settings.controlInput); // set attributes
+
+	      var attrs = ['autocorrect', 'autocapitalize', 'autocomplete'];
+	      iterate(attrs, attr => {
+	        if (input.getAttribute(attr)) {
+	          setAttr(control_input, {
+	            [attr]: input.getAttribute(attr)
+	          });
+	        }
+	      });
+	      control_input.tabIndex = -1;
+	      control.appendChild(control_input);
+	      this.focus_node = control_input; // dom element	
+	    } else if (settings.controlInput) {
+	      control_input = getDom(settings.controlInput);
+	      this.focus_node = control_input;
+	    } else {
+	      control_input = getDom('<input/>');
+	      this.focus_node = control;
+	    }
+
+	    this.wrapper = wrapper;
+	    this.dropdown = dropdown;
+	    this.dropdown_content = dropdown_content;
+	    this.control = control;
+	    this.control_input = control_input;
+	    this.setup();
+	  }
+	  /**
+	   * set up event bindings.
+	   *
+	   */
+
+
+	  setup() {
+	    const self = this;
+	    const settings = self.settings;
+	    const control_input = self.control_input;
+	    const dropdown = self.dropdown;
+	    const dropdown_content = self.dropdown_content;
+	    const wrapper = self.wrapper;
+	    const control = self.control;
+	    const input = self.input;
+	    const focus_node = self.focus_node;
+	    const passive_event = {
+	      passive: true
+	    };
+	    const listboxId = self.inputId + '-ts-dropdown';
+	    setAttr(dropdown_content, {
+	      id: listboxId
+	    });
+	    setAttr(focus_node, {
+	      role: 'combobox',
+	      'aria-haspopup': 'listbox',
+	      'aria-expanded': 'false',
+	      'aria-controls': listboxId
+	    });
+	    const control_id = getId(focus_node, self.inputId + '-ts-control');
+	    const query = "label[for='" + escapeQuery(self.inputId) + "']";
+	    const label = document.querySelector(query);
+	    const label_click = self.focus.bind(self);
+
+	    if (label) {
+	      addEvent(label, 'click', label_click);
+	      setAttr(label, {
+	        for: control_id
+	      });
+	      const label_id = getId(label, self.inputId + '-ts-label');
+	      setAttr(focus_node, {
+	        'aria-labelledby': label_id
+	      });
+	      setAttr(dropdown_content, {
+	        'aria-labelledby': label_id
+	      });
+	    }
+
+	    wrapper.style.width = input.style.width;
+
+	    if (self.plugins.names.length) {
+	      const classes_plugins = 'plugin-' + self.plugins.names.join(' plugin-');
+	      addClasses([wrapper, dropdown], classes_plugins);
+	    }
+
+	    if ((settings.maxItems === null || settings.maxItems > 1) && self.is_select_tag) {
+	      setAttr(input, {
+	        multiple: 'multiple'
+	      });
+	    }
+
+	    if (self.settings.placeholder) {
+	      setAttr(control_input, {
+	        placeholder: settings.placeholder
+	      });
+	    } // if splitOn was not passed in, construct it from the delimiter to allow pasting universally
+
+
+	    if (!self.settings.splitOn && self.settings.delimiter) {
+	      self.settings.splitOn = new RegExp('\\s*' + escape_regex(self.settings.delimiter) + '+\\s*');
+	    } // debounce user defined load() if loadThrottle > 0
+	    // after initializePlugins() so plugins can create/modify user defined loaders
+
+
+	    if (settings.load && settings.loadThrottle) {
+	      settings.load = loadDebounce(settings.load, settings.loadThrottle);
+	    }
+
+	    self.control_input.type = input.type; // clicking on an option should select it
+
+	    addEvent(dropdown, 'click', evt => {
+	      const option = parentMatch(evt.target, '[data-selectable]');
+
+	      if (option) {
+	        self.onOptionSelect(evt, option);
+	        preventDefault(evt, true);
+	      }
+	    });
+	    addEvent(control, 'click', evt => {
+	      var target_match = parentMatch(evt.target, '[data-ts-item]', control);
+
+	      if (target_match && self.onItemSelect(evt, target_match)) {
+	        preventDefault(evt, true);
+	        return;
+	      } // retain focus (see control_input mousedown)
+
+
+	      if (control_input.value != '') {
+	        return;
+	      }
+
+	      self.onClick();
+	      preventDefault(evt, true);
+	    }); // keydown on focus_node for arrow_down/arrow_up
+
+	    addEvent(focus_node, 'keydown', e => self.onKeyDown(e)); // keypress and input/keyup
+
+	    addEvent(control_input, 'keypress', e => self.onKeyPress(e));
+	    addEvent(control_input, 'input', e => self.onInput(e));
+	    addEvent(focus_node, 'resize', () => self.positionDropdown(), passive_event);
+	    addEvent(focus_node, 'blur', e => self.onBlur(e));
+	    addEvent(focus_node, 'focus', e => self.onFocus(e));
+	    addEvent(focus_node, 'paste', e => self.onPaste(e));
+
+	    const doc_mousedown = evt => {
+	      // blur if target is outside of this instance
+	      // dropdown is not always inside wrapper
+	      const target = evt.composedPath()[0];
+
+	      if (!wrapper.contains(target) && !dropdown.contains(target)) {
+	        if (self.isFocused) {
+	          self.blur();
+	        }
+
+	        self.inputState();
+	        return;
+	      } // retain focus by preventing native handling. if the
+	      // event target is the input it should not be modified.
+	      // otherwise, text selection within the input won't work.
+	      // Fixes bug #212 which is no covered by tests
+
+
+	      if (target == control_input && self.isOpen) {
+	        evt.stopPropagation(); // clicking anywhere in the control should not blur the control_input (which would close the dropdown)
+	      } else {
+	        preventDefault(evt, true);
+	      }
+	    };
+
+	    var win_scroll = () => {
+	      if (self.isOpen) {
+	        self.positionDropdown();
+	      }
+	    };
+
+	    addEvent(document, 'mousedown', doc_mousedown);
+	    addEvent(window, 'scroll', win_scroll, passive_event);
+	    addEvent(window, 'resize', win_scroll, passive_event);
+
+	    this._destroy = () => {
+	      document.removeEventListener('mousedown', doc_mousedown);
+	      window.removeEventListener('sroll', win_scroll);
+	      window.removeEventListener('resize', win_scroll);
+	      if (label) label.removeEventListener('click', label_click);
+	    }; // store original html and tab index so that they can be
+	    // restored when the destroy() method is called.
+
+
+	    this.revertSettings = {
+	      innerHTML: input.innerHTML,
+	      tabIndex: input.tabIndex
+	    };
+	    input.tabIndex = -1;
+	    input.insertAdjacentElement('afterend', self.wrapper);
+	    self.sync(false);
+	    settings.items = [];
+	    delete settings.optgroups;
+	    delete settings.options;
+	    addEvent(input, 'invalid', e => {
+	      if (self.isValid) {
+	        self.isValid = false;
+	        self.isInvalid = true;
+	        self.refreshState();
+	      }
+	    });
+	    self.updateOriginalInput();
+	    self.refreshItems();
+	    self.close(false);
+	    self.inputState();
+	    self.isSetup = true;
+
+	    if (input.disabled) {
+	      self.disable();
+	    } else {
+	      self.enable(); //sets tabIndex
+	    }
+
+	    self.on('change', this.onChange);
+	    addClasses(input, 'tomselected', 'ts-hidden-accessible');
+	    self.trigger('initialize'); // preload options
+
+	    if (settings.preload === true) {
+	      self.preload();
+	    }
+	  }
+	  /**
+	   * Register options and optgroups
+	   *
+	   */
+
+
+	  setupOptions(options = [], optgroups = []) {
+	    // build options table
+	    this.addOptions(options); // build optgroup table
+
+	    iterate(optgroups, optgroup => {
+	      this.registerOptionGroup(optgroup);
+	    });
+	  }
+	  /**
+	   * Sets up default rendering functions.
+	   */
+
+
+	  setupTemplates() {
+	    var self = this;
+	    var field_label = self.settings.labelField;
+	    var field_optgroup = self.settings.optgroupLabelField;
+	    var templates = {
+	      'optgroup': data => {
+	        let optgroup = document.createElement('div');
+	        optgroup.className = 'optgroup';
+	        optgroup.appendChild(data.options);
+	        return optgroup;
+	      },
+	      'optgroup_header': (data, escape) => {
+	        return '<div class="optgroup-header">' + escape(data[field_optgroup]) + '</div>';
+	      },
+	      'option': (data, escape) => {
+	        return '<div>' + escape(data[field_label]) + '</div>';
+	      },
+	      'item': (data, escape) => {
+	        return '<div>' + escape(data[field_label]) + '</div>';
+	      },
+	      'option_create': (data, escape) => {
+	        return '<div class="create">Add <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+	      },
+	      'no_results': () => {
+	        return '<div class="no-results">No results found</div>';
+	      },
+	      'loading': () => {
+	        return '<div class="spinner"></div>';
+	      },
+	      'not_loading': () => {},
+	      'dropdown': () => {
+	        return '<div></div>';
+	      }
+	    };
+	    self.settings.render = Object.assign({}, templates, self.settings.render);
+	  }
+	  /**
+	   * Maps fired events to callbacks provided
+	   * in the settings used when creating the control.
+	   */
+
+
+	  setupCallbacks() {
+	    var key, fn;
+	    var callbacks = {
+	      'initialize': 'onInitialize',
+	      'change': 'onChange',
+	      'item_add': 'onItemAdd',
+	      'item_remove': 'onItemRemove',
+	      'item_select': 'onItemSelect',
+	      'clear': 'onClear',
+	      'option_add': 'onOptionAdd',
+	      'option_remove': 'onOptionRemove',
+	      'option_clear': 'onOptionClear',
+	      'optgroup_add': 'onOptionGroupAdd',
+	      'optgroup_remove': 'onOptionGroupRemove',
+	      'optgroup_clear': 'onOptionGroupClear',
+	      'dropdown_open': 'onDropdownOpen',
+	      'dropdown_close': 'onDropdownClose',
+	      'type': 'onType',
+	      'load': 'onLoad',
+	      'focus': 'onFocus',
+	      'blur': 'onBlur'
+	    };
+
+	    for (key in callbacks) {
+	      fn = this.settings[callbacks[key]];
+	      if (fn) this.on(key, fn);
+	    }
+	  }
+	  /**
+	   * Sync the Tom Select instance with the original input or select
+	   *
+	   */
+
+
+	  sync(get_settings = true) {
+	    const self = this;
+	    const settings = get_settings ? getSettings(self.input, {
+	      delimiter: self.settings.delimiter
+	    }) : self.settings;
+	    self.setupOptions(settings.options, settings.optgroups);
+	    self.setValue(settings.items, true); // silent prevents recursion
+
+	    self.lastQuery = null; // so updated options will be displayed in dropdown
+	  }
+	  /**
+	   * Triggered when the main control element
+	   * has a click event.
+	   *
+	   */
+
+
+	  onClick() {
+	    var self = this;
+
+	    if (self.activeItems.length > 0) {
+	      self.clearActiveItems();
+	      self.focus();
+	      return;
+	    }
+
+	    if (self.isFocused && self.isOpen) {
+	      self.blur();
+	    } else {
+	      self.focus();
+	    }
+	  }
+	  /**
+	   * @deprecated v1.7
+	   *
+	   */
+
+
+	  onMouseDown() {}
+	  /**
+	   * Triggered when the value of the control has been changed.
+	   * This should propagate the event to the original DOM
+	   * input / select element.
+	   */
+
+
+	  onChange() {
+	    triggerEvent(this.input, 'input');
+	    triggerEvent(this.input, 'change');
+	  }
+	  /**
+	   * Triggered on <input> paste.
+	   *
+	   */
+
+
+	  onPaste(e) {
+	    var self = this;
+
+	    if (self.isInputHidden || self.isLocked) {
+	      preventDefault(e);
+	      return;
+	    } // If a regex or string is included, this will split the pasted
+	    // input and create Items for each separate value
+
+
+	    if (self.settings.splitOn) {
+	      // Wait for pasted text to be recognized in value
+	      setTimeout(() => {
+	        var pastedText = self.inputValue();
+
+	        if (!pastedText.match(self.settings.splitOn)) {
+	          return;
+	        }
+
+	        var splitInput = pastedText.trim().split(self.settings.splitOn);
+	        iterate(splitInput, piece => {
+	          self.createItem(piece);
+	        });
+	      }, 0);
+	    }
+	  }
+	  /**
+	   * Triggered on <input> keypress.
+	   *
+	   */
+
+
+	  onKeyPress(e) {
+	    var self = this;
+
+	    if (self.isLocked) {
+	      preventDefault(e);
+	      return;
+	    }
+
+	    var character = String.fromCharCode(e.keyCode || e.which);
+
+	    if (self.settings.create && self.settings.mode === 'multi' && character === self.settings.delimiter) {
+	      self.createItem();
+	      preventDefault(e);
+	      return;
+	    }
+	  }
+	  /**
+	   * Triggered on <input> keydown.
+	   *
+	   */
+
+
+	  onKeyDown(e) {
+	    var self = this;
+
+	    if (self.isLocked) {
+	      if (e.keyCode !== KEY_TAB) {
+	        preventDefault(e);
+	      }
+
+	      return;
+	    }
+
+	    switch (e.keyCode) {
+	      // ctrl+A: select all
+	      case KEY_A:
+	        if (isKeyDown(KEY_SHORTCUT, e)) {
+	          if (self.control_input.value == '') {
+	            preventDefault(e);
+	            self.selectAll();
+	            return;
+	          }
+	        }
+
+	        break;
+	      // esc: close dropdown
+
+	      case KEY_ESC:
+	        if (self.isOpen) {
+	          preventDefault(e, true);
+	          self.close();
+	        }
+
+	        self.clearActiveItems();
+	        return;
+	      // down: open dropdown or move selection down
+
+	      case KEY_DOWN:
+	        if (!self.isOpen && self.hasOptions) {
+	          self.open();
+	        } else if (self.activeOption) {
+	          let next = self.getAdjacent(self.activeOption, 1);
+	          if (next) self.setActiveOption(next);
+	        }
+
+	        preventDefault(e);
+	        return;
+	      // up: move selection up
+
+	      case KEY_UP:
+	        if (self.activeOption) {
+	          let prev = self.getAdjacent(self.activeOption, -1);
+	          if (prev) self.setActiveOption(prev);
+	        }
+
+	        preventDefault(e);
+	        return;
+	      // return: select active option
+
+	      case KEY_RETURN:
+	        if (self.canSelect(self.activeOption)) {
+	          self.onOptionSelect(e, self.activeOption);
+	          preventDefault(e); // if the option_create=null, the dropdown might be closed
+	        } else if (self.settings.create && self.createItem()) {
+	          preventDefault(e);
+	        }
+
+	        return;
+	      // left: modifiy item selection to the left
+
+	      case KEY_LEFT:
+	        self.advanceSelection(-1, e);
+	        return;
+	      // right: modifiy item selection to the right
+
+	      case KEY_RIGHT:
+	        self.advanceSelection(1, e);
+	        return;
+	      // tab: select active option and/or create item
+
+	      case KEY_TAB:
+	        if (self.settings.selectOnTab) {
+	          if (self.canSelect(self.activeOption)) {
+	            self.onOptionSelect(e, self.activeOption); // prevent default [tab] behaviour of jump to the next field
+	            // if select isFull, then the dropdown won't be open and [tab] will work normally
+
+	            preventDefault(e);
+	          }
+
+	          if (self.settings.create && self.createItem()) {
+	            preventDefault(e);
+	          }
+	        }
+
+	        return;
+	      // delete|backspace: delete items
+
+	      case KEY_BACKSPACE:
+	      case KEY_DELETE:
+	        self.deleteSelection(e);
+	        return;
+	    } // don't enter text in the control_input when active items are selected
+
+
+	    if (self.isInputHidden && !isKeyDown(KEY_SHORTCUT, e)) {
+	      preventDefault(e);
+	    }
+	  }
+	  /**
+	   * Triggered on <input> keyup.
+	   *
+	   */
+
+
+	  onInput(e) {
+	    var self = this;
+
+	    if (self.isLocked) {
+	      return;
+	    }
+
+	    var value = self.inputValue();
+
+	    if (self.lastValue !== value) {
+	      self.lastValue = value;
+
+	      if (self.settings.shouldLoad.call(self, value)) {
+	        self.load(value);
+	      }
+
+	      self.refreshOptions();
+	      self.trigger('type', value);
+	    }
+	  }
+	  /**
+	   * Triggered on <input> focus.
+	   *
+	   */
+
+
+	  onFocus(e) {
+	    var self = this;
+	    var wasFocused = self.isFocused;
+
+	    if (self.isDisabled) {
+	      self.blur();
+	      preventDefault(e);
+	      return;
+	    }
+
+	    if (self.ignoreFocus) return;
+	    self.isFocused = true;
+	    if (self.settings.preload === 'focus') self.preload();
+	    if (!wasFocused) self.trigger('focus');
+
+	    if (!self.activeItems.length) {
+	      self.showInput();
+	      self.refreshOptions(!!self.settings.openOnFocus);
+	    }
+
+	    self.refreshState();
+	  }
+	  /**
+	   * Triggered on <input> blur.
+	   *
+	   */
+
+
+	  onBlur(e) {
+	    if (document.hasFocus() === false) return;
+	    var self = this;
+	    if (!self.isFocused) return;
+	    self.isFocused = false;
+	    self.ignoreFocus = false;
+
+	    var deactivate = () => {
+	      self.close();
+	      self.setActiveItem();
+	      self.setCaret(self.items.length);
+	      self.trigger('blur');
+	    };
+
+	    if (self.settings.create && self.settings.createOnBlur) {
+	      self.createItem(null, false, deactivate);
+	    } else {
+	      deactivate();
+	    }
+	  }
+	  /**
+	   * Triggered when the user clicks on an option
+	   * in the autocomplete dropdown menu.
+	   *
+	   */
+
+
+	  onOptionSelect(evt, option) {
+	    var value,
+	        self = this; // should not be possible to trigger a option under a disabled optgroup
+
+	    if (option.parentElement && option.parentElement.matches('[data-disabled]')) {
+	      return;
+	    }
+
+	    if (option.classList.contains('create')) {
+	      self.createItem(null, true, () => {
+	        if (self.settings.closeAfterSelect) {
+	          self.close();
+	        }
+	      });
+	    } else {
+	      value = option.dataset.value;
+
+	      if (typeof value !== 'undefined') {
+	        self.lastQuery = null;
+	        self.addItem(value);
+
+	        if (self.settings.closeAfterSelect) {
+	          self.close();
+	        }
+
+	        if (!self.settings.hideSelected && evt.type && /click/.test(evt.type)) {
+	          self.setActiveOption(option);
+	        }
+	      }
+	    }
+	  }
+	  /**
+	   * Return true if the given option can be selected
+	   *
+	   */
+
+
+	  canSelect(option) {
+	    if (this.isOpen && option && this.dropdown_content.contains(option)) {
+	      return true;
+	    }
+
+	    return false;
+	  }
+	  /**
+	   * Triggered when the user clicks on an item
+	   * that has been selected.
+	   *
+	   */
+
+
+	  onItemSelect(evt, item) {
+	    var self = this;
+
+	    if (!self.isLocked && self.settings.mode === 'multi') {
+	      preventDefault(evt);
+	      self.setActiveItem(item, evt);
+	      return true;
+	    }
+
+	    return false;
+	  }
+	  /**
+	   * Determines whether or not to invoke
+	   * the user-provided option provider / loader
+	   *
+	   * Note, there is a subtle difference between
+	   * this.canLoad() and this.settings.shouldLoad();
+	   *
+	   *	- settings.shouldLoad() is a user-input validator.
+	   *	When false is returned, the not_loading template
+	   *	will be added to the dropdown
+	   *
+	   *	- canLoad() is lower level validator that checks
+	   * 	the Tom Select instance. There is no inherent user
+	   *	feedback when canLoad returns false
+	   *
+	   */
+
+
+	  canLoad(value) {
+	    if (!this.settings.load) return false;
+	    if (this.loadedSearches.hasOwnProperty(value)) return false;
+	    return true;
+	  }
+	  /**
+	   * Invokes the user-provided option provider / loader.
+	   *
+	   */
+
+
+	  load(value) {
+	    const self = this;
+	    if (!self.canLoad(value)) return;
+	    addClasses(self.wrapper, self.settings.loadingClass);
+	    self.loading++;
+	    const callback = self.loadCallback.bind(self);
+	    self.settings.load.call(self, value, callback);
+	  }
+	  /**
+	   * Invoked by the user-provided option provider
+	   *
+	   */
+
+
+	  loadCallback(options, optgroups) {
+	    const self = this;
+	    self.loading = Math.max(self.loading - 1, 0);
+	    self.lastQuery = null;
+	    self.clearActiveOption(); // when new results load, focus should be on first option
+
+	    self.setupOptions(options, optgroups);
+	    self.refreshOptions(self.isFocused && !self.isInputHidden);
+
+	    if (!self.loading) {
+	      removeClasses(self.wrapper, self.settings.loadingClass);
+	    }
+
+	    self.trigger('load', options, optgroups);
+	  }
+
+	  preload() {
+	    var classList = this.wrapper.classList;
+	    if (classList.contains('preloaded')) return;
+	    classList.add('preloaded');
+	    this.load('');
+	  }
+	  /**
+	   * Sets the input field of the control to the specified value.
+	   *
+	   */
+
+
+	  setTextboxValue(value = '') {
+	    var input = this.control_input;
+	    var changed = input.value !== value;
+
+	    if (changed) {
+	      input.value = value;
+	      triggerEvent(input, 'update');
+	      this.lastValue = value;
+	    }
+	  }
+	  /**
+	   * Returns the value of the control. If multiple items
+	   * can be selected (e.g. <select multiple>), this returns
+	   * an array. If only one item can be selected, this
+	   * returns a string.
+	   *
+	   */
+
+
+	  getValue() {
+	    if (this.is_select_tag && this.input.hasAttribute('multiple')) {
+	      return this.items;
+	    }
+
+	    return this.items.join(this.settings.delimiter);
+	  }
+	  /**
+	   * Resets the selected items to the given value.
+	   *
+	   */
+
+
+	  setValue(value, silent) {
+	    var events = silent ? [] : ['change'];
+	    debounce_events(this, events, () => {
+	      this.clear(silent);
+	      this.addItems(value, silent);
+	    });
+	  }
+	  /**
+	   * Resets the number of max items to the given value
+	   *
+	   */
+
+
+	  setMaxItems(value) {
+	    if (value === 0) value = null; //reset to unlimited items.
+
+	    this.settings.maxItems = value;
+	    this.refreshState();
+	  }
+	  /**
+	   * Sets the selected item.
+	   *
+	   */
+
+
+	  setActiveItem(item, e) {
+	    var self = this;
+	    var eventName;
+	    var i, begin, end, swap;
+	    var last;
+	    if (self.settings.mode === 'single') return; // clear the active selection
+
+	    if (!item) {
+	      self.clearActiveItems();
+
+	      if (self.isFocused) {
+	        self.showInput();
+	      }
+
+	      return;
+	    } // modify selection
+
+
+	    eventName = e && e.type.toLowerCase();
+
+	    if (eventName === 'click' && isKeyDown('shiftKey', e) && self.activeItems.length) {
+	      last = self.getLastActive();
+	      begin = Array.prototype.indexOf.call(self.control.children, last);
+	      end = Array.prototype.indexOf.call(self.control.children, item);
+
+	      if (begin > end) {
+	        swap = begin;
+	        begin = end;
+	        end = swap;
+	      }
+
+	      for (i = begin; i <= end; i++) {
+	        item = self.control.children[i];
+
+	        if (self.activeItems.indexOf(item) === -1) {
+	          self.setActiveItemClass(item);
+	        }
+	      }
+
+	      preventDefault(e);
+	    } else if (eventName === 'click' && isKeyDown(KEY_SHORTCUT, e) || eventName === 'keydown' && isKeyDown('shiftKey', e)) {
+	      if (item.classList.contains('active')) {
+	        self.removeActiveItem(item);
+	      } else {
+	        self.setActiveItemClass(item);
+	      }
+	    } else {
+	      self.clearActiveItems();
+	      self.setActiveItemClass(item);
+	    } // ensure control has focus
+
+
+	    self.hideInput();
+
+	    if (!self.isFocused) {
+	      self.focus();
+	    }
+	  }
+	  /**
+	   * Set the active and last-active classes
+	   *
+	   */
+
+
+	  setActiveItemClass(item) {
+	    const self = this;
+	    const last_active = self.control.querySelector('.last-active');
+	    if (last_active) removeClasses(last_active, 'last-active');
+	    addClasses(item, 'active last-active');
+	    self.trigger('item_select', item);
+
+	    if (self.activeItems.indexOf(item) == -1) {
+	      self.activeItems.push(item);
+	    }
+	  }
+	  /**
+	   * Remove active item
+	   *
+	   */
+
+
+	  removeActiveItem(item) {
+	    var idx = this.activeItems.indexOf(item);
+	    this.activeItems.splice(idx, 1);
+	    removeClasses(item, 'active');
+	  }
+	  /**
+	   * Clears all the active items
+	   *
+	   */
+
+
+	  clearActiveItems() {
+	    removeClasses(this.activeItems, 'active');
+	    this.activeItems = [];
+	  }
+	  /**
+	   * Sets the selected item in the dropdown menu
+	   * of available options.
+	   *
+	   */
+
+
+	  setActiveOption(option) {
+	    if (option === this.activeOption) {
+	      return;
+	    }
+
+	    this.clearActiveOption();
+	    if (!option) return;
+	    this.activeOption = option;
+	    setAttr(this.focus_node, {
+	      'aria-activedescendant': option.getAttribute('id')
+	    });
+	    setAttr(option, {
+	      'aria-selected': 'true'
+	    });
+	    addClasses(option, 'active');
+	    this.scrollToOption(option);
+	  }
+	  /**
+	   * Sets the dropdown_content scrollTop to display the option
+	   *
+	   */
+
+
+	  scrollToOption(option, behavior) {
+	    if (!option) return;
+	    const content = this.dropdown_content;
+	    const height_menu = content.clientHeight;
+	    const scrollTop = content.scrollTop || 0;
+	    const height_item = option.offsetHeight;
+	    const y = option.getBoundingClientRect().top - content.getBoundingClientRect().top + scrollTop;
+
+	    if (y + height_item > height_menu + scrollTop) {
+	      this.scroll(y - height_menu + height_item, behavior);
+	    } else if (y < scrollTop) {
+	      this.scroll(y, behavior);
+	    }
+	  }
+	  /**
+	   * Scroll the dropdown to the given position
+	   *
+	   */
+
+
+	  scroll(scrollTop, behavior) {
+	    const content = this.dropdown_content;
+
+	    if (behavior) {
+	      content.style.scrollBehavior = behavior;
+	    }
+
+	    content.scrollTop = scrollTop;
+	    content.style.scrollBehavior = '';
+	  }
+	  /**
+	   * Clears the active option
+	   *
+	   */
+
+
+	  clearActiveOption() {
+	    if (this.activeOption) {
+	      removeClasses(this.activeOption, 'active');
+	      setAttr(this.activeOption, {
+	        'aria-selected': null
+	      });
+	    }
+
+	    this.activeOption = null;
+	    setAttr(this.focus_node, {
+	      'aria-activedescendant': null
+	    });
+	  }
+	  /**
+	   * Selects all items (CTRL + A).
+	   */
+
+
+	  selectAll() {
+	    if (this.settings.mode === 'single') return;
+	    const activeItems = this.controlChildren();
+	    if (!activeItems.length) return;
+	    this.hideInput();
+	    this.close();
+	    this.activeItems = activeItems;
+	    addClasses(activeItems, 'active');
+	  }
+	  /**
+	   * Determines if the control_input should be in a hidden or visible state
+	   *
+	   */
+
+
+	  inputState() {
+	    var self = this;
+	    if (!self.control.contains(self.control_input)) return;
+	    setAttr(self.control_input, {
+	      placeholder: self.settings.placeholder
+	    });
+
+	    if (self.activeItems.length > 0 || !self.isFocused && self.settings.hidePlaceholder && self.items.length > 0) {
+	      self.setTextboxValue();
+	      self.isInputHidden = true;
+	    } else {
+	      if (self.settings.hidePlaceholder && self.items.length > 0) {
+	        setAttr(self.control_input, {
+	          placeholder: ''
+	        });
+	      }
+
+	      self.isInputHidden = false;
+	    }
+
+	    self.wrapper.classList.toggle('input-hidden', self.isInputHidden);
+	  }
+	  /**
+	   * Hides the input element out of view, while
+	   * retaining its focus.
+	   * @deprecated 1.3
+	   */
+
+
+	  hideInput() {
+	    this.inputState();
+	  }
+	  /**
+	   * Restores input visibility.
+	   * @deprecated 1.3
+	   */
+
+
+	  showInput() {
+	    this.inputState();
+	  }
+	  /**
+	   * Get the input value
+	   */
+
+
+	  inputValue() {
+	    return this.control_input.value.trim();
+	  }
+	  /**
+	   * Gives the control focus.
+	   */
+
+
+	  focus() {
+	    var self = this;
+	    if (self.isDisabled) return;
+	    self.ignoreFocus = true;
+
+	    if (self.control_input.offsetWidth) {
+	      self.control_input.focus();
+	    } else {
+	      self.focus_node.focus();
+	    }
+
+	    setTimeout(() => {
+	      self.ignoreFocus = false;
+	      self.onFocus();
+	    }, 0);
+	  }
+	  /**
+	   * Forces the control out of focus.
+	   *
+	   */
+
+
+	  blur() {
+	    this.focus_node.blur();
+	    this.onBlur();
+	  }
+	  /**
+	   * Returns a function that scores an object
+	   * to show how good of a match it is to the
+	   * provided query.
+	   *
+	   * @return {function}
+	   */
+
+
+	  getScoreFunction(query) {
+	    return this.sifter.getScoreFunction(query, this.getSearchOptions());
+	  }
+	  /**
+	   * Returns search options for sifter (the system
+	   * for scoring and sorting results).
+	   *
+	   * @see https://github.com/orchidjs/sifter.js
+	   * @return {object}
+	   */
+
+
+	  getSearchOptions() {
+	    var settings = this.settings;
+	    var sort = settings.sortField;
+
+	    if (typeof settings.sortField === 'string') {
+	      sort = [{
+	        field: settings.sortField
+	      }];
+	    }
+
+	    return {
+	      fields: settings.searchField,
+	      conjunction: settings.searchConjunction,
+	      sort: sort,
+	      nesting: settings.nesting
+	    };
+	  }
+	  /**
+	   * Searches through available options and returns
+	   * a sorted array of matches.
+	   *
+	   */
+
+
+	  search(query) {
+	    var i, result, calculateScore;
+	    var self = this;
+	    var options = this.getSearchOptions(); // validate user-provided result scoring function
+
+	    if (self.settings.score) {
+	      calculateScore = self.settings.score.call(self, query);
+
+	      if (typeof calculateScore !== 'function') {
+	        throw new Error('Tom Select "score" setting must be a function that returns a function');
+	      }
+	    } // perform search
+
+
+	    if (query !== self.lastQuery) {
+	      self.lastQuery = query;
+	      result = self.sifter.search(query, Object.assign(options, {
+	        score: calculateScore
+	      }));
+	      self.currentResults = result;
+	    } else {
+	      result = Object.assign({}, self.currentResults);
+	    } // filter out selected items
+
+
+	    if (self.settings.hideSelected) {
+	      for (i = result.items.length - 1; i >= 0; i--) {
+	        let hashed = hash_key(result.items[i].id);
+
+	        if (hashed && self.items.indexOf(hashed) !== -1) {
+	          result.items.splice(i, 1);
+	        }
+	      }
+	    }
+
+	    return result;
+	  }
+	  /**
+	   * Refreshes the list of available options shown
+	   * in the autocomplete dropdown menu.
+	   *
+	   */
+
+
+	  refreshOptions(triggerDropdown = true) {
+	    var i, j, k, n, optgroup, optgroups, html, has_create_option, active_value, active_group;
+	    var create;
+	    const groups = {};
+	    const groups_order = [];
+	    var self = this;
+	    var query = self.inputValue();
+	    var results = self.search(query);
+	    var active_option = self.activeOption;
+	    var show_dropdown = self.settings.shouldOpen || false;
+	    var dropdown_content = self.dropdown_content;
+
+	    if (active_option) {
+	      active_value = active_option.dataset.value;
+	      active_group = active_option.closest('[data-group]');
+	    } // build markup
+
+
+	    n = results.items.length;
+
+	    if (typeof self.settings.maxOptions === 'number') {
+	      n = Math.min(n, self.settings.maxOptions);
+	    }
+
+	    if (n > 0) {
+	      show_dropdown = true;
+	    } // render and group available options individually
+
+
+	    for (i = 0; i < n; i++) {
+	      // get option dom element
+	      let opt_value = results.items[i].id;
+	      let option = self.options[opt_value];
+	      let option_el = self.getOption(opt_value, true); // toggle 'selected' class
+
+	      if (!self.settings.hideSelected) {
+	        option_el.classList.toggle('selected', self.items.includes(opt_value));
+	      }
+
+	      optgroup = option[self.settings.optgroupField] || '';
+	      optgroups = Array.isArray(optgroup) ? optgroup : [optgroup];
+
+	      for (j = 0, k = optgroups && optgroups.length; j < k; j++) {
+	        optgroup = optgroups[j];
+
+	        if (!self.optgroups.hasOwnProperty(optgroup)) {
+	          optgroup = '';
+	        }
+
+	        if (!groups.hasOwnProperty(optgroup)) {
+	          groups[optgroup] = document.createDocumentFragment();
+	          groups_order.push(optgroup);
+	        } // nodes can only have one parent, so if the option is in mutple groups, we need a clone
+
+
+	        if (j > 0) {
+	          option_el = option_el.cloneNode(true);
+	          setAttr(option_el, {
+	            id: option.$id + '-clone-' + j,
+	            'aria-selected': null
+	          });
+	          option_el.classList.add('ts-cloned');
+	          removeClasses(option_el, 'active');
+	        } // make sure we keep the activeOption in the same group
+
+
+	        if (active_value == opt_value && active_group && active_group.dataset.group === optgroup) {
+	          active_option = option_el;
+	        }
+
+	        groups[optgroup].appendChild(option_el);
+	      }
+	    } // sort optgroups
+
+
+	    if (this.settings.lockOptgroupOrder) {
+	      groups_order.sort((a, b) => {
+	        var a_order = self.optgroups[a] && self.optgroups[a].$order || 0;
+	        var b_order = self.optgroups[b] && self.optgroups[b].$order || 0;
+	        return a_order - b_order;
+	      });
+	    } // render optgroup headers & join groups
+
+
+	    html = document.createDocumentFragment();
+	    iterate(groups_order, optgroup => {
+	      if (self.optgroups.hasOwnProperty(optgroup) && groups[optgroup].children.length) {
+	        let group_options = document.createDocumentFragment();
+	        let header = self.render('optgroup_header', self.optgroups[optgroup]);
+	        append(group_options, header);
+	        append(group_options, groups[optgroup]);
+	        let group_html = self.render('optgroup', {
+	          group: self.optgroups[optgroup],
+	          options: group_options
+	        });
+	        append(html, group_html);
+	      } else {
+	        append(html, groups[optgroup]);
+	      }
+	    });
+	    dropdown_content.innerHTML = '';
+	    append(dropdown_content, html); // highlight matching terms inline
+
+	    if (self.settings.highlight) {
+	      removeHighlight(dropdown_content);
+
+	      if (results.query.length && results.tokens.length) {
+	        iterate(results.tokens, tok => {
+	          highlight(dropdown_content, tok.regex);
+	        });
+	      }
+	    } // helper method for adding templates to dropdown
+
+
+	    var add_template = template => {
+	      let content = self.render(template, {
+	        input: query
+	      });
+
+	      if (content) {
+	        show_dropdown = true;
+	        dropdown_content.insertBefore(content, dropdown_content.firstChild);
+	      }
+
+	      return content;
+	    }; // add loading message
+
+
+	    if (self.loading) {
+	      add_template('loading'); // invalid query
+	    } else if (!self.settings.shouldLoad.call(self, query)) {
+	      add_template('not_loading'); // add no_results message
+	    } else if (results.items.length === 0) {
+	      add_template('no_results');
+	    } // add create option
+
+
+	    has_create_option = self.canCreate(query);
+
+	    if (has_create_option) {
+	      create = add_template('option_create');
+	    } // activate
+
+
+	    self.hasOptions = results.items.length > 0 || has_create_option;
+
+	    if (show_dropdown) {
+	      if (results.items.length > 0) {
+	        if (!dropdown_content.contains(active_option) && self.settings.mode === 'single' && self.items.length) {
+	          active_option = self.getOption(self.items[0]);
+	        }
+
+	        if (!dropdown_content.contains(active_option)) {
+	          let active_index = 0;
+
+	          if (create && !self.settings.addPrecedence) {
+	            active_index = 1;
+	          }
+
+	          active_option = self.selectable()[active_index];
+	        }
+	      } else if (create) {
+	        active_option = create;
+	      }
+
+	      if (triggerDropdown && !self.isOpen) {
+	        self.open();
+	        self.scrollToOption(active_option, 'auto');
+	      }
+
+	      self.setActiveOption(active_option);
+	    } else {
+	      self.clearActiveOption();
+
+	      if (triggerDropdown && self.isOpen) {
+	        self.close(false); // if create_option=null, we want the dropdown to close but not reset the textbox value
+	      }
+	    }
+	  }
+	  /**
+	   * Return list of selectable options
+	   *
+	   */
+
+
+	  selectable() {
+	    return this.dropdown_content.querySelectorAll('[data-selectable]');
+	  }
+	  /**
+	   * Adds an available option. If it already exists,
+	   * nothing will happen. Note: this does not refresh
+	   * the options list dropdown (use `refreshOptions`
+	   * for that).
+	   *
+	   * Usage:
+	   *
+	   *   this.addOption(data)
+	   *
+	   */
+
+
+	  addOption(data, user_created = false) {
+	    const self = this; // @deprecated 1.7.7
+	    // use addOptions( array, user_created ) for adding multiple options
+
+	    if (Array.isArray(data)) {
+	      self.addOptions(data, user_created);
+	      return false;
+	    }
+
+	    const key = hash_key(data[self.settings.valueField]);
+
+	    if (key === null || self.options.hasOwnProperty(key)) {
+	      return false;
+	    }
+
+	    data.$order = data.$order || ++self.order;
+	    data.$id = self.inputId + '-opt-' + data.$order;
+	    self.options[key] = data;
+	    self.lastQuery = null;
+
+	    if (user_created) {
+	      self.userOptions[key] = user_created;
+	      self.trigger('option_add', key, data);
+	    }
+
+	    return key;
+	  }
+	  /**
+	   * Add multiple options
+	   *
+	   */
+
+
+	  addOptions(data, user_created = false) {
+	    iterate(data, dat => {
+	      this.addOption(dat, user_created);
+	    });
+	  }
+	  /**
+	   * @deprecated 1.7.7
+	   */
+
+
+	  registerOption(data) {
+	    return this.addOption(data);
+	  }
+	  /**
+	   * Registers an option group to the pool of option groups.
+	   *
+	   * @return {boolean|string}
+	   */
+
+
+	  registerOptionGroup(data) {
+	    var key = hash_key(data[this.settings.optgroupValueField]);
+	    if (key === null) return false;
+	    data.$order = data.$order || ++this.order;
+	    this.optgroups[key] = data;
+	    return key;
+	  }
+	  /**
+	   * Registers a new optgroup for options
+	   * to be bucketed into.
+	   *
+	   */
+
+
+	  addOptionGroup(id, data) {
+	    var hashed_id;
+	    data[this.settings.optgroupValueField] = id;
+
+	    if (hashed_id = this.registerOptionGroup(data)) {
+	      this.trigger('optgroup_add', hashed_id, data);
+	    }
+	  }
+	  /**
+	   * Removes an existing option group.
+	   *
+	   */
+
+
+	  removeOptionGroup(id) {
+	    if (this.optgroups.hasOwnProperty(id)) {
+	      delete this.optgroups[id];
+	      this.clearCache();
+	      this.trigger('optgroup_remove', id);
+	    }
+	  }
+	  /**
+	   * Clears all existing option groups.
+	   */
+
+
+	  clearOptionGroups() {
+	    this.optgroups = {};
+	    this.clearCache();
+	    this.trigger('optgroup_clear');
+	  }
+	  /**
+	   * Updates an option available for selection. If
+	   * it is visible in the selected items or options
+	   * dropdown, it will be re-rendered automatically.
+	   *
+	   */
+
+
+	  updateOption(value, data) {
+	    const self = this;
+	    var item_new;
+	    var index_item;
+	    const value_old = hash_key(value);
+	    const value_new = hash_key(data[self.settings.valueField]); // sanity checks
+
+	    if (value_old === null) return;
+	    if (!self.options.hasOwnProperty(value_old)) return;
+	    if (typeof value_new !== 'string') throw new Error('Value must be set in option data');
+	    const option = self.getOption(value_old);
+	    const item = self.getItem(value_old);
+	    data.$order = data.$order || self.options[value_old].$order;
+	    delete self.options[value_old]; // invalidate render cache
+	    // don't remove existing node yet, we'll remove it after replacing it
+
+	    self.uncacheValue(value_new);
+	    self.options[value_new] = data; // update the option if it's in the dropdown
+
+	    if (option) {
+	      if (self.dropdown_content.contains(option)) {
+	        const option_new = self._render('option', data);
+
+	        replaceNode(option, option_new);
+
+	        if (self.activeOption === option) {
+	          self.setActiveOption(option_new);
+	        }
+	      }
+
+	      option.remove();
+	    } // update the item if we have one
+
+
+	    if (item) {
+	      index_item = self.items.indexOf(value_old);
+
+	      if (index_item !== -1) {
+	        self.items.splice(index_item, 1, value_new);
+	      }
+
+	      item_new = self._render('item', data);
+	      if (item.classList.contains('active')) addClasses(item_new, 'active');
+	      replaceNode(item, item_new);
+	    } // invalidate last query because we might have updated the sortField
+
+
+	    self.lastQuery = null;
+	  }
+	  /**
+	   * Removes a single option.
+	   *
+	   */
+
+
+	  removeOption(value, silent) {
+	    const self = this;
+	    value = get_hash(value);
+	    self.uncacheValue(value);
+	    delete self.userOptions[value];
+	    delete self.options[value];
+	    self.lastQuery = null;
+	    self.trigger('option_remove', value);
+	    self.removeItem(value, silent);
+	  }
+	  /**
+	   * Clears all options.
+	   */
+
+
+	  clearOptions() {
+	    this.loadedSearches = {};
+	    this.userOptions = {};
+	    this.clearCache();
+	    var selected = {};
+	    iterate(this.options, (option, key) => {
+	      if (this.items.indexOf(key) >= 0) {
+	        selected[key] = this.options[key];
+	      }
+	    });
+	    this.options = this.sifter.items = selected;
+	    this.lastQuery = null;
+	    this.trigger('option_clear');
+	  }
+	  /**
+	   * Returns the dom element of the option
+	   * matching the given value.
+	   *
+	   */
+
+
+	  getOption(value, create = false) {
+	    const hashed = hash_key(value);
+
+	    if (hashed !== null && this.options.hasOwnProperty(hashed)) {
+	      const option = this.options[hashed];
+
+	      if (option.$div) {
+	        return option.$div;
+	      }
+
+	      if (create) {
+	        return this._render('option', option);
+	      }
+	    }
+
+	    return null;
+	  }
+	  /**
+	   * Returns the dom element of the next or previous dom element of the same type
+	   * Note: adjacent options may not be adjacent DOM elements (optgroups)
+	   *
+	   */
+
+
+	  getAdjacent(option, direction, type = 'option') {
+	    var self = this,
+	        all;
+
+	    if (!option) {
+	      return null;
+	    }
+
+	    if (type == 'item') {
+	      all = self.controlChildren();
+	    } else {
+	      all = self.dropdown_content.querySelectorAll('[data-selectable]');
+	    }
+
+	    for (let i = 0; i < all.length; i++) {
+	      if (all[i] != option) {
+	        continue;
+	      }
+
+	      if (direction > 0) {
+	        return all[i + 1];
+	      }
+
+	      return all[i - 1];
+	    }
+
+	    return null;
+	  }
+	  /**
+	   * Returns the dom element of the item
+	   * matching the given value.
+	   *
+	   */
+
+
+	  getItem(item) {
+	    if (typeof item == 'object') {
+	      return item;
+	    }
+
+	    var value = hash_key(item);
+	    return value !== null ? this.control.querySelector(`[data-value="${addSlashes(value)}"]`) : null;
+	  }
+	  /**
+	   * "Selects" multiple items at once. Adds them to the list
+	   * at the current caret position.
+	   *
+	   */
+
+
+	  addItems(values, silent) {
+	    var self = this;
+	    var items = Array.isArray(values) ? values : [values];
+	    items = items.filter(x => self.items.indexOf(x) === -1);
+
+	    for (let i = 0, n = items.length; i < n; i++) {
+	      self.isPending = i < n - 1;
+	      self.addItem(items[i], silent);
+	    }
+	  }
+	  /**
+	   * "Selects" an item. Adds it to the list
+	   * at the current caret position.
+	   *
+	   */
+
+
+	  addItem(value, silent) {
+	    var events = silent ? [] : ['change', 'dropdown_close'];
+	    debounce_events(this, events, () => {
+	      var item, wasFull;
+	      const self = this;
+	      const inputMode = self.settings.mode;
+	      const hashed = hash_key(value);
+
+	      if (hashed && self.items.indexOf(hashed) !== -1) {
+	        if (inputMode === 'single') {
+	          self.close();
+	        }
+
+	        if (inputMode === 'single' || !self.settings.duplicates) {
+	          return;
+	        }
+	      }
+
+	      if (hashed === null || !self.options.hasOwnProperty(hashed)) return;
+	      if (inputMode === 'single') self.clear(silent);
+	      if (inputMode === 'multi' && self.isFull()) return;
+	      item = self._render('item', self.options[hashed]);
+
+	      if (self.control.contains(item)) {
+	        // duplicates
+	        item = item.cloneNode(true);
+	      }
+
+	      wasFull = self.isFull();
+	      self.items.splice(self.caretPos, 0, hashed);
+	      self.insertAtCaret(item);
+
+	      if (self.isSetup) {
+	        // update menu / remove the option (if this is not one item being added as part of series)
+	        if (!self.isPending && self.settings.hideSelected) {
+	          let option = self.getOption(hashed);
+	          let next = self.getAdjacent(option, 1);
+
+	          if (next) {
+	            self.setActiveOption(next);
+	          }
+	        } // refreshOptions after setActiveOption(),
+	        // otherwise setActiveOption() will be called by refreshOptions() with the wrong value
+
+
+	        if (!self.isPending && !self.settings.closeAfterSelect) {
+	          self.refreshOptions(self.isFocused && inputMode !== 'single');
+	        } // hide the menu if the maximum number of items have been selected or no options are left
+
+
+	        if (self.settings.closeAfterSelect != false && self.isFull()) {
+	          self.close();
+	        } else if (!self.isPending) {
+	          self.positionDropdown();
+	        }
+
+	        self.trigger('item_add', hashed, item);
+
+	        if (!self.isPending) {
+	          self.updateOriginalInput({
+	            silent: silent
+	          });
+	        }
+	      }
+
+	      if (!self.isPending || !wasFull && self.isFull()) {
+	        self.inputState();
+	        self.refreshState();
+	      }
+	    });
+	  }
+	  /**
+	   * Removes the selected item matching
+	   * the provided value.
+	   *
+	   */
+
+
+	  removeItem(item = null, silent) {
+	    const self = this;
+	    item = self.getItem(item);
+	    if (!item) return;
+	    var i, idx;
+	    const value = item.dataset.value;
+	    i = nodeIndex(item);
+	    item.remove();
+
+	    if (item.classList.contains('active')) {
+	      idx = self.activeItems.indexOf(item);
+	      self.activeItems.splice(idx, 1);
+	      removeClasses(item, 'active');
+	    }
+
+	    self.items.splice(i, 1);
+	    self.lastQuery = null;
+
+	    if (!self.settings.persist && self.userOptions.hasOwnProperty(value)) {
+	      self.removeOption(value, silent);
+	    }
+
+	    if (i < self.caretPos) {
+	      self.setCaret(self.caretPos - 1);
+	    }
+
+	    self.updateOriginalInput({
+	      silent: silent
+	    });
+	    self.refreshState();
+	    self.positionDropdown();
+	    self.trigger('item_remove', value, item);
+	  }
+	  /**
+	   * Invokes the `create` method provided in the
+	   * TomSelect options that should provide the data
+	   * for the new item, given the user input.
+	   *
+	   * Once this completes, it will be added
+	   * to the item list.
+	   *
+	   */
+
+
+	  createItem(input = null, triggerDropdown = true, callback = () => {}) {
+	    var self = this;
+	    var caret = self.caretPos;
+	    var output;
+	    input = input || self.inputValue();
+
+	    if (!self.canCreate(input)) {
+	      callback();
+	      return false;
+	    }
+
+	    self.lock();
+	    var created = false;
+
+	    var create = data => {
+	      self.unlock();
+	      if (!data || typeof data !== 'object') return callback();
+	      var value = hash_key(data[self.settings.valueField]);
+
+	      if (typeof value !== 'string') {
+	        return callback();
+	      }
+
+	      self.setTextboxValue();
+	      self.addOption(data, true);
+	      self.setCaret(caret);
+	      self.addItem(value);
+	      callback(data);
+	      created = true;
+	    };
+
+	    if (typeof self.settings.create === 'function') {
+	      output = self.settings.create.call(this, input, create);
+	    } else {
+	      output = {
+	        [self.settings.labelField]: input,
+	        [self.settings.valueField]: input
+	      };
+	    }
+
+	    if (!created) {
+	      create(output);
+	    }
+
+	    return true;
+	  }
+	  /**
+	   * Re-renders the selected item lists.
+	   */
+
+
+	  refreshItems() {
+	    var self = this;
+	    self.lastQuery = null;
+
+	    if (self.isSetup) {
+	      self.addItems(self.items);
+	    }
+
+	    self.updateOriginalInput();
+	    self.refreshState();
+	  }
+	  /**
+	   * Updates all state-dependent attributes
+	   * and CSS classes.
+	   */
+
+
+	  refreshState() {
+	    const self = this;
+	    self.refreshValidityState();
+	    const isFull = self.isFull();
+	    const isLocked = self.isLocked;
+	    self.wrapper.classList.toggle('rtl', self.rtl);
+	    const wrap_classList = self.wrapper.classList;
+	    wrap_classList.toggle('focus', self.isFocused);
+	    wrap_classList.toggle('disabled', self.isDisabled);
+	    wrap_classList.toggle('required', self.isRequired);
+	    wrap_classList.toggle('invalid', !self.isValid);
+	    wrap_classList.toggle('locked', isLocked);
+	    wrap_classList.toggle('full', isFull);
+	    wrap_classList.toggle('input-active', self.isFocused && !self.isInputHidden);
+	    wrap_classList.toggle('dropdown-active', self.isOpen);
+	    wrap_classList.toggle('has-options', isEmptyObject(self.options));
+	    wrap_classList.toggle('has-items', self.items.length > 0);
+	  }
+	  /**
+	   * Update the `required` attribute of both input and control input.
+	   *
+	   * The `required` property needs to be activated on the control input
+	   * for the error to be displayed at the right place. `required` also
+	   * needs to be temporarily deactivated on the input since the input is
+	   * hidden and can't show errors.
+	   */
+
+
+	  refreshValidityState() {
+	    var self = this;
+
+	    if (!self.input.checkValidity) {
+	      return;
+	    }
+
+	    self.isValid = self.input.checkValidity();
+	    self.isInvalid = !self.isValid;
+	  }
+	  /**
+	   * Determines whether or not more items can be added
+	   * to the control without exceeding the user-defined maximum.
+	   *
+	   * @returns {boolean}
+	   */
+
+
+	  isFull() {
+	    return this.settings.maxItems !== null && this.items.length >= this.settings.maxItems;
+	  }
+	  /**
+	   * Refreshes the original <select> or <input>
+	   * element to reflect the current state.
+	   *
+	   */
+
+
+	  updateOriginalInput(opts = {}) {
+	    const self = this;
+	    var option, label;
+	    const empty_option = self.input.querySelector('option[value=""]');
+
+	    if (self.is_select_tag) {
+	      const selected = [];
+
+	      function AddSelected(option_el, value, label) {
+	        if (!option_el) {
+	          option_el = getDom('<option value="' + escape_html(value) + '">' + escape_html(label) + '</option>');
+	        } // don't move empty option from top of list
+	        // fixes bug in firefox https://bugzilla.mozilla.org/show_bug.cgi?id=1725293				
+
+
+	        if (option_el != empty_option) {
+	          self.input.append(option_el);
+	        }
+
+	        selected.push(option_el);
+	        option_el.selected = true;
+	        return option_el;
+	      } // unselect all selected options
+
+
+	      self.input.querySelectorAll('option:checked').forEach(option_el => {
+	        option_el.selected = false;
+	      }); // nothing selected?
+
+	      if (self.items.length == 0 && self.settings.mode == 'single') {
+	        AddSelected(empty_option, "", ""); // order selected <option> tags for values in self.items
+	      } else {
+	        self.items.forEach(value => {
+	          option = self.options[value];
+	          label = option[self.settings.labelField] || '';
+
+	          if (selected.includes(option.$option)) {
+	            const reuse_opt = self.input.querySelector(`option[value="${addSlashes(value)}"]:not(:checked)`);
+	            AddSelected(reuse_opt, value, label);
+	          } else {
+	            option.$option = AddSelected(option.$option, value, label);
+	          }
+	        });
+	      }
+	    } else {
+	      self.input.value = self.getValue();
+	    }
+
+	    if (self.isSetup) {
+	      if (!opts.silent) {
+	        self.trigger('change', self.getValue());
+	      }
+	    }
+	  }
+	  /**
+	   * Shows the autocomplete dropdown containing
+	   * the available options.
+	   */
+
+
+	  open() {
+	    var self = this;
+	    if (self.isLocked || self.isOpen || self.settings.mode === 'multi' && self.isFull()) return;
+	    self.isOpen = true;
+	    setAttr(self.focus_node, {
+	      'aria-expanded': 'true'
+	    });
+	    self.refreshState();
+	    applyCSS(self.dropdown, {
+	      visibility: 'hidden',
+	      display: 'block'
+	    });
+	    self.positionDropdown();
+	    applyCSS(self.dropdown, {
+	      visibility: 'visible',
+	      display: 'block'
+	    });
+	    self.focus();
+	    self.trigger('dropdown_open', self.dropdown);
+	  }
+	  /**
+	   * Closes the autocomplete dropdown menu.
+	   */
+
+
+	  close(setTextboxValue = true) {
+	    var self = this;
+	    var trigger = self.isOpen;
+
+	    if (setTextboxValue) {
+	      // before blur() to prevent form onchange event
+	      self.setTextboxValue();
+
+	      if (self.settings.mode === 'single' && self.items.length) {
+	        self.hideInput();
+	      }
+	    }
+
+	    self.isOpen = false;
+	    setAttr(self.focus_node, {
+	      'aria-expanded': 'false'
+	    });
+	    applyCSS(self.dropdown, {
+	      display: 'none'
+	    });
+
+	    if (self.settings.hideSelected) {
+	      self.clearActiveOption();
+	    }
+
+	    self.refreshState();
+	    if (trigger) self.trigger('dropdown_close', self.dropdown);
+	  }
+	  /**
+	   * Calculates and applies the appropriate
+	   * position of the dropdown if dropdownParent = 'body'.
+	   * Otherwise, position is determined by css
+	   */
+
+
+	  positionDropdown() {
+	    if (this.settings.dropdownParent !== 'body') {
+	      return;
+	    }
+
+	    var context = this.control;
+	    var rect = context.getBoundingClientRect();
+	    var top = context.offsetHeight + rect.top + window.scrollY;
+	    var left = rect.left + window.scrollX;
+	    applyCSS(this.dropdown, {
+	      width: rect.width + 'px',
+	      top: top + 'px',
+	      left: left + 'px'
+	    });
+	  }
+	  /**
+	   * Resets / clears all selected items
+	   * from the control.
+	   *
+	   */
+
+
+	  clear(silent) {
+	    var self = this;
+	    if (!self.items.length) return;
+	    var items = self.controlChildren();
+	    iterate(items, item => {
+	      self.removeItem(item, true);
+	    });
+	    self.showInput();
+	    if (!silent) self.updateOriginalInput();
+	    self.trigger('clear');
+	  }
+	  /**
+	   * A helper method for inserting an element
+	   * at the current caret position.
+	   *
+	   */
+
+
+	  insertAtCaret(el) {
+	    const self = this;
+	    const caret = self.caretPos;
+	    const target = self.control;
+	    target.insertBefore(el, target.children[caret]);
+	    self.setCaret(caret + 1);
+	  }
+	  /**
+	   * Removes the current selected item(s).
+	   *
+	   */
+
+
+	  deleteSelection(e) {
+	    var direction, selection, caret, tail;
+	    var self = this;
+	    direction = e && e.keyCode === KEY_BACKSPACE ? -1 : 1;
+	    selection = getSelection(self.control_input); // determine items that will be removed
+
+	    const rm_items = [];
+
+	    if (self.activeItems.length) {
+	      tail = getTail(self.activeItems, direction);
+	      caret = nodeIndex(tail);
+
+	      if (direction > 0) {
+	        caret++;
+	      }
+
+	      iterate(self.activeItems, item => rm_items.push(item));
+	    } else if ((self.isFocused || self.settings.mode === 'single') && self.items.length) {
+	      const items = self.controlChildren();
+
+	      if (direction < 0 && selection.start === 0 && selection.length === 0) {
+	        rm_items.push(items[self.caretPos - 1]);
+	      } else if (direction > 0 && selection.start === self.inputValue().length) {
+	        rm_items.push(items[self.caretPos]);
+	      }
+	    }
+
+	    const values = rm_items.map(item => item.dataset.value); // allow the callback to abort
+
+	    if (!values.length || typeof self.settings.onDelete === 'function' && self.settings.onDelete.call(self, values, e) === false) {
+	      return false;
+	    }
+
+	    preventDefault(e, true); // perform removal
+
+	    if (typeof caret !== 'undefined') {
+	      self.setCaret(caret);
+	    }
+
+	    while (rm_items.length) {
+	      self.removeItem(rm_items.pop());
+	    }
+
+	    self.showInput();
+	    self.positionDropdown();
+	    self.refreshOptions(false);
+	    return true;
+	  }
+	  /**
+	   * Selects the previous / next item (depending on the `direction` argument).
+	   *
+	   * > 0 - right
+	   * < 0 - left
+	   *
+	   */
+
+
+	  advanceSelection(direction, e) {
+	    var last_active,
+	        adjacent,
+	        self = this;
+	    if (self.rtl) direction *= -1;
+	    if (self.inputValue().length) return; // add or remove to active items
+
+	    if (isKeyDown(KEY_SHORTCUT, e) || isKeyDown('shiftKey', e)) {
+	      last_active = self.getLastActive(direction);
+
+	      if (last_active) {
+	        if (!last_active.classList.contains('active')) {
+	          adjacent = last_active;
+	        } else {
+	          adjacent = self.getAdjacent(last_active, direction, 'item');
+	        } // if no active item, get items adjacent to the control input
+
+	      } else if (direction > 0) {
+	        adjacent = self.control_input.nextElementSibling;
+	      } else {
+	        adjacent = self.control_input.previousElementSibling;
+	      }
+
+	      if (adjacent) {
+	        if (adjacent.classList.contains('active')) {
+	          self.removeActiveItem(last_active);
+	        }
+
+	        self.setActiveItemClass(adjacent); // mark as last_active !! after removeActiveItem() on last_active
+	      } // move caret to the left or right
+
+	    } else {
+	      self.moveCaret(direction);
+	    }
+	  }
+
+	  moveCaret(direction) {}
+	  /**
+	   * Get the last active item
+	   *
+	   */
+
+
+	  getLastActive(direction) {
+	    let last_active = this.control.querySelector('.last-active');
+
+	    if (last_active) {
+	      return last_active;
+	    }
+
+	    var result = this.control.querySelectorAll('.active');
+
+	    if (result) {
+	      return getTail(result, direction);
+	    }
+	  }
+	  /**
+	   * Moves the caret to the specified index.
+	   *
+	   * The input must be moved by leaving it in place and moving the
+	   * siblings, due to the fact that focus cannot be restored once lost
+	   * on mobile webkit devices
+	   *
+	   */
+
+
+	  setCaret(new_pos) {
+	    this.caretPos = this.items.length;
+	  }
+	  /**
+	   * Return list of item dom elements
+	   *
+	   */
+
+
+	  controlChildren() {
+	    return Array.from(this.control.querySelectorAll('[data-ts-item]'));
+	  }
+	  /**
+	   * Disables user input on the control. Used while
+	   * items are being asynchronously created.
+	   */
+
+
+	  lock() {
+	    this.isLocked = true;
+	    this.refreshState();
+	  }
+	  /**
+	   * Re-enables user input on the control.
+	   */
+
+
+	  unlock() {
+	    this.isLocked = false;
+	    this.refreshState();
+	  }
+	  /**
+	   * Disables user input on the control completely.
+	   * While disabled, it cannot receive focus.
+	   */
+
+
+	  disable() {
+	    var self = this;
+	    self.input.disabled = true;
+	    self.control_input.disabled = true;
+	    self.focus_node.tabIndex = -1;
+	    self.isDisabled = true;
+	    this.close();
+	    self.lock();
+	  }
+	  /**
+	   * Enables the control so that it can respond
+	   * to focus and user input.
+	   */
+
+
+	  enable() {
+	    var self = this;
+	    self.input.disabled = false;
+	    self.control_input.disabled = false;
+	    self.focus_node.tabIndex = self.tabIndex;
+	    self.isDisabled = false;
+	    self.unlock();
+	  }
+	  /**
+	   * Completely destroys the control and
+	   * unbinds all event listeners so that it can
+	   * be garbage collected.
+	   */
+
+
+	  destroy() {
+	    var self = this;
+	    var revertSettings = self.revertSettings;
+	    self.trigger('destroy');
+	    self.off();
+	    self.wrapper.remove();
+	    self.dropdown.remove();
+	    self.input.innerHTML = revertSettings.innerHTML;
+	    self.input.tabIndex = revertSettings.tabIndex;
+	    removeClasses(self.input, 'tomselected', 'ts-hidden-accessible');
+
+	    self._destroy();
+
+	    delete self.input.tomselect;
+	  }
+	  /**
+	   * A helper method for rendering "item" and
+	   * "option" templates, given the data.
+	   *
+	   */
+
+
+	  render(templateName, data) {
+	    if (typeof this.settings.render[templateName] !== 'function') {
+	      return null;
+	    }
+
+	    return this._render(templateName, data);
+	  }
+	  /**
+	   * _render() can be called directly when we know we don't want to hit the cache
+	   * return type could be null for some templates, we need https://github.com/microsoft/TypeScript/issues/33014
+	   */
+
+
+	  _render(templateName, data) {
+	    var value = '',
+	        id,
+	        html;
+	    const self = this;
+
+	    if (templateName === 'option' || templateName == 'item') {
+	      value = get_hash(data[self.settings.valueField]);
+	    } // render markup
+
+
+	    html = self.settings.render[templateName].call(this, data, escape_html);
+
+	    if (html == null) {
+	      return html;
+	    }
+
+	    html = getDom(html); // add mandatory attributes
+
+	    if (templateName === 'option' || templateName === 'option_create') {
+	      if (data[self.settings.disabledField]) {
+	        setAttr(html, {
+	          'aria-disabled': 'true'
+	        });
+	      } else {
+	        setAttr(html, {
+	          'data-selectable': ''
+	        });
+	      }
+	    } else if (templateName === 'optgroup') {
+	      id = data.group[self.settings.optgroupValueField];
+	      setAttr(html, {
+	        'data-group': id
+	      });
+
+	      if (data.group[self.settings.disabledField]) {
+	        setAttr(html, {
+	          'data-disabled': ''
+	        });
+	      }
+	    }
+
+	    if (templateName === 'option' || templateName === 'item') {
+	      setAttr(html, {
+	        'data-value': value
+	      }); // make sure we have some classes if a template is overwritten
+
+	      if (templateName === 'item') {
+	        addClasses(html, self.settings.itemClass);
+	        setAttr(html, {
+	          'data-ts-item': ''
+	        });
+	      } else {
+	        addClasses(html, self.settings.optionClass);
+	        setAttr(html, {
+	          role: 'option',
+	          id: data.$id
+	        }); // update cache
+
+	        self.options[value].$div = html;
+	      }
+	    }
+
+	    return html;
+	  }
+	  /**
+	   * Clears the render cache for a template. If
+	   * no template is given, clears all render
+	   * caches.
+	   *
+	   */
+
+
+	  clearCache() {
+	    iterate(this.options, (option, value) => {
+	      if (option.$div) {
+	        option.$div.remove();
+	        delete option.$div;
+	      }
+	    });
+	  }
+	  /**
+	   * Removes a value from item and option caches
+	   *
+	   */
+
+
+	  uncacheValue(value) {
+	    const option_el = this.getOption(value);
+	    if (option_el) option_el.remove();
+	  }
+	  /**
+	   * Determines whether or not to display the
+	   * create item prompt, given a user input.
+	   *
+	   */
+
+
+	  canCreate(input) {
+	    return this.settings.create && input.length > 0 && this.settings.createFilter.call(this, input);
+	  }
+	  /**
+	   * Wraps this.`method` so that `new_fn` can be invoked 'before', 'after', or 'instead' of the original method
+	   *
+	   * this.hook('instead','onKeyDown',function( arg1, arg2 ...){
+	   *
+	   * });
+	   */
+
+
+	  hook(when, method, new_fn) {
+	    var self = this;
+	    var orig_method = self[method];
+
+	    self[method] = function () {
+	      var result, result_new;
+
+	      if (when === 'after') {
+	        result = orig_method.apply(self, arguments);
+	      }
+
+	      result_new = new_fn.apply(self, arguments);
+
+	      if (when === 'instead') {
+	        return result_new;
+	      }
+
+	      if (when === 'before') {
+	        result = orig_method.apply(self, arguments);
+	      }
+
+	      return result;
+	    };
+	  }
+
+	}
+
+	/**
+	 * Plugin: "change_listener" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function change_listener () {
+	  addEvent(this.input, 'change', () => {
+	    this.sync();
+	  });
+	}
+
+	/**
+	 * Plugin: "restore_on_backspace" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function checkbox_options () {
+	  var self = this;
+	  var orig_onOptionSelect = self.onOptionSelect;
+	  self.settings.hideSelected = false; // update the checkbox for an option
+
+	  var UpdateCheckbox = function UpdateCheckbox(option) {
+	    setTimeout(() => {
+	      var checkbox = option.querySelector('input');
+
+	      if (option.classList.contains('selected')) {
+	        checkbox.checked = true;
+	      } else {
+	        checkbox.checked = false;
+	      }
+	    }, 1);
+	  }; // add checkbox to option template
+
+
+	  self.hook('after', 'setupTemplates', () => {
+	    var orig_render_option = self.settings.render.option;
+
+	    self.settings.render.option = (data, escape_html) => {
+	      var rendered = getDom(orig_render_option.call(self, data, escape_html));
+	      var checkbox = document.createElement('input');
+	      checkbox.addEventListener('click', function (evt) {
+	        preventDefault(evt);
+	      });
+	      checkbox.type = 'checkbox';
+	      const hashed = hash_key(data[self.settings.valueField]);
+
+	      if (hashed && self.items.indexOf(hashed) > -1) {
+	        checkbox.checked = true;
+	      }
+
+	      rendered.prepend(checkbox);
+	      return rendered;
+	    };
+	  }); // uncheck when item removed
+
+	  self.on('item_remove', value => {
+	    var option = self.getOption(value);
+
+	    if (option) {
+	      // if dropdown hasn't been opened yet, the option won't exist
+	      option.classList.remove('selected'); // selected class won't be removed yet
+
+	      UpdateCheckbox(option);
+	    }
+	  }); // remove items when selected option is clicked
+
+	  self.hook('instead', 'onOptionSelect', (evt, option) => {
+	    if (option.classList.contains('selected')) {
+	      option.classList.remove('selected');
+	      self.removeItem(option.dataset.value);
+	      self.refreshOptions();
+	      preventDefault(evt, true);
+	      return;
+	    }
+
+	    orig_onOptionSelect.call(self, evt, option);
+	    UpdateCheckbox(option);
+	  });
+	}
+
+	/**
+	 * Plugin: "dropdown_header" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function clear_button (userOptions) {
+	  const self = this;
+	  const options = Object.assign({
+	    className: 'clear-button',
+	    title: 'Clear All',
+	    html: data => {
+	      return `<div class="${data.className}" title="${data.title}">&times;</div>`;
+	    }
+	  }, userOptions);
+	  self.on('initialize', () => {
+	    var button = getDom(options.html(options));
+	    button.addEventListener('click', evt => {
+	      self.clear();
+
+	      if (self.settings.mode === 'single' && self.settings.allowEmptyOption) {
+	        self.addItem('');
+	      }
+
+	      evt.preventDefault();
+	      evt.stopPropagation();
+	    });
+	    self.control.appendChild(button);
+	  });
+	}
+
+	/**
+	 * Plugin: "drag_drop" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function drag_drop () {
+	  var self = this;
+	  if (!$.fn.sortable) throw new Error('The "drag_drop" plugin requires jQuery UI "sortable".');
+	  if (self.settings.mode !== 'multi') return;
+	  var orig_lock = self.lock;
+	  var orig_unlock = self.unlock;
+	  self.hook('instead', 'lock', () => {
+	    var sortable = $(self.control).data('sortable');
+	    if (sortable) sortable.disable();
+	    return orig_lock.call(self);
+	  });
+	  self.hook('instead', 'unlock', () => {
+	    var sortable = $(self.control).data('sortable');
+	    if (sortable) sortable.enable();
+	    return orig_unlock.call(self);
+	  });
+	  self.on('initialize', () => {
+	    var $control = $(self.control).sortable({
+	      items: '[data-value]',
+	      forcePlaceholderSize: true,
+	      disabled: self.isLocked,
+	      start: (e, ui) => {
+	        ui.placeholder.css('width', ui.helper.css('width'));
+	        $control.css({
+	          overflow: 'visible'
+	        });
+	      },
+	      stop: () => {
+	        $control.css({
+	          overflow: 'hidden'
+	        });
+	        var values = [];
+	        $control.children('[data-value]').each(function () {
+	          if (this.dataset.value) values.push(this.dataset.value);
+	        });
+	        self.setValue(values);
+	      }
+	    });
+	  });
+	}
+
+	/**
+	 * Plugin: "dropdown_header" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function dropdown_header (userOptions) {
+	  const self = this;
+	  const options = Object.assign({
+	    title: 'Untitled',
+	    headerClass: 'dropdown-header',
+	    titleRowClass: 'dropdown-header-title',
+	    labelClass: 'dropdown-header-label',
+	    closeClass: 'dropdown-header-close',
+	    html: data => {
+	      return '<div class="' + data.headerClass + '">' + '<div class="' + data.titleRowClass + '">' + '<span class="' + data.labelClass + '">' + data.title + '</span>' + '<a class="' + data.closeClass + '">&times;</a>' + '</div>' + '</div>';
+	    }
+	  }, userOptions);
+	  self.on('initialize', () => {
+	    var header = getDom(options.html(options));
+	    var close_link = header.querySelector('.' + options.closeClass);
+
+	    if (close_link) {
+	      close_link.addEventListener('click', evt => {
+	        preventDefault(evt, true);
+	        self.close();
+	      });
+	    }
+
+	    self.dropdown.insertBefore(header, self.dropdown.firstChild);
+	  });
+	}
+
+	/**
+	 * Plugin: "dropdown_input" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function caret_position () {
+	  var self = this;
+	  /**
+	   * Moves the caret to the specified index.
+	   *
+	   * The input must be moved by leaving it in place and moving the
+	   * siblings, due to the fact that focus cannot be restored once lost
+	   * on mobile webkit devices
+	   *
+	   */
+
+	  self.hook('instead', 'setCaret', new_pos => {
+	    if (self.settings.mode === 'single' || !self.control.contains(self.control_input)) {
+	      new_pos = self.items.length;
+	    } else {
+	      new_pos = Math.max(0, Math.min(self.items.length, new_pos));
+
+	      if (new_pos != self.caretPos && !self.isPending) {
+	        self.controlChildren().forEach((child, j) => {
+	          if (j < new_pos) {
+	            self.control_input.insertAdjacentElement('beforebegin', child);
+	          } else {
+	            self.control.appendChild(child);
+	          }
+	        });
+	      }
+	    }
+
+	    self.caretPos = new_pos;
+	  });
+	  self.hook('instead', 'moveCaret', direction => {
+	    if (!self.isFocused) return; // move caret before or after selected items
+
+	    const last_active = self.getLastActive(direction);
+
+	    if (last_active) {
+	      const idx = nodeIndex(last_active);
+	      self.setCaret(direction > 0 ? idx + 1 : idx);
+	      self.setActiveItem(); // move caret left or right of current position
+	    } else {
+	      self.setCaret(self.caretPos + direction);
+	    }
+	  });
+	}
+
+	/**
+	 * Plugin: "dropdown_input" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function dropdown_input () {
+	  var self = this;
+	  self.settings.shouldOpen = true; // make sure the input is shown even if there are no options to display in the dropdown
+
+	  self.hook('before', 'setup', () => {
+	    self.focus_node = self.control;
+	    addClasses(self.control_input, 'dropdown-input');
+	    const div = getDom('<div class="dropdown-input-wrap">');
+	    div.append(self.control_input);
+	    self.dropdown.insertBefore(div, self.dropdown.firstChild);
+	  });
+	  self.on('initialize', () => {
+	    // set tabIndex on control to -1, otherwise [shift+tab] will put focus right back on control_input
+	    self.control_input.addEventListener('keydown', evt => {
+	      //addEvent(self.control_input,'keydown' as const,(evt:KeyboardEvent) =>{
+	      switch (evt.keyCode) {
+	        case KEY_ESC:
+	          if (self.isOpen) {
+	            preventDefault(evt, true);
+	            self.close();
+	          }
+
+	          self.clearActiveItems();
+	          return;
+
+	        case KEY_TAB:
+	          self.focus_node.tabIndex = -1;
+	          break;
+	      }
+
+	      return self.onKeyDown.call(self, evt);
+	    });
+	    self.on('blur', () => {
+	      self.focus_node.tabIndex = self.isDisabled ? -1 : self.tabIndex;
+	    }); // give the control_input focus when the dropdown is open
+
+	    self.on('dropdown_open', () => {
+	      self.control_input.focus();
+	    }); // prevent onBlur from closing when focus is on the control_input
+
+	    const orig_onBlur = self.onBlur;
+	    self.hook('instead', 'onBlur', evt => {
+	      if (evt && evt.relatedTarget == self.control_input) return;
+	      return orig_onBlur.call(self);
+	    });
+	    addEvent(self.control_input, 'blur', () => self.onBlur()); // return focus to control to allow further keyboard input
+
+	    self.hook('before', 'close', () => {
+	      if (!self.isOpen) return;
+	      self.focus_node.focus();
+	    });
+	  });
+	}
+
+	/**
+	 * Plugin: "input_autogrow" (Tom Select)
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function input_autogrow () {
+	  var self = this;
+	  self.on('initialize', () => {
+	    var test_input = document.createElement('span');
+	    var control = self.control_input;
+	    test_input.style.cssText = 'position:absolute; top:-99999px; left:-99999px; width:auto; padding:0; white-space:pre; ';
+	    self.wrapper.appendChild(test_input);
+	    var transfer_styles = ['letterSpacing', 'fontSize', 'fontFamily', 'fontWeight', 'textTransform'];
+
+	    for (const style_name of transfer_styles) {
+	      // @ts-ignore TS7015 https://stackoverflow.com/a/50506154/697576
+	      test_input.style[style_name] = control.style[style_name];
+	    }
+	    /**
+	     * Set the control width
+	     *
+	     */
+
+
+	    var resize = () => {
+	      if (self.items.length > 0) {
+	        test_input.textContent = control.value;
+	        control.style.width = test_input.clientWidth + 'px';
+	      } else {
+	        control.style.width = '';
+	      }
+	    };
+
+	    resize();
+	    self.on('update item_add item_remove', resize);
+	    addEvent(control, 'input', resize);
+	    addEvent(control, 'keyup', resize);
+	    addEvent(control, 'blur', resize);
+	    addEvent(control, 'update', resize);
+	  });
+	}
+
+	/**
+	 * Plugin: "input_autogrow" (Tom Select)
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function no_backspace_delete () {
+	  var self = this;
+	  var orig_deleteSelection = self.deleteSelection;
+	  this.hook('instead', 'deleteSelection', evt => {
+	    if (self.activeItems.length) {
+	      return orig_deleteSelection.call(self, evt);
+	    }
+
+	    return false;
+	  });
+	}
+
+	/**
+	 * Plugin: "input_autogrow" (Tom Select)
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function no_active_items () {
+	  this.hook('instead', 'setActiveItem', () => {});
+	  this.hook('instead', 'selectAll', () => {});
+	}
+
+	/**
+	 * Plugin: "optgroup_columns" (Tom Select.js)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function optgroup_columns () {
+	  var self = this;
+	  var orig_keydown = self.onKeyDown;
+	  self.hook('instead', 'onKeyDown', evt => {
+	    var index, option, options, optgroup;
+
+	    if (!self.isOpen || !(evt.keyCode === KEY_LEFT || evt.keyCode === KEY_RIGHT)) {
+	      return orig_keydown.call(self, evt);
+	    }
+
+	    optgroup = parentMatch(self.activeOption, '[data-group]');
+	    index = nodeIndex(self.activeOption, '[data-selectable]');
+
+	    if (!optgroup) {
+	      return;
+	    }
+
+	    if (evt.keyCode === KEY_LEFT) {
+	      optgroup = optgroup.previousSibling;
+	    } else {
+	      optgroup = optgroup.nextSibling;
+	    }
+
+	    if (!optgroup) {
+	      return;
+	    }
+
+	    options = optgroup.querySelectorAll('[data-selectable]');
+	    option = options[Math.min(options.length - 1, index)];
+
+	    if (option) {
+	      self.setActiveOption(option);
+	    }
+	  });
+	}
+
+	/**
+	 * Plugin: "remove_button" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function remove_button (userOptions) {
+	  const options = Object.assign({
+	    label: '&times;',
+	    title: 'Remove',
+	    className: 'remove',
+	    append: true
+	  }, userOptions); //options.className = 'remove-single';
+
+	  var self = this; // override the render method to add remove button to each item
+
+	  if (!options.append) {
+	    return;
+	  }
+
+	  var html = '<a href="javascript:void(0)" class="' + options.className + '" tabindex="-1" title="' + escape_html(options.title) + '">' + options.label + '</a>';
+	  self.hook('after', 'setupTemplates', () => {
+	    var orig_render_item = self.settings.render.item;
+
+	    self.settings.render.item = (data, escape) => {
+	      var rendered = getDom(orig_render_item.call(self, data, escape));
+	      var close_button = getDom(html);
+	      rendered.appendChild(close_button);
+	      addEvent(close_button, 'mousedown', evt => {
+	        preventDefault(evt, true);
+	      });
+	      addEvent(close_button, 'click', evt => {
+	        // propagating will trigger the dropdown to show for single mode
+	        preventDefault(evt, true);
+	        if (self.isLocked) return;
+	        var value = rendered.dataset.value;
+	        self.removeItem(value);
+	        self.refreshOptions(false);
+	      });
+	      return rendered;
+	    };
+	  });
+	}
+
+	/**
+	 * Plugin: "restore_on_backspace" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function restore_on_backspace (userOptions) {
+	  const self = this;
+	  const options = Object.assign({
+	    text: option => {
+	      return option[self.settings.labelField];
+	    }
+	  }, userOptions);
+	  self.on('item_remove', function (value) {
+	    if (self.control_input.value.trim() === '') {
+	      var option = self.options[value];
+
+	      if (option) {
+	        self.setTextboxValue(options.text.call(self, option));
+	      }
+	    }
+	  });
+	}
+
+	/**
+	 * Plugin: "restore_on_backspace" (Tom Select)
+	 * Copyright (c) contributors
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+	 * file except in compliance with the License. You may obtain a copy of the License at:
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software distributed under
+	 * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+	 * ANY KIND, either express or implied. See the License for the specific language
+	 * governing permissions and limitations under the License.
+	 *
+	 */
+	function virtual_scroll () {
+	  const self = this;
+	  const orig_canLoad = self.canLoad;
+	  const orig_clearActiveOption = self.clearActiveOption;
+	  const orig_loadCallback = self.loadCallback;
+	  var pagination = {};
+	  var dropdown_content;
+	  var loading_more = false;
+
+	  if (!self.settings.firstUrl) {
+	    throw 'virtual_scroll plugin requires a firstUrl() method';
+	  } // in order for virtual scrolling to work,
+	  // options need to be ordered the same way they're returned from the remote data source
+
+
+	  self.settings.sortField = [{
+	    field: '$order'
+	  }, {
+	    field: '$score'
+	  }]; // can we load more results for given query?
+
+	  function canLoadMore(query) {
+	    if (typeof self.settings.maxOptions === 'number' && dropdown_content.children.length >= self.settings.maxOptions) {
+	      return false;
+	    }
+
+	    if (query in pagination && pagination[query]) {
+	      return true;
+	    }
+
+	    return false;
+	  } // set the next url that will be
+
+
+	  self.setNextUrl = function (value, next_url) {
+	    pagination[value] = next_url;
+	  }; // getUrl() to be used in settings.load()
+
+
+	  self.getUrl = function (query) {
+	    if (query in pagination) {
+	      const next_url = pagination[query];
+	      pagination[query] = false;
+	      return next_url;
+	    } // if the user goes back to a previous query
+	    // we need to load the first page again
+
+
+	    pagination = {};
+	    return self.settings.firstUrl(query);
+	  }; // don't clear the active option (and cause unwanted dropdown scroll)
+	  // while loading more results
+
+
+	  self.hook('instead', 'clearActiveOption', () => {
+	    if (loading_more) {
+	      return;
+	    }
+
+	    return orig_clearActiveOption.call(self);
+	  }); // override the canLoad method
+
+	  self.hook('instead', 'canLoad', query => {
+	    // first time the query has been seen
+	    if (!(query in pagination)) {
+	      return orig_canLoad.call(self, query);
+	    }
+
+	    return canLoadMore(query);
+	  }); // wrap the load
+
+	  self.hook('instead', 'loadCallback', (options, optgroups) => {
+	    if (!loading_more) {
+	      self.clearOptions();
+	    }
+
+	    orig_loadCallback.call(self, options, optgroups);
+	    loading_more = false;
+	  }); // add templates to dropdown
+	  //	loading_more if we have another url in the queue
+	  //	no_more_results if we don't have another url in the queue
+
+	  self.hook('after', 'refreshOptions', () => {
+	    const query = self.lastValue;
+	    var option;
+
+	    if (canLoadMore(query)) {
+	      option = self.render('loading_more', {
+	        query: query
+	      });
+	      if (option) option.setAttribute('data-selectable', ''); // so that navigating dropdown with [down] keypresses can navigate to this node
+	    } else if (query in pagination && !dropdown_content.querySelector('.no-results')) {
+	      option = self.render('no_more_results', {
+	        query: query
+	      });
+	    }
+
+	    if (option) {
+	      addClasses(option, self.settings.optionClass);
+	      dropdown_content.append(option);
+	    }
+	  }); // add scroll listener and default templates
+
+	  self.on('initialize', () => {
+	    dropdown_content = self.dropdown_content; // default templates
+
+	    self.settings.render = Object.assign({}, {
+	      loading_more: function () {
+	        return `<div class="loading-more-results">Loading more results ... </div>`;
+	      },
+	      no_more_results: function () {
+	        return `<div class="no-more-results">No more results</div>`;
+	      }
+	    }, self.settings.render); // watch dropdown content scroll position
+
+	    dropdown_content.addEventListener('scroll', function () {
+	      const scroll_percent = dropdown_content.clientHeight / (dropdown_content.scrollHeight - dropdown_content.scrollTop);
+
+	      if (scroll_percent < 0.95) {
+	        return;
+	      } // !important: this will get checked again in load() but we still need to check here otherwise loading_more will be set to true
+
+
+	      if (!canLoadMore(self.lastValue)) {
+	        return;
+	      } // don't call load() too much
+
+
+	      if (loading_more) return;
+	      loading_more = true;
+	      self.load.call(self, self.lastValue);
+	    });
+	  });
+	}
+
+	TomSelect.define('change_listener', change_listener);
+	TomSelect.define('checkbox_options', checkbox_options);
+	TomSelect.define('clear_button', clear_button);
+	TomSelect.define('drag_drop', drag_drop);
+	TomSelect.define('dropdown_header', dropdown_header);
+	TomSelect.define('caret_position', caret_position);
+	TomSelect.define('dropdown_input', dropdown_input);
+	TomSelect.define('input_autogrow', input_autogrow);
+	TomSelect.define('no_backspace_delete', no_backspace_delete);
+	TomSelect.define('no_active_items', no_active_items);
+	TomSelect.define('optgroup_columns', optgroup_columns);
+	TomSelect.define('remove_button', remove_button);
+	TomSelect.define('restore_on_backspace', restore_on_backspace);
+	TomSelect.define('virtual_scroll', virtual_scroll);
+
+	return TomSelect;
+
+})));
+var tomSelect=function(el,opts){return new TomSelect(el,opts);} 
+//# sourceMappingURL=tom-select.complete.js.map
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			id: moduleId,
+/******/ 			loaded: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__webpack_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__webpack_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__webpack_require__.f).reduce((promises, key) => {
+/******/ 				__webpack_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks
+/******/ 		__webpack_require__.u = (chunkId) => {
+/******/ 			// return url for filenames not based on template
+/******/ 			if ({"resources_js_bootstrap_js":1,"resources_js_elements_turbo-echo-stream-tag_js":1}[chunkId]) return "js/" + chunkId + ".js";
+/******/ 			// return url for filenames based on template
+/******/ 			return undefined;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get mini-css chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference all chunks
+/******/ 		__webpack_require__.miniCssF = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".css";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/load script */
+/******/ 	(() => {
+/******/ 		var inProgress = {};
+/******/ 		// data-webpack is not used as build has no uniqueName
+/******/ 		// loadScript function to load a script via script tag
+/******/ 		__webpack_require__.l = (url, done, key, chunkId) => {
+/******/ 			if(inProgress[url]) { inProgress[url].push(done); return; }
+/******/ 			var script, needAttach;
+/******/ 			if(key !== undefined) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				for(var i = 0; i < scripts.length; i++) {
+/******/ 					var s = scripts[i];
+/******/ 					if(s.getAttribute("src") == url) { script = s; break; }
+/******/ 				}
+/******/ 			}
+/******/ 			if(!script) {
+/******/ 				needAttach = true;
+/******/ 				script = document.createElement('script');
+/******/ 		
+/******/ 				script.charset = 'utf-8';
+/******/ 				script.timeout = 120;
+/******/ 				if (__webpack_require__.nc) {
+/******/ 					script.setAttribute("nonce", __webpack_require__.nc);
+/******/ 				}
+/******/ 		
+/******/ 		
+/******/ 				script.src = url;
+/******/ 			}
+/******/ 			inProgress[url] = [done];
+/******/ 			var onScriptComplete = (prev, event) => {
+/******/ 				// avoid mem leaks in IE.
+/******/ 				script.onerror = script.onload = null;
+/******/ 				clearTimeout(timeout);
+/******/ 				var doneFns = inProgress[url];
+/******/ 				delete inProgress[url];
+/******/ 				script.parentNode && script.parentNode.removeChild(script);
+/******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
+/******/ 				if(prev) return prev(event);
+/******/ 			}
+/******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
+/******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
+/******/ 			script.onload = onScriptComplete.bind(null, script.onload);
+/******/ 			needAttach && document.head.appendChild(script);
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/node module decorator */
+/******/ 	(() => {
+/******/ 		__webpack_require__.nmd = (module) => {
+/******/ 			module.paths = [];
+/******/ 			if (!module.children) module.children = [];
+/******/ 			return module;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		__webpack_require__.p = "/";
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"/js/app": 0,
+/******/ 			"css/app": 0
+/******/ 		};
+/******/ 		
+/******/ 		__webpack_require__.f.j = (chunkId, promises) => {
+/******/ 				// JSONP chunk loading for javascript
+/******/ 				var installedChunkData = __webpack_require__.o(installedChunks, chunkId) ? installedChunks[chunkId] : undefined;
+/******/ 				if(installedChunkData !== 0) { // 0 means "already installed".
+/******/ 		
+/******/ 					// a Promise means "currently loading".
+/******/ 					if(installedChunkData) {
+/******/ 						promises.push(installedChunkData[2]);
+/******/ 					} else {
+/******/ 						if("css/app" != chunkId) {
+/******/ 							// setup Promise in chunk cache
+/******/ 							var promise = new Promise((resolve, reject) => (installedChunkData = installedChunks[chunkId] = [resolve, reject]));
+/******/ 							promises.push(installedChunkData[2] = promise);
+/******/ 		
+/******/ 							// start chunk loading
+/******/ 							var url = __webpack_require__.p + __webpack_require__.u(chunkId);
+/******/ 							// create error before stack unwound to get useful stacktrace later
+/******/ 							var error = new Error();
+/******/ 							var loadingEnded = (event) => {
+/******/ 								if(__webpack_require__.o(installedChunks, chunkId)) {
+/******/ 									installedChunkData = installedChunks[chunkId];
+/******/ 									if(installedChunkData !== 0) installedChunks[chunkId] = undefined;
+/******/ 									if(installedChunkData) {
+/******/ 										var errorType = event && (event.type === 'load' ? 'missing' : event.type);
+/******/ 										var realSrc = event && event.target && event.target.src;
+/******/ 										error.message = 'Loading chunk ' + chunkId + ' failed.\n(' + errorType + ': ' + realSrc + ')';
+/******/ 										error.name = 'ChunkLoadError';
+/******/ 										error.type = errorType;
+/******/ 										error.request = realSrc;
+/******/ 										installedChunkData[1](error);
+/******/ 									}
+/******/ 								}
+/******/ 							};
+/******/ 							__webpack_require__.l(url, loadingEnded, "chunk-" + chunkId, chunkId);
+/******/ 						} else installedChunks[chunkId] = 0;
+/******/ 					}
+/******/ 				}
+/******/ 		};
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunk"] = self["webpackChunk"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	__webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/js/app.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/css/app.css")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
+/******/ })()
+;

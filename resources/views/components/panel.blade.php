@@ -2,7 +2,7 @@
 
 <div class="flex justify-center">
     <div {{ $attributes->merge(['class' => "panel border border-green-500 rounded-md w-screen sm:w-full $maxWidth"])}}>
-        <div class="panel-header bg-theme1 flex justify-center py-1 px-2 text-white font-semibold w-full">
+        <div class="section-bg  flex justify-center py-1 px-2 text-white font-semibold w-full">
             {{$title}}
         </div>
         <div class="panel-body p-2 w-full">

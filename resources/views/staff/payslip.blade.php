@@ -56,12 +56,13 @@
             if(elYear.value != ''){
                 loader.classList.remove('hidden');
                 axios.get('/staff/payroll-period/year-month/'+elYear.value).then(response =>{
-                    var months = response.data;
+                    var months = response.data['months'];
+                    // console.log(months['months']);
                     if(months != null){
                         for(var i=0; i<months.length; i++){
                             var elOption = document.createElement("option");
-                            elOption.textContent = getMonthName(months[i]['Period_Month']);
-                            elOption.value = months[i]['Period_Month'];
+                            elOption.textContent = months[i]['MonthName'];
+                            elOption.value = months[i]['PeriodMonth'];
                             elMonth.appendChild(elOption);
                         }
                     }
@@ -72,48 +73,6 @@
                     loader.classList.add('hidden');
                 });
             }
-        }
-        function getMonthName(i){
-            var monthName = '';
-            switch(i){
-                case 1:
-                    monthName='January';
-                break;
-                case 2:
-                    monthName='February';
-                break;
-                case 3:
-                    monthName='March';
-                break;
-                case 4:
-                    monthName='April';
-                break;
-                case 5:
-                    monthName='May';
-                break;
-                case 6:
-                    monthName='June';
-                break;
-                case 7:
-                    monthName='July';
-                break;
-                case 8:
-                    monthName='August';
-                break;
-                case 9:
-                    monthName='September';
-                break;
-                case 10:
-                    monthName='October';
-                break;
-                case 11:
-                    monthName='November';
-                break;
-                case 12:
-                    monthName='December';
-                break;
-            }
-            return monthName;
         }
     </script>
 @endpush
