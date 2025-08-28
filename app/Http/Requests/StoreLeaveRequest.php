@@ -29,7 +29,7 @@ class StoreLeaveRequest extends FormRequest
             ],
             'appliedDays' => ['nullable', 'integer', 'min:1'],
             'startDate' => ['nullable', 'date'],
-            'endDate' => ['nullable', 'date', 'after_or_equal:startDate'],
+            'endDate' => ['nullable', 'date'],
             'reason' => ['required', 'string', 'max:255'],
             'requestLeaveAllowance' => ['required', 'boolean'],
             'reliever' => ['nullable', 'string', 'max:50'],
@@ -45,14 +45,15 @@ class StoreLeaveRequest extends FormRequest
     public function getValidatedData(): array
     {
         $data = $this->validated();
-        $dates = $this->leaveService->getLeaveDetails($data['leaveType'], $data['startDate'] ?? null, $data['endDate'] ?? null);
+        // $dates = $this->leaveService->getLeaveDetails($data['leaveType'], $data['startDate'] ?? null, $data['endDate'] ?? null);
+        // // dd($data['endDate']);
+        // if (!$dates) {
+        //     throw new \Illuminate\Validation\ValidationException(
+        //         \Illuminate\Support\Facades\Validator::make([], [], ['leaveType' => 'Unable to calculate leave dates. Please check your inputs.'])
+        //     );
+        // }
 
-        if (!$dates) {
-            throw new \Illuminate\Validation\ValidationException(
-                \Illuminate\Support\Facades\Validator::make([], [], ['leaveType' => 'Unable to calculate leave dates. Please check your inputs.'])
-            );
-        }
-
-        return array_merge($data, $dates);
+        // return array_merge($data, $dates);
+        return $data;
     }
 }

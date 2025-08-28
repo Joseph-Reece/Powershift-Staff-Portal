@@ -300,7 +300,7 @@ class LeaveService
         // Call Business Central codeunit
         $result = $this->bcService->callCodeunitAction(
             'cuStaffPortal',
-            'LeaveApplication',
+            'APILeaveApplication',
             [
                 'action' => 'edit',
                 'leaveNo' => $requisitionNo,
@@ -313,6 +313,7 @@ class LeaveService
                 'myUserID' => $userId,
                 'leaveType' => $leaveType,
                 'isRequestLeaveAllowance' => $requestLeaveAllowance,
+                'staffNo' => $empNo,
             ]
         );
 
@@ -528,19 +529,21 @@ class LeaveService
             'leaveNo' => '',
             'employeeNo' => $empNo,
             'daysApplied' => $data['appliedDays'] ?? 0,
-            'startDate' => $data['startDate'] ? Carbon::parse($data['startDate'])->toIso8601String() : null,
-            'endDate' => $data['endDate'] ? Carbon::parse($data['endDate'])->toIso8601String() : null,
+            'startDate' => $data['startDate'],
+            'endDate' => $data['endDate'],
             'reason' => $data['reason'],
             'reliever' => $data['reliever'] ?? '',
             'myUserID' => $userID,
             'leaveType' => $data['leaveType'],
             'isRequestLeaveAllowance' => filter_var($data['requestLeaveAllowance'], FILTER_VALIDATE_BOOLEAN),
+            'staffNo' => $empNo,
         ];
+        // dd($params);
 
         // Call LeaveApplication codeunit
-        $result = $this->bcService->callCodeunitAction('cuStaffPortal', 'LeaveApplication', $params);
+        $result = $this->bcService->callCodeunitAction('cuStaffPortal', 'APILeaveApplication', $params);
 
-        if (!$result || !isset($result->value) || !is_string($result->value)) {
+        if (!$result || !isset($result->value) || !is_bool($result->value)) {
             Log::error('Failed to create leave application', [
                 'employeeNo' => $empNo,
                 'params' => $params,

@@ -218,6 +218,7 @@ class LeaveController extends Controller
             $data = $request->getValidatedData();
             $attachment = $request->file('attachment');
 
+            // dd($data);
             $leaveNo = $this->leaveService->createLeaveApplication($data, $attachment);
 
             return redirect()->route('leave.index')->with('success', 'Leave application created successfully. Application No: ' . $leaveNo);
