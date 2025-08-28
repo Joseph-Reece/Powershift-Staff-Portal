@@ -99,9 +99,9 @@ Route::group(['prefix' => 'farmer'], function(){
                     ->middleware('guest')
                     ->name('frm_password.email');
 
-    Route::get('/reset-password/{farmerNo}', [FarmerNewPasswordController::class, 'create'])
-                    ->middleware('guest')
-                    ->name('frm_password.reset');
+    // Route::get('/reset-password/{farmerNo}', [FarmerNewPasswordController::class, 'create'])
+    //                 ->middleware('guest')
+    //                 ->name('frm_password.reset');
 
     Route::post('/reset-password', [FarmerNewPasswordController::class, 'store'])
                     ->middleware('guest')

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreLeaveRequest;
 use Illuminate\Http\Request;
 use App\Traits\WebServicesTrait;
 use App\Traits\AttachmentTrait;
@@ -124,7 +125,7 @@ class LeaveController extends Controller
 
         return view('staff.leave.application')->with($data);
     }
-    public function store(REQUEST $request)
+    public function storeLeave(REQUEST $request)
     {
         $request->validate([
             'leaveType' => 'required',
@@ -206,6 +207,28 @@ class LeaveController extends Controller
             $errorMsg = $e->faultstring;
             // dd($errorMsg);
             return redirect()->back()->with('error', $errorMsg);
+        }
+    }
+    /**
+     * Store a new leave application.
+     */
+    public function store(StoreLeaveRequest $request): RedirectResponse
+    {
+        try {
+            $data = $request->getValidatedData();
+            $attachment = $request->file('attachment');
+
+            $leaveNo = $this->leaveService->createLeaveApplication($data, $attachment);
+
+            return redirect()->route('leave.index')->with('success', 'Leave application created successfully. Application No: ' . $leaveNo);
+        } catch (\Exception $e) {
+            Log::error('Failed to create leave application', [
+                'employeeNo' => Session::get('authUser.employeeNo'),
+                'data' => $request->except('attachment'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['leaveType' => $e->getMessage() ?: 'Unable to create leave application. Please try again or contact support.']);
         }
     }
     public function show($no)
@@ -573,7 +596,7 @@ class LeaveController extends Controller
             // dd($result);
             // return $result;
             // $result = $service->FnGetLeaveDetails($params);
-            dd($result);
+            // dd($result);
             if ($result->value != "") {
                 $vars = explode("##", $result->value);
                 $appliedDays = $vars[1];

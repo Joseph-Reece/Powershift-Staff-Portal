@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Services\DashboardService;
 use Illuminate\Http\Request;
 use App\Traits\WebServicesTrait;
 use App\CustomClasses\NTLM\NTLMSoapClient;
@@ -37,12 +38,16 @@ class GeneralController extends Controller
 {
     use WebServicesTrait;
     protected $payrollService;
+    protected $dashboardService;
 
-    public function __construct(PayrollService $payrollService)
-    {
+    public function __construct(
+        PayrollService $payrollService,
+        DashboardService $dashboardService
+    ) {
         $this->middleware('isAuth');
         $this->middleware('staff');
         $this->payrollService = $payrollService;
+        $this->dashboardService = $dashboardService;
     }
     public function dashboardStatistics()
     {
@@ -75,6 +80,31 @@ class GeneralController extends Controller
             'totalClaims' => $totalClaims,
         ];
         return $data;
+    }
+   /**
+     * Fetch dashboard statistics as JSON.
+     */
+    public function GetDashboardStatistics(): JsonResponse
+    {
+        try {
+            $userID = Session::get('authUser.userID');
+            if (!$userID) {
+                Log::warning('User ID not found in session for dashboard statistics');
+                return response()->json(['error' => 'Unauthorized. Please log in again.'], 401);
+            }
+
+            $statistics = $this->dashboardService->getDashboardStatistics();
+
+            return response()->json(['statistics' => $statistics]);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch dashboard statistics', [
+                'userID' => Session::get('authUser.userID'),
+                'employeeNo' => Session::get('authUser.employeeNo'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Unable to fetch dashboard data. Please try again or contact support.'], 500);
+        }
     }
     public function payslip()
     {
@@ -239,7 +269,7 @@ class GeneralController extends Controller
         $periods = $this->odataClient()->from(PayrollPeriod::wsName())
             ->select('Period_Month')
             ->where('Closed', 'true')
-            ->where('Period_Year', (int)$year)
+            ->where('Period_Year', (int) $year)
             ->get();
         $periodMonths = $periods->unique('Period_Month');
         return $periodMonths;

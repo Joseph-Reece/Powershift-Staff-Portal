@@ -88,6 +88,7 @@ class BusinessCentralService
                 'Accept'        => 'application/json',
                 'Content-Type'  => 'application/json',
             ],
+            // 'verify'  => false // 👈 disable SSL check
         ];
 
         if ($method === 'POST') {

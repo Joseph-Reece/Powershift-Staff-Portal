@@ -497,4 +497,100 @@ class LeaveService
 
         return base64_decode($result->value, true);
     }
+    /**
+     * Create a leave application in Business Central.
+     *
+     * @param array $data
+     * @param \Illuminate\Http\UploadedFile|null $attachment
+     * @return string Leave application number
+     * @throws InvalidArgumentException
+     */
+    public function createLeaveApplication(array $data, ?\Illuminate\Http\UploadedFile $attachment = null): string
+    {
+        $empNo = Session::get('authUser.employeeNo');
+        $userID = Session::get('authUser.userID');
+        if (!$empNo || !$userID) {
+            throw new InvalidArgumentException('Employee number or user ID not found in session.');
+        }
+
+        // Validate leave type
+        $leaveTypeData = $this->bcService->callPage(LeaveType::wsName(), [
+            '$filter' => "Code eq '{$data['leaveType']}'",
+            '$top' => 1,
+        ]);
+        if (empty($leaveTypeData->value)) {
+            throw new InvalidArgumentException("Leave type '{$data['leaveType']}' not found.");
+        }
+
+        // Prepare parameters
+        $params = [
+            'action' => 'create',
+            'leaveNo' => '',
+            'employeeNo' => $empNo,
+            'daysApplied' => $data['appliedDays'] ?? 0,
+            'startDate' => $data['startDate'] ? Carbon::parse($data['startDate'])->toIso8601String() : null,
+            'endDate' => $data['endDate'] ? Carbon::parse($data['endDate'])->toIso8601String() : null,
+            'reason' => $data['reason'],
+            'reliever' => $data['reliever'] ?? '',
+            'myUserID' => $userID,
+            'leaveType' => $data['leaveType'],
+            'isRequestLeaveAllowance' => filter_var($data['requestLeaveAllowance'], FILTER_VALIDATE_BOOLEAN),
+        ];
+
+        // Call LeaveApplication codeunit
+        $result = $this->bcService->callCodeunitAction('cuStaffPortal', 'LeaveApplication', $params);
+
+        if (!$result || !isset($result->value) || !is_string($result->value)) {
+            Log::error('Failed to create leave application', [
+                'employeeNo' => $empNo,
+                'params' => $params,
+                'result' => $result,
+            ]);
+            throw new InvalidArgumentException('Failed to create leave application.');
+        }
+
+        $leaveNo = $result->value;
+
+        // Handle attachment
+        if ($attachment) {
+            $this->uploadAttachment($leaveNo, $attachment);
+        }
+
+        return $leaveNo;
+    }
+
+    /**
+     * Upload an attachment for a leave application.
+     *
+     * @param string $leaveNo
+     * @param \Illuminate\Http\UploadedFile $attachment
+     * @throws InvalidArgumentException
+     */
+    protected function uploadAttachment(string $leaveNo, \Illuminate\Http\UploadedFile $attachment): void
+    {
+        if ($attachment->getSize() > 3 * 1024 * 1024) { // 3MB
+            throw new InvalidArgumentException('File size cannot exceed 3MB.');
+        }
+
+        $params = [
+            'action' => 'insert',
+            'accountNo' => $leaveNo,
+            'attachmentID' => 0,
+            'description' => 'Leave Attachment',
+            'b64File' => base64_encode(file_get_contents($attachment->getRealPath())),
+            'fileName' => str_replace([' ', '/'], ['-', '_'], 'leave_attachment_' . $leaveNo . '.' . $attachment->getClientOriginalExtension()),
+            'tableID' => 52202673, // Verify this ID in Business Central
+        ];
+
+        $result = $this->bcService->callCodeunitAction('cuStaffPortal', 'FnAttachment', $params);
+
+        if (!$result || !isset($result->value)) {
+            Log::error('Failed to upload leave attachment', [
+                'leaveNo' => $leaveNo,
+                'params' => $params,
+                'result' => $result,
+            ]);
+            throw new InvalidArgumentException('Failed to upload leave attachment.');
+        }
+    }
 }

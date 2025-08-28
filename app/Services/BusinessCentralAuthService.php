@@ -49,6 +49,7 @@ class BusinessCentralAuthService
                     'scope' => $this->scope,
                 ],
                 'headers' => ['Accept' => 'application/json'],
+                // 'verify'  => false // 👈 disable SSL check
             ]);
 
             $data = json_decode($response->getBody(), true);

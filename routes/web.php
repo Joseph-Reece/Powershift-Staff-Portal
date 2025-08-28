@@ -41,7 +41,7 @@ Route::get('/', function(){
 Route::get('/dashboard',[GeneralController::class,'dashboard'])->name('dashboard');
 Route::post('/send-sms',[GeneralController::class,'sendSMS']);
 Route::group(['prefix' => 'staff'], function(){
-    Route::get('/dashboard/statistics',[StaffGeneralController::class,'dashboardStatistics']);
+    Route::get('/dashboard/statistics',[StaffGeneralController::class,'GetDashboardStatistics']);
     //APPROVAL
     Route::get('/approval/open',[ApprovalsController::class,'openDocuments']);
     // Route::get('/approval/open/{type}',[ApprovalsController::class,'openDocumentsType']);

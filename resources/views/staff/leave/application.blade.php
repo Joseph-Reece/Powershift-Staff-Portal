@@ -171,6 +171,7 @@
             var appliedDays = null;
             if (action == 'edit') {
                 appliedDays = "<?php echo isset($requisition) ? $requisition->DaysApplied : ''; ?>";
+                console.log($appliedDays);
             }
 
             function fnOnLoad() {
@@ -215,12 +216,12 @@
                             //clearSelect('appliedDays');
                             if (pendingCount == 0) {
                                 if (isHourly == false) {
-                                    for (var i = 1; i <= leaveDays; i++) {
-                                        var elOption = document.createElement("option");
-                                        elOption.textContent = i;
-                                        elOption.value = i;
-                                        elAppliedDays.appendChild(elOption);
-                                    }
+                                    // for (var i = 1; i <= leaveDays; i++) {
+                                    //     var elOption = document.createElement("option");
+                                    //     elOption.textContent = i;
+                                    //     elOption.value = i;
+                                    //     elAppliedDays.appendChild(elOption);
+                                    // }
                                     elDivAppliedDays.classList.remove('hidden');
                                     elDivStartDate.classList.remove('hidden');
                                     elDivEndDate.classList.remove('hidden');
@@ -393,7 +394,7 @@
                         elStartDate.value = isHourly ? elStartDate.value : '';
                         elStartDateTime.value = isHourly ? '' : elStartDateTime.value;
                     } else {
-                        // elAppliedDays.innerHTML = dates.appliedDays;
+                        elAppliedDays.innerHTML = dates.appliedDays;
                         elReturnDate.innerHTML = dates.returnDate;
                     }
                 }).catch(error => {

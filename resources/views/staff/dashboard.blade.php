@@ -74,7 +74,8 @@
             var elStoreReqs = document.getElementById('storeReqs');
             var elTransportReqs = document.getElementById('transportReqs');
             axios.get('/staff/dashboard/statistics/').then(response =>{
-                var data = response.data;
+                var data = response.data.statistics;
+                // console.log(data)
                 elPendingApproval.innerHTML = data.totalPendingApproval;
                 elApprovedDocs.innerHTML = data.totalApproved;
                 elRejectedDocs.innerHTML = data.totalRejected;
